@@ -59,6 +59,7 @@
 #include "PointCloud.h"
 #include "OsgContainer.h"
 #include "WorkerThread.h"
+#include "TimerClock.h"
 
 
 class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer//多视景器
@@ -74,7 +75,6 @@ public:
 		frame();
 	}
 
-
 private:
 	QWidget* addViewWidget(osgQt::GraphicsWindowQt* gw, osg::ref_ptr<osg::Group> scence);
 	
@@ -83,12 +83,14 @@ private:
 	void SetCamerToObjectCenter(osg::ref_ptr<osg::Node> cur_node);
 
 protected:
-	int _timerID;               //定时器ID
+	TimerClock _timerClock;     //计时器
 
 private:
 	void Init_Mian_Menu();
 
 	void Init_Tool_Bar();
+
+	void Init_View_Bar();
 
 	void Init_Console_Frame();
 
@@ -101,6 +103,8 @@ private:
 
 	QToolBar* tool_bar;
 
+	QToolBar * view_bar;
+
 	QDockWidget* Dock_Console_Widget;
 
 	QFrame* Console_Frame;
@@ -109,17 +113,15 @@ private:
 
 	QProgressDialog *readDataProgressDlg;
 
-	QTimer _timer;
-
-	std::chrono::steady_clock::time_point startTime;
+	QTimer read_timer;
 
 private:
-	void AddToConsoleSlot(const QString& add_text);
+	void AddToConsoleSlot(const QString& show_text);
 
 private:
-	osg::ref_ptr<osg::Group> root;
+	osg::ref_ptr<osg::Group> root{nullptr};
 
-	osg::ref_ptr<PointCloud> scene_Pcloud;
+	osg::ref_ptr<PointCloud> scene_Pcloud{nullptr};
 
 	QMutex m_mutex;
 

@@ -63,8 +63,17 @@ public:
 
 	QColor point_color;
 	POINT_FILE_TYPE m_Type;
+	bool b_isSelected;
 
 public:
+
+	void setSelected(bool isSelected) {
+		b_isSelected = isSelected;
+	}
+
+	bool isSelected() const {
+		return b_isSelected;
+	}
 
 	void setName(const std::string & fullName) {
 		point_name = fullName;
@@ -101,4 +110,68 @@ public:
 		bool cancel = false;
 		readPoints(openfileName, rate, cancel);
 	};
+};
+
+class PCloudManager {
+private:
+	PCloudManager(){};
+	~PCloudManager(){ 
+		all_pcloud_map.clear();
+	};
+
+	PCloudManager(const PCloudManager&);
+	PCloudManager & operator=(const PCloudManager&);
+
+public:
+	static PCloudManager * getInstance() {
+		static PCloudManager instance;
+		return &instance;
+	}
+
+	void addPointCloud(PointCloud* pcloud) {
+		if (pcloud) {
+			all_pcloud_map.emplace(pcloud->getName(), pcloud);
+		}
+	};
+
+	void removePointCloud(PointCloud* pcloud) {
+		if (pcloud) {
+			auto iter = all_pcloud_map.begin();
+			while (iter != all_pcloud_map.end()) {
+				if (iter->first == pcloud->getName()) {
+					all_pcloud_map.erase(iter++);
+					break;
+				}
+				iter++;
+			}
+		}
+	};
+
+	void removePointCloud(const std::string & pName) {
+		if (!pName.empty()) {
+			auto iter = all_pcloud_map.begin();
+			while (iter != all_pcloud_map.end()) {
+				if (iter->first == pName) {
+					all_pcloud_map.erase(iter++);
+					break;
+				}
+				iter++;
+			}
+		}
+	};
+
+	PointCloud* getPointCloud(const std::string & pName) {
+		if (pName.empty()) {
+			return nullptr;
+		}
+		auto iter = all_pcloud_map.find(pName);
+		if (iter != all_pcloud_map.end()) {
+			return iter->second;
+		}
+		return nullptr;
+	};
+
+public:
+	std::map<std::string, PointCloud*> all_pcloud_map;
+	std::vector<PointCloud*> selected_pcloud_list;
 };

@@ -1,0 +1,15 @@
+bin/
+data/
+include/
+lib/
+osgQtViewer/.vs/
+osgQtViewer/moc_osgcontainer.cpp
+osgQtViewer/moc_osgqtwindow.cpp
+osgQtViewer/moc_workerthread.cpp
+osgQtViewer/osgQtViewer.VC.VC.opendb
+osgQtViewer/osgQtViewer.VC.db
+osgQtViewer/osgQtViewer.sln
+osgQtViewer/osgQtViewer.vcxproj
+osgQtViewer/osgQtViewer.vcxproj.filters
+osgQtViewer/osgQtViewer.vcxproj.user
+osgQtViewer/x64/

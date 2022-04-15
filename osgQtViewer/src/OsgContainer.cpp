@@ -157,17 +157,6 @@ void OsgContainer::resizeEvent(QResizeEvent *event) {
 	window->resized(x(), y(), size.width(), size.height());
 	window->getEventQueue()->windowResize(x(), y(), size.width(), size.height());
 	window->requestRedraw();
-
-	//    const QSize& oldSize = event->oldSize();
-	//    int oldWidth = oldSize.width();
-	//    int oldHeight = oldSize.height();
-
-	//    int newWidth = size.width();
-	//    int newHeight = size.height();
-
-	//    double widthChangeRatio = double(newWidth) / double(oldWidth);
-	//    double heigtChangeRatio = double(newHeight) / double(oldHeight);
-	//    double aspectRatioChange = widthChangeRatio / heigtChangeRatio;
 	QOpenGLWidget::resizeEvent(event);
 }
 

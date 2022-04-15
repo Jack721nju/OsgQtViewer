@@ -27,6 +27,9 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMai
 	//初始化工具栏
 	Init_Tool_Bar();
 
+	//初始化视角切换工具栏
+	Init_View_Bar();
+
 	//初始化命令输出框
 	Init_Console_Frame();
 
@@ -41,6 +44,10 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMai
 
 	//设置中央主窗口
 	this->setCentralWidget(centerWidget);
+
+	//设置读取计时器
+	read_timer.setSingleShot(false);
+	read_timer.setInterval(100);
 }
 
 OsgQtTest::~OsgQtTest() {
@@ -317,6 +324,46 @@ void OsgQtTest::Init_Tool_Bar() {
 	tool_bar->addAction(tool_action25);
 }
 
+void OsgQtTest::Init_View_Bar() {
+	view_bar = this->addToolBar(tr("Change View"));
+	view_bar->setAllowedAreas(Qt::LeftToolBarArea);
+
+	QAction * view_action1 = new QAction(QIcon(Icon_Path + QString("view_top.png")), QString::fromLocal8Bit("&Top"), view_bar);
+	view_action1->connect(view_action1, SIGNAL(triggered()), this, SLOT(SetTopDirection()));
+	view_action1->setToolTip(tr("Set the Top view"));
+	view_bar->addAction(view_action1);
+
+	QAction * view_action2 = new QAction(QIcon(Icon_Path + QString("view_down.png")), QString::fromLocal8Bit("&Down"), view_bar);
+	view_action2->connect(view_action2, SIGNAL(triggered()), this, SLOT(SetDownDirection()));
+	view_action2->setToolTip(tr("Set the Down view"));
+	view_bar->addAction(view_action2);
+
+	QAction * view_action3 = new QAction(QIcon(Icon_Path + QString("view_left.png")), QString::fromLocal8Bit("&Left"), view_bar);
+	view_action3->connect(view_action3, SIGNAL(triggered()), this, SLOT(SetLeftDirection()));
+	view_action3->setToolTip(tr("Set the Left view"));
+	view_bar->addAction(view_action3);
+
+	QAction * view_action4 = new QAction(QIcon(Icon_Path + QString("view_right.png")), QString::fromLocal8Bit("&Right"), view_bar);
+	view_action4->connect(view_action4, SIGNAL(triggered()), this, SLOT(SetRightDirection()));
+	view_action4->setToolTip(tr("Set the Right view"));
+	view_bar->addAction(view_action4);
+
+	QAction * view_action5 = new QAction(QIcon(Icon_Path + QString("view_front.png")), QString::fromLocal8Bit("&Front"), view_bar);
+	view_action5->connect(view_action5, SIGNAL(triggered()), this, SLOT(SetFrontDirection()));
+	view_action5->setToolTip(tr("Set the Front view"));
+	view_bar->addAction(view_action5);
+
+	QAction * view_action6 = new QAction(QIcon(Icon_Path + QString("view_back.png")), QString::fromLocal8Bit("&Back"), view_bar);
+	view_action6->connect(view_action6, SIGNAL(triggered()), this, SLOT(SetBackDirection()));
+	view_action6->setToolTip(tr("Set the Back view"));
+	view_bar->addAction(view_action6);
+
+	QAction * view_action7 = new QAction(QIcon(Icon_Path + QString("color_height.png")), QString::fromLocal8Bit("&Color"), view_bar);
+	view_action7->connect(view_action7, SIGNAL(triggered()), this, SLOT(SetPointColorByHeight()));
+	view_action7->setToolTip(tr("Set color by height"));
+	view_bar->addAction(view_action7);
+}
+
 void OsgQtTest::Init_Console_Frame()
 {
 	Console_Frame = new QFrame(this);
@@ -338,17 +385,23 @@ void OsgQtTest::Init_Console_Frame()
 	this->addDockWidget(Qt::BottomDockWidgetArea, Dock_Console_Widget);
 }
 
-void OsgQtTest::AddToConsoleSlot(const QString& add_text)
-{
+void OsgQtTest::AddToConsoleSlot(const QString & show_text){
 	QString cur_systemTime = "[" + QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") + "] ";
-	Console_edit->append(cur_systemTime + add_text);
+	if (Console_edit) {
+		Console_edit->append(cur_systemTime + show_text);
+	}
 }
 
 //打开文件
-void OsgQtTest::OpenData() {
-	QString getFullName = QFileDialog::getOpenFileName(nullptr, tr("Open data name:"), Data_Path, "Screen files(*.txt *.las *.org *.osg *.ive *.earth)");
+void OsgQtTest::OpenData(){
+	const QString &getFullName = QFileDialog::getOpenFileName(nullptr, tr("Open data name:"), Data_Path, "Screen files(*.txt *.las *.org *.osg *.ive *.earth)");
 
-	QFileInfo fileInfo = QFileInfo(getFullName);
+	if (getFullName.isEmpty()) {
+		this->AddToConsoleSlot(QString("[INFO] Open file cancel"));
+		return;
+	}
+
+	const QFileInfo &fileInfo = QFileInfo(getFullName);
 
 	//判断是存在文件
 	if (false == fileInfo.exists())	{
@@ -357,23 +410,21 @@ void OsgQtTest::OpenData() {
 	}
 
 	//文件名
-	QString curFileName = fileInfo.fileName();
+	const QString &curFileName = fileInfo.fileName();
 
 	//文件后缀名
-	QString curFileSuffix = fileInfo.suffix();
+	const QString &curFileSuffix = fileInfo.suffix();
 
 	//文件绝对路径
-	QString curFilePath = fileInfo.absolutePath();
+	const QString &curFilePath = fileInfo.absolutePath();
 
-	string fullname = getFullName.toStdString();//全局名称，包含完整路径和文件名
-	string path_name = curFilePath.toStdString();//完整路径
+	const string &fullname = getFullName.toStdString();//全局名称，包含完整路径和文件名
+	const string &path_name = curFilePath.toStdString();//完整路径
 
-	string type_name = curFileSuffix.toStdString();//文件类型
-	string file_name = curFileName.toStdString();//文件名称
+	const string &type_name = curFileSuffix.toStdString();//文件类型
+	const string &file_name = curFileName.toStdString();//文件名称
 
-	startTime = chrono::steady_clock::now();
-	_timer.setSingleShot(false);
-	_timer.setInterval(100);
+	_timerClock.start();//开始计时
 	
 	if (type_name == "las")	{
 		ReadLasData(fullname);
@@ -387,8 +438,7 @@ void OsgQtTest::ReadLasData(const std::string & fileName) {
 	ifstream ifs;
 	ifs.open(fileName, ios::in | ios::binary);
 
-	if (ifs)
-	{
+	if (ifs){
 		liblas::ReaderFactory ff;
 		const liblas::Reader & reader = ff.CreateWithStream(ifs);
 		const liblas::Header & header = reader.GetHeader();
@@ -403,9 +453,7 @@ void OsgQtTest::ReadLasData(const std::string & fileName) {
 		if (pointNum < 10000000) {
 			scene_Pcloud->readLasData(fileName);
 			SetCamerToObjectCenter(scene_Pcloud.get());
-			auto endTime = chrono::steady_clock::now();
-			auto costTime = chrono::duration_cast<chrono::milliseconds>(endTime - startTime).count();
-			float showTime = (float)(costTime * 0.001);
+			float showTime = (float)(_timerClock.getTimerMilliSec() * 0.001);
 			QString read_time_text = "[Time] Read file <" + QString::fromStdString(fileName) + "> " + "[" +
 				QString::number(scene_Pcloud->getPointNum()) + "] points cost " + QString::number(showTime, 'f', 2) + "s";
 			this->AddToConsoleSlot(read_time_text);
@@ -414,8 +462,8 @@ void OsgQtTest::ReadLasData(const std::string & fileName) {
 			Init_ReadProgressDlg();
 			this->slot_GetMaxPointNum(scene_Pcloud->getPointNum());
 			WorkerThread * readData_thread = new WorkerThread(scene_Pcloud, progressMinValue, progressMaxValue, this);
-			connect(&_timer, SIGNAL(timeout()), readData_thread, SLOT(updateRate()));
-			connect(readData_thread, SIGNAL(started()), &_timer, SLOT(start()));
+			connect(&read_timer, SIGNAL(timeout()), readData_thread, SLOT(updateRate()));
+			connect(readData_thread, SIGNAL(started()), &read_timer, SLOT(start()));
 			connect(readData_thread, SIGNAL(signal_ProgressVal(int)), this, SLOT(slot_UpdateProgress(int)));
 			connect(readDataProgressDlg, SIGNAL(canceled()), readData_thread, SLOT(stopRun()));
 			if (!readData_thread->isRunning()) {
@@ -442,7 +490,7 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 		return;
 	}
 
-	QString firstLine = allparts[0];
+	const QString &firstLine = allparts[0];
 	this->slot_GetMaxPointNum(line_count);
 
 	QRegExp regep("[,;' ']");
@@ -465,8 +513,8 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 	root->addChild(scene_Pcloud.get());
 	
 	WorkerThread *readData_thread = new WorkerThread(scene_Pcloud, progressMinValue, progressMaxValue, this);
-	connect(&_timer, SIGNAL(timeout()), readData_thread, SLOT(updateRate()));
-	connect(readData_thread, SIGNAL(started()), &_timer, SLOT(start()));
+	connect(&read_timer, SIGNAL(timeout()), readData_thread, SLOT(updateRate()));
+	connect(readData_thread, SIGNAL(started()), &read_timer, SLOT(start()));
 	connect(readData_thread, SIGNAL(signal_ProgressVal(int)), this, SLOT(slot_UpdateProgress(int)));
 	connect(readDataProgressDlg, SIGNAL(canceled()), readData_thread, SLOT(stopRun()));
 
@@ -512,9 +560,7 @@ void OsgQtTest::slot_UpdateProgress(int progressValue) {
 
 void OsgQtTest::slot_CancelReadProgress() {
 	if (readDataProgressDlg) {
-		_timer.stop();
-		auto endTime = chrono::steady_clock::now();
-		auto costTime = chrono::duration_cast<chrono::milliseconds>(endTime - startTime).count();
+		read_timer.stop();
 		QString read_time_text = "[I/O] Cancel Load file <" + QString::fromStdString(scene_Pcloud->getName()) + ">";
 		this->AddToConsoleSlot(read_time_text);
 		root->removeChild(scene_Pcloud.get());
@@ -523,11 +569,10 @@ void OsgQtTest::slot_CancelReadProgress() {
 
 void OsgQtTest::slot_FisishReadProgress() {
 	if (readDataProgressDlg) {
-		_timer.stop();
+		read_timer.stop();
 		SetCamerToObjectCenter(scene_Pcloud.get());
-		auto endTime = chrono::steady_clock::now();
-		auto costTime = chrono::duration_cast<chrono::milliseconds>(endTime - startTime).count();
-		float showTime = (float)(costTime * 0.001);
+		PCloudManager::getInstance()->addPointCloud(scene_Pcloud.get());
+		float showTime = (float)(_timerClock.getTimerMilliSec() * 0.001);
 		QString read_time_text = "[I/O] Load file <" + QString::fromStdString(scene_Pcloud->getName()) + "> " + "[" + QString::number(scene_Pcloud->getPointNum()) +
 			"] points cost " + QString::number(showTime, 'f', 2) + "s";
 		this->AddToConsoleSlot(read_time_text);

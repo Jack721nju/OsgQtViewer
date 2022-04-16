@@ -65,6 +65,12 @@ public:
 	POINT_FILE_TYPE m_Type;
 	bool b_isSelected;
 
+private:
+	void clearData() {
+		this->removeDrawables(0, this->getNumDrawables());//剔除节点内所有的几何体
+		geo_point = nullptr;
+	}
+
 public:
 
 	void setSelected(bool isSelected) {
@@ -101,15 +107,9 @@ public:
 
 	void readLasData(const std::string & openfileName);
 
-	void readLasData(const std::string & openfileName, int & rate);
+	void readLasData(const std::string & openfileName, int & rate, bool & isCancel);
 
 	void readPoints(const std::string & openfileName, int & rate, bool & isCancel);
-
-	void readPoints(const std::string & openfileName) {
-		int rate;
-		bool cancel = false;
-		readPoints(openfileName, rate, cancel);
-	};
 };
 
 class PCloudManager {
@@ -117,6 +117,7 @@ private:
 	PCloudManager(){};
 	~PCloudManager(){ 
 		all_pcloud_map.clear();
+		selected_pcloud_list.clear();
 	};
 
 	PCloudManager(const PCloudManager&);
@@ -171,7 +172,25 @@ public:
 		return nullptr;
 	};
 
+	bool selectPointCloud(const std::string & pName, bool isSelected) {
+		if (pName.empty()) {
+			return false;
+		}
+		PointCloud * curPCl = getPointCloud(pName);
+		if (curPCl) {
+			curPCl->setSelected(isSelected);
+			if (isSelected) {
+				selected_pcloud_list.emplace_back(curPCl);
+			}
+			else{
+				selected_pcloud_list.remove(curPCl);
+			}
+			return true;
+		}		
+		return false;
+	};
+
 public:
 	std::map<std::string, PointCloud*> all_pcloud_map;
-	std::vector<PointCloud*> selected_pcloud_list;
+	std::list<PointCloud*> selected_pcloud_list;
 };

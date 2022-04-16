@@ -47,7 +47,7 @@ void WorkerThread::updateRate() {
 }
 
 void WorkerThread::runLas() {
-	readPcloud->readLasData(fileName, m_Rate);	
+	readPcloud->readLasData(fileName, m_Rate, b_Stop);
 }
 
 void WorkerThread::runTxt() {

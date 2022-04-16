@@ -86,11 +86,15 @@ void PointCloud::readLasData(const std::string & openfileName) {
 	this->addDrawable(geo_point.get());//加入当前新的点云几何绘制体
 }
 
-void PointCloud::readLasData(const std::string & openfileName, int & rate) {
+void PointCloud::readLasData(const std::string & openfileName, int & rate, bool & isCancel) {
 	std::fstream ifs;
 	ifs.open(openfileName.c_str(), std::ios::in | std::ios::binary);
 	if (!ifs)
 		return;
+
+	if (isCancel) {
+		return;
+	}
 
 	liblas::ReaderFactory f;
 	liblas::Reader & reader = f.CreateWithStream(ifs);
@@ -109,6 +113,9 @@ void PointCloud::readLasData(const std::string & openfileName, int & rate) {
 	try
 	{
 		while (reader.ReadNextPoint()) {
+			if (isCancel) {
+				break;
+			}
 			liblas::Point const& p = reader.GetPoint();
 			osg::Vec3 single_point(p.GetX(), p.GetY(), p.GetZ());
 			osg::Vec4 single_color(p.GetColor().GetRed() / 255.0, p.GetColor().GetGreen() / 255.0, p.GetColor().GetBlue() / 255.0, 1.0);
@@ -131,6 +138,11 @@ void PointCloud::readLasData(const std::string & openfileName, int & rate) {
 
 	if (this->getPointNum() != point_count) {
 		errInfo = "The point num is not same";
+	}
+
+	if (isCancel) {
+		clearData();
+		return;
 	}
 
 	normal->push_back(osg::Vec3(0.0, 0.0, 1.0));
@@ -237,8 +249,7 @@ void PointCloud::readPoints(const std::string & openfileName, int & rate, bool &
 	}	
 
 	if (isCancel) {
-		this->removeDrawables(0, this->getNumDrawables());//剔除节点内所有的几何体
-		geo_point = nullptr;
+		clearData();
 		return;
 	}
 

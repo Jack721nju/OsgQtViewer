@@ -539,7 +539,7 @@ void OsgQtTest::Init_ReadProgressDlg() {
 
 void OsgQtTest::slot_GetMaxPointNum(int MaxValue){
 	if (readDataProgressDlg) {
-		readDataProgressDlg->setLabelText(QString("Loading Data"));
+		readDataProgressDlg->setLabelText(QString("Points: ") + QString::number(MaxValue));
 	}
 }
 

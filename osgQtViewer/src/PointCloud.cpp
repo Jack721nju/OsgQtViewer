@@ -17,6 +17,87 @@ PointCloud::~PointCloud() {
 
 
 void PointCloud::readLasData(const std::string & openfileName) {
+	//fstream ifs;
+	//ifs.open(openfileName.c_str(), ios::in | ios::binary);
+	//if (!ifs)
+	//	return;
+
+	LASreadOpener opener;
+	opener.set_file_name(openfileName.c_str());
+	if (false == opener.active()){
+		return;
+	}
+	LASreader * reader = opener.open();
+	if (reader == nullptr) {
+		return;
+	}
+
+	geo_point = new osg::Geometry;//创建一个几何体对象
+	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
+	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//创建顶点数组,逆时针排序
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
+	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
+
+	size_t count = 0;
+	std::string errInfo;
+	try
+	{
+		while (reader->read_point()) {
+			double  x, y, z;
+			double  r, g, b, w;
+
+			const LASpoint & p = reader->point;
+
+			x = p.get_x();
+			y = p.get_y();
+			z = p.get_z();
+
+			r = p.get_R() / 255.0;
+			g = p.get_G() / 255.0;
+			b = p.get_B() / 255.0;
+			w = 1.0;
+
+			osg::Vec3 single_point(x, y, z);
+			osg::Vec4 single_color(r, g, b, w);
+
+			vert->push_back(single_point);
+			color->push_back(single_color);
+
+			point->push_back(count);
+			++count;//points num
+		}
+
+		reader->close();
+		delete reader;
+		reader = nullptr;
+	}
+	catch (std::exception & e)
+	{
+		errInfo = e.what();
+	}
+	catch (...)
+	{
+		errInfo = "get unknown exception";
+	}
+	
+
+	this->point_num = count;
+
+	normal->push_back(osg::Vec3(0.0, 0.0, 1.0));
+
+	geo_point->setVertexArray(vert.get());
+	geo_point->setNormalArray(normal.get());
+	geo_point->setNormalBinding(osg::Geometry::BIND_OVERALL);
+	geo_point->setColorArray(color.get());
+	geo_point->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+	geo_point->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, count));
+
+	this->removeDrawables(0, this->getNumDrawables());//读取文件前先剔除节点内所有的几何体
+	this->addDrawable(geo_point.get());//加入当前新的点云几何绘制体
+}
+
+
+void PointCloud::readLasDataByLibLas(const std::string & openfileName) {
 	fstream ifs;
 	ifs.open(openfileName.c_str(), ios::in | ios::binary);
 	if (!ifs)
@@ -69,7 +150,7 @@ void PointCloud::readLasData(const std::string & openfileName) {
 	{
 		errInfo = "get unknown exception";
 	}
-	
+
 
 	this->point_num = count;
 
@@ -87,18 +168,24 @@ void PointCloud::readLasData(const std::string & openfileName) {
 }
 
 void PointCloud::readLasData(const std::string & openfileName, int & rate, bool & isCancel) {
-	std::fstream ifs;
-	ifs.open(openfileName.c_str(), std::ios::in | std::ios::binary);
-	if (!ifs)
-		return;
+	//std::fstream ifs;
+	//ifs.open(openfileName.c_str(), std::ios::in | std::ios::binary);
+	//if (!ifs)
+	//	return;
 
 	if (isCancel) {
 		return;
 	}
 
-	liblas::ReaderFactory f;
-	liblas::Reader & reader = f.CreateWithStream(ifs);
-	liblas::Header const& header = reader.GetHeader();
+	LASreadOpener opener;
+	opener.set_file_name(openfileName.c_str());
+	if (false == opener.active()) {
+		return;
+	}
+	LASreader * reader = opener.open();
+	if (reader == nullptr) {
+		return;
+	}
 
 	geo_point = new osg::Geometry;//创建一个几何体对象
 	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
@@ -106,25 +193,25 @@ void PointCloud::readLasData(const std::string & openfileName, int & rate, bool 
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
 
-	size_t pointAllNum = this->getPointNum() / 100;
+	size_t numInterval = this->getPointNum() / 100;
 	size_t point_count = 0;
 	int m_Rate = 1;
 	std::string errInfo;
 	try
 	{
-		while (reader.ReadNextPoint()) {
+		while (reader->read_point()) {
 			if (isCancel) {
 				break;
 			}
-			liblas::Point const& p = reader.GetPoint();
-			osg::Vec3 single_point(p.GetX(), p.GetY(), p.GetZ());
-			osg::Vec4 single_color(p.GetColor().GetRed() / 255.0, p.GetColor().GetGreen() / 255.0, p.GetColor().GetBlue() / 255.0, 1.0);
+			const LASpoint & p = reader->point;
+			osg::Vec3 single_point(p.get_x(), p.get_y(), p.get_z());
+			osg::Vec4 single_color(p.get_R() / 255.0, p.get_G() / 255.0, p.get_B() / 255.0, 1.0);
 
 			vert->push_back(single_point);
 			color->push_back(single_color);
 			point->push_back(point_count);
 
-			if (++point_count > pointAllNum * m_Rate) {
+			if (++point_count > numInterval * m_Rate) {
 				rate = m_Rate++;
 			}
 		}
@@ -139,6 +226,10 @@ void PointCloud::readLasData(const std::string & openfileName, int & rate, bool 
 	if (this->getPointNum() != point_count) {
 		errInfo = "The point num is not same";
 	}
+
+	reader->close();
+	delete reader;
+	reader = nullptr;
 
 	if (isCancel) {
 		clearData();
@@ -201,6 +292,7 @@ void PointCloud::readPoints(const std::string & openfileName, int & rate, bool &
 				break;
 			}
 			xyz_list.clear();
+			lineSubstr = strtok(substr, delim);
 			while (lineSubstr != nullptr) {
 				xyz_list.push_back(atof(lineSubstr));
 				lineSubstr = strtok(nullptr, delim);

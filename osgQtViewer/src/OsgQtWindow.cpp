@@ -6,6 +6,8 @@ static QString Data_Path = "E:/Data/";
 static int progressMinValue = 0;
 static int progressMaxValue = 100;
 
+#define MaxUsingThreadReadNum 5000000
+
 using namespace std;
 
 OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMainWindow() {
@@ -15,10 +17,10 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMai
 	setAcceptDrops(true);//开启拖拽功能
 
 	MainWidget = new OsgContainer(this);
-	root = MainWidget->getRoot();
-	if (root) {
+	mainView_root = MainWidget->getRoot();
+	if (mainView_root) {
 		osgUtil::Optimizer opt;
-		opt.optimize(root.get());
+		opt.optimize(mainView_root.get());
 	}
 
 	//初始化主菜单栏
@@ -45,9 +47,12 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMai
 	//设置中央主窗口
 	this->setCentralWidget(centerWidget);
 
-	//设置读取计时器
+	//设置读取数据进度条计时器
 	read_timer.setSingleShot(false);
 	read_timer.setInterval(100);
+
+	//初始化点云数据管理器，单例模式
+	PCloudManager::Instance(mainView_root);
 }
 
 OsgQtTest::~OsgQtTest() {
@@ -150,10 +155,10 @@ void OsgQtTest::Init_Mian_Menu() {
 
 	QMenu * menu_File = menu_bar->addMenu("File");
 	QAction * file_action1 = new QAction(QString::fromLocal8Bit("&Open"), menu_File);
-	file_action1->connect(file_action1, SIGNAL(triggered()), this, SLOT(OpenData()));
+	file_action1->connect(file_action1, SIGNAL(triggered()), this, SLOT(slot_OpenData()));
 	menu_File->addAction(file_action1);
 	QAction * file_action2 = new QAction(QString::fromLocal8Bit("&Save"), menu_File);
-	file_action2->connect(file_action2, SIGNAL(triggered()), this, SLOT(SaveData()));
+	file_action2->connect(file_action2, SIGNAL(triggered()), this, SLOT(slot_SaveData()));
 	menu_File->addAction(file_action2);
 	QAction * file_action3 = new QAction(QString::fromLocal8Bit("&Delete"), menu_File);
 	file_action3->connect(file_action3, SIGNAL(triggered()), this, SLOT(deleteItemSlot()));
@@ -197,12 +202,12 @@ void OsgQtTest::Init_Tool_Bar() {
 	QActionGroup * groupA = new QActionGroup(tool_bar);
 
 	QAction * tool_action1 = new QAction(QIcon(Icon_Path + QString("open.png")), QString::fromLocal8Bit("&Open"), tool_bar);
-	tool_action1->connect(tool_action1, SIGNAL(triggered()), this, SLOT(OpenData()));
+	tool_action1->connect(tool_action1, SIGNAL(triggered()), this, SLOT(slot_OpenData()));
 	tool_action1->setToolTip(tr("Open the file"));
 	tool_bar->addAction(groupA->addAction(tool_action1));
 
 	QAction * tool_action2 = new QAction(QIcon(Icon_Path + QString("save.png")), QString::fromLocal8Bit("&Save"), tool_bar);
-	tool_action2->connect(tool_action2, SIGNAL(triggered()), this, SLOT(SaveData()));
+	tool_action2->connect(tool_action2, SIGNAL(triggered()), this, SLOT(slot_SaveData()));
 	tool_action2->setToolTip(tr("Save the file"));
 	tool_bar->addAction(groupA->addAction(tool_action2));
 
@@ -392,12 +397,36 @@ void OsgQtTest::AddToConsoleSlot(const QString & show_text){
 	}
 }
 
+bool OsgQtTest::hasSelectedPcloud() {
+	if (PCloudManager::Instance()->selectedPcloudNum() > 0) {
+		return true;
+	}
+	return false;
+}
+
+void OsgQtTest::slot_SaveData() {
+	const QString &saveFileName =  QFileDialog::getSaveFileName(0, tr("Save data name:"), Data_Path, "Screen files(*.txt *.las)");
+	const std::string &save_name = saveFileName.toStdString();
+
+	//判断是否已选择目标点云
+	if (false == hasSelectedPcloud()){
+		this->AddToConsoleSlot("[WARING] No data has been selected");
+		return;
+	}
+
+	_timerClock.start();//开始计时
+
+	PCloudManager::Instance()->saveSelectedToFile(save_name);
+	float saveTime = _timerClock.getTime<Ms>() * 0.001;
+	this->AddToConsoleSlot(QString("[I/O] Save file <") + saveFileName + QString("> successfully cost ") + QString::number(saveTime, 'f', 2) + "s");
+}
+
 //打开文件
-void OsgQtTest::OpenData(){
+void OsgQtTest::slot_OpenData(){
 	const QString &getFullName = QFileDialog::getOpenFileName(nullptr, tr("Open data name:"), Data_Path, "Screen files(*.txt *.las *.org *.osg *.ive *.earth)");
 
 	if (getFullName.isEmpty()) {
-		this->AddToConsoleSlot(QString("[INFO] Open file cancel"));
+		this->AddToConsoleSlot(QString("[INFO] Cancel opening file ") + getFullName);
 		return;
 	}
 
@@ -405,7 +434,7 @@ void OsgQtTest::OpenData(){
 
 	//判断是存在文件
 	if (false == fileInfo.exists())	{
-		this->AddToConsoleSlot(QString("[WARING] The file is not exists"));
+		this->AddToConsoleSlot(QString("[WARING] The file <") + getFullName + QString("> is not exists"));
 		return;
 	}
 
@@ -444,23 +473,22 @@ void OsgQtTest::ReadLasData(const std::string & fileName) {
 		const liblas::Header & header = reader.GetHeader();
 		size_t pointNum = header.GetPointRecordsCount();
 
-		scene_Pcloud = new PointCloud();
-		scene_Pcloud->setName(fileName);
+		PointCloud * scene_Pcloud = PCloudManager::Instance()->addPointCloud(fileName);
+
 		scene_Pcloud->setType(POINT_FILE_TYPE::LAS);
 		scene_Pcloud->setPointNum(pointNum);
-		root->addChild(scene_Pcloud.get());
-
-		if (pointNum < 10000000) {
+	
+		if (pointNum < MaxUsingThreadReadNum) {
 			scene_Pcloud->readLasData(fileName);
-			SetCamerToObjectCenter(scene_Pcloud.get());
-			float showTime = (float)(_timerClock.getTimerMilliSec() * 0.001);
+			SetCamerToObjectCenter(scene_Pcloud);
+			float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
 			QString read_time_text = "[Time] Read file <" + QString::fromStdString(fileName) + "> " + "[" +
 				QString::number(scene_Pcloud->getPointNum()) + "] points cost " + QString::number(showTime, 'f', 2) + "s";
 			this->AddToConsoleSlot(read_time_text);
 		}
 		else {
-			Init_ReadProgressDlg();
-			this->slot_GetMaxPointNum(scene_Pcloud->getPointNum());
+			Init_ReadProgressDlg(fileName);
+			this->setMaxReadPointNum(scene_Pcloud->getPointNum());
 			WorkerThread * readData_thread = new WorkerThread(scene_Pcloud, progressMinValue, progressMaxValue, this);
 			connect(&read_timer, SIGNAL(timeout()), readData_thread, SLOT(updateRate()));
 			connect(readData_thread, SIGNAL(started()), &read_timer, SLOT(start()));
@@ -479,7 +507,7 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 		return;
 	}
 
-	Init_ReadProgressDlg();
+	Init_ReadProgressDlg(fileName);
 	QTextStream stream(&text_file);
 	const QString & allLine = stream.readAll();
 	QChar pp = '\n';
@@ -491,7 +519,7 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 	}
 
 	const QString &firstLine = allparts[0];
-	this->slot_GetMaxPointNum(line_count);
+	this->setMaxReadPointNum(line_count);
 
 	QRegExp regep("[,;' ']");
 	const QStringList & row_parts = firstLine.split(regep, QString::SkipEmptyParts);
@@ -506,11 +534,10 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 		isOnlyXYZ = false;
 	}
 
-	scene_Pcloud = new PointCloud();
-	scene_Pcloud->setName(fileName);
+	PointCloud * scene_Pcloud = PCloudManager::Instance()->addPointCloud(fileName);
 	scene_Pcloud->setType(isOnlyXYZ ? POINT_FILE_TYPE::TXT : POINT_FILE_TYPE::TXT_COLOR);
 	scene_Pcloud->setPointNum(line_count);
-	root->addChild(scene_Pcloud.get());
+
 	
 	WorkerThread *readData_thread = new WorkerThread(scene_Pcloud, progressMinValue, progressMaxValue, this);
 	connect(&read_timer, SIGNAL(timeout()), readData_thread, SLOT(updateRate()));
@@ -523,8 +550,9 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 	}
 }
 
-void OsgQtTest::Init_ReadProgressDlg() {
+void OsgQtTest::Init_ReadProgressDlg(const std::string fileName) {
 	readDataProgressDlg = new QProgressDialog();
+	readDataProgressDlg->setObjectName(QString::fromStdString(fileName));
 	readDataProgressDlg->setWindowTitle(QString("Loading"));
 	readDataProgressDlg->setCancelButtonText(QString("Cancel"));
 	readDataProgressDlg->setWindowModality(Qt::WindowModal);
@@ -537,7 +565,7 @@ void OsgQtTest::Init_ReadProgressDlg() {
 	readDataProgressDlg->setValue(progressMinValue);
 }
 
-void OsgQtTest::slot_GetMaxPointNum(int MaxValue){
+void OsgQtTest::setMaxReadPointNum(int MaxValue){
 	if (readDataProgressDlg) {
 		readDataProgressDlg->setLabelText(QString("Points: ") + QString::number(MaxValue));
 	}
@@ -561,20 +589,21 @@ void OsgQtTest::slot_UpdateProgress(int progressValue) {
 void OsgQtTest::slot_CancelReadProgress() {
 	if (readDataProgressDlg) {
 		read_timer.stop();
-		QString read_time_text = "[I/O] Cancel Load file <" + QString::fromStdString(scene_Pcloud->getName()) + ">";
+		QString read_time_text = "[I/O] Cancel Load file <" + readDataProgressDlg->objectName() + ">";
+		PCloudManager::Instance()->removePointCloud(readDataProgressDlg->objectName().toStdString());
 		this->AddToConsoleSlot(read_time_text);
-		root->removeChild(scene_Pcloud.get());
 	}
 }
 
 void OsgQtTest::slot_FisishReadProgress() {
 	if (readDataProgressDlg) {
 		read_timer.stop();
-		SetCamerToObjectCenter(scene_Pcloud.get());
-		PCloudManager::getInstance()->addPointCloud(scene_Pcloud.get());
-		float showTime = (float)(_timerClock.getTimerMilliSec() * 0.001);
-		QString read_time_text = "[I/O] Load file <" + QString::fromStdString(scene_Pcloud->getName()) + "> " + "[" + QString::number(scene_Pcloud->getPointNum()) +
-			"] points cost " + QString::number(showTime, 'f', 2) + "s";
+		PointCloud * curPcloud = PCloudManager::Instance()->getPointCloud(readDataProgressDlg->objectName().toStdString());
+		SetCamerToObjectCenter(curPcloud);
+		float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
+		QString read_time_text = "[I/O] Load file <" + readDataProgressDlg->objectName() + "> "
+								+ "[" + QString::number(curPcloud->getPointNum()) + "] points cost "
+								+ QString::number(showTime, 'f', 2) + "s";
 		this->AddToConsoleSlot(read_time_text);
 	}
 }

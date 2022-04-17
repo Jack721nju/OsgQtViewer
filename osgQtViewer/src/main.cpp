@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
 	splash.show();
 	a.processEvents();
 
-	Sleep(600);
+	Sleep(300);
 	
 	OsgQtTest* viewWidget = new OsgQtTest();
 	viewWidget->setGeometry(500, 200, 1500, 1000);

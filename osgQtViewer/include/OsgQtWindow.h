@@ -94,7 +94,7 @@ private:
 
 	void Init_Console_Frame();
 
-	void Init_ReadProgressDlg();
+	void Init_ReadProgressDlg(const std::string fileName);
 
 private:
 	OsgContainer* MainWidget;
@@ -118,20 +118,26 @@ private:
 private:
 	void AddToConsoleSlot(const QString& show_text);
 
-private:
-	osg::ref_ptr<osg::Group> root{nullptr};
 
-	osg::ref_ptr<PointCloud> scene_Pcloud{nullptr};
+
+private:
+	osg::ref_ptr<osg::Group> mainView_root{nullptr};
 
 	QMutex m_mutex;
 
 public slots:
-	void OpenData();
-	void ReadLasData(const std::string & fileName);
-	void ReadTxtData(const std::string & fileName);
+	void slot_OpenData();
+	void slot_SaveData();
 
-	void slot_GetMaxPointNum(int MaxValue);
 	void slot_UpdateProgress(int progressValue);
 	void slot_FisishReadProgress();
 	void slot_CancelReadProgress();
+
+public:
+	void ReadLasData(const std::string & fileName);
+	void ReadTxtData(const std::string & fileName);
+	void setMaxReadPointNum(int MaxValue);
+
+public:
+	bool hasSelectedPcloud();
 };

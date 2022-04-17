@@ -42,20 +42,31 @@
 #include <ostream>
 
 #include <liblas/liblas.hpp>
+#include <liblas/reader.hpp>
+#include <liblas/writer.hpp>
+
+#include "lasreader.hpp"
+#include "laswriter.hpp"
 
 enum POINT_FILE_TYPE {
 	LAS = 0,
 	TXT = 1,
-	TXT_COLOR = 2 
+	TXT_COLOR = 2,
+	UNKNOWN
 };
 
 class PointCloud : public osg::Geode
 {
-public:
+private:
 	explicit PointCloud(osg::ref_ptr<osg::Group> root = nullptr);
 	virtual ~PointCloud();
+
+	PointCloud(const PointCloud &other) = delete;
+	PointCloud & operator=(const PointCloud& other) = delete;
+
+	friend class PCloudManager;
 	
-public:
+private:
 	size_t point_num;//µãÊýÁ¿
 	float point_size;
 	std::string point_name;
@@ -72,7 +83,6 @@ private:
 	}
 
 public:
-
 	void setSelected(bool isSelected) {
 		b_isSelected = isSelected;
 	}
@@ -107,6 +117,8 @@ public:
 
 	void readLasData(const std::string & openfileName);
 
+	void PointCloud::readLasDataByLibLas(const std::string & openfileName);
+
 	void readLasData(const std::string & openfileName, int & rate, bool & isCancel);
 
 	void readPoints(const std::string & openfileName, int & rate, bool & isCancel);
@@ -114,26 +126,35 @@ public:
 
 class PCloudManager {
 private:
-	PCloudManager(){};
+	PCloudManager(osg::ref_ptr<osg::Group> root = nullptr): m_root(root){
+	};
+
 	~PCloudManager(){ 
 		all_pcloud_map.clear();
 		selected_pcloud_list.clear();
+		m_root = nullptr;
 	};
 
-	PCloudManager(const PCloudManager&);
-	PCloudManager & operator=(const PCloudManager&);
+	PCloudManager(const PCloudManager& other) {	};
+
+	PCloudManager & operator=(const PCloudManager& other) {};
 
 public:
-	static PCloudManager * getInstance() {
-		static PCloudManager instance;
+	static PCloudManager * Instance(osg::ref_ptr<osg::Group> root = nullptr) {
+		static PCloudManager instance(root);
 		return &instance;
 	}
 
-	void addPointCloud(PointCloud* pcloud) {
-		if (pcloud) {
-			all_pcloud_map.emplace(pcloud->getName(), pcloud);
+	PointCloud * addPointCloud(const std::string & pName) {
+		PointCloud * pcloud = new PointCloud();
+		pcloud->setName(pName);
+		all_pcloud_map.emplace(pcloud->getName(), pcloud);
+		selected_pcloud_list.emplace_back(pcloud);
+		if (m_root) {
+			m_root->addChild(pcloud);
 		}
-	};
+		return pcloud;
+	}
 
 	void removePointCloud(PointCloud* pcloud) {
 		if (pcloud) {
@@ -145,6 +166,7 @@ public:
 				}
 				iter++;
 			}
+			m_root->removeChild(pcloud);
 		}
 	};
 
@@ -172,7 +194,7 @@ public:
 		return nullptr;
 	};
 
-	bool selectPointCloud(const std::string & pName, bool isSelected) {
+	bool setSelectState(const std::string & pName, bool isSelected) {
 		if (pName.empty()) {
 			return false;
 		}
@@ -190,7 +212,89 @@ public:
 		return false;
 	};
 
+	size_t selectedPcloudNum() const {
+		return selected_pcloud_list.size();
+	}
+
+	void saveSelectedToFile(const std::string & saveFileName) {
+		if (saveFileName.empty() || saveFileName.find_last_of(".") < 0) {
+			return;
+		}
+		
+		std::ofstream outf(saveFileName, std::ios::out | std::ios::binary);
+		if (!outf.is_open()) {
+			return;
+		}
+
+		osg::Vec3f singP;
+		osg::ref_ptr<osg::Vec3Array> vertAll  = new osg::Vec3Array;
+		size_t allPointNum = 0;
+		for (const auto item : selected_pcloud_list) {
+			osg::Vec3Array* vertices = dynamic_cast<osg::Vec3Array*>(item->geo_point->getVertexArray());
+			allPointNum += item->getPointNum();
+			vertAll->resizeArray(allPointNum);
+			vertAll->assign(vertices->begin(), vertices->end());
+		}
+
+		int pos = saveFileName.find_last_of('.');
+		const std::string &fileFormat = saveFileName.substr(pos + 1);
+		if (fileFormat == "txt") {			
+			for (const auto & curVert : *vertAll) {
+				outf << curVert.x() << " " << curVert.y() << " " << curVert.z() << " " << std::endl;
+			}
+		}
+		else if (fileFormat == "las") {		
+			LASwriteOpener writerOpener;
+			writerOpener.set_file_name(saveFileName.c_str());
+			LASheader header;
+			header.x_scale_factor = 0.001;
+			header.y_scale_factor = 0.001;
+			header.z_scale_factor = 0.001;
+			header.point_data_format = 1;
+			header.point_data_record_length = 28;
+			header.number_of_point_records = allPointNum;
+			LASwriter *writer = writerOpener.open(&header);
+			//header.set_bounding_box();
+
+			LASpoint point;
+			point.init(&header, header.point_data_format, header.point_data_record_length, nullptr);
+
+			for (const auto & curVert : *vertAll) {
+				point.set_x(curVert.x());
+				point.set_y(curVert.y());
+				point.set_z(curVert.z());
+				writer->write_point(&point);
+				writer->update_inventory(&point);
+			}
+
+			writer->update_header(&header, true);
+			writer->close();
+			delete writer;
+			writer = nullptr;
+
+			//liblas::Header * header = new liblas::Header;
+			//header->SetVersionMajor(1);
+			//header->SetVersionMinor(2);
+			//header->SetDataFormatId(liblas::ePointFormat3);
+			//header->SetScale(0.001, 0.001, 0.001);
+			//header->SetPointRecordsCount(allPointNum);
+
+			//liblas::Point curPoint(header);
+			//liblas::Writer *writer = new liblas::Writer(outf, *header);
+			//for (const auto & curVert : *vertAll) {
+			//	curPoint.SetCoordinates(curVert.x(), curVert.y(), curVert.z());
+			//	writer->WritePoint(curPoint);
+			//}
+			//writer->SetHeader(*header);
+			//writer->WriteHeader();
+		}
+
+		outf.flush();
+		outf.close();
+	}
+
 public:
+	osg::ref_ptr<osg::Group> m_root;
 	std::map<std::string, PointCloud*> all_pcloud_map;
 	std::list<PointCloud*> selected_pcloud_list;
 };

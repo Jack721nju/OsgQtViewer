@@ -17,6 +17,16 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMai
 	setAcceptDrops(true);//开启拖拽功能
 
 	MainWidget = new OsgContainer(this);
+	QHBoxLayout * hgrid = new QHBoxLayout;
+	hgrid->addWidget(MainWidget);
+	QGridLayout * grid = new QGridLayout;
+	grid->addLayout(hgrid, 0, 0);
+	QWidget* centerWidget = new QWidget;
+	centerWidget->setLayout(grid);
+	
+	//设置中央主窗口
+	this->setCentralWidget(centerWidget);
+
 	mainView_root = MainWidget->getRoot();
 	if (mainView_root) {
 		osgUtil::Optimizer opt;
@@ -35,17 +45,11 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMai
 	//初始化命令输出框
 	Init_Console_Frame();
 
-	QHBoxLayout * hgrid = new QHBoxLayout;
-	hgrid->addWidget(MainWidget);
+	//初始化数据管理窗口
+	Init_Data_Manager_Widget();
 
-	QGridLayout * grid = new QGridLayout;
-	grid->addLayout(hgrid, 0, 0);
-
-	QWidget* centerWidget = new QWidget;
-	centerWidget->setLayout(grid);
-
-	//设置中央主窗口
-	this->setCentralWidget(centerWidget);
+	//初始化数据信息窗口
+	Init_Data_Info_Widget();
 
 	//设置读取数据进度条计时器
 	read_timer.setSingleShot(false);
@@ -386,8 +390,150 @@ void OsgQtTest::Init_Console_Frame()
 
 	Dock_Console_Widget = new QDockWidget();
 	Dock_Console_Widget->setWidget(Console_Frame);
+	Dock_Console_Widget->setFont(QFont("Arial", 10, QFont::Light, false));
 	Dock_Console_Widget->setWindowTitle(tr("Console"));
 	this->addDockWidget(Qt::BottomDockWidgetArea, Dock_Console_Widget);
+}
+
+void OsgQtTest::Init_Data_Manager_Widget() {
+	Data_TreeWidget = new QTreeWidget(this);
+	Data_TreeWidget->setHeaderHidden(true);
+	Data_TreeWidget->setDragEnabled(true);
+
+	QTreeWidgetItem * TopItem = new QTreeWidgetItem;
+	TopItem->setText(0, "DIR");
+	TopItem->setCheckState(0, Qt::PartiallyChecked);
+	TopItem->setIcon(0, QIcon(Icon_Path + QString("layer.png")));
+
+	Data_TreeWidget->addTopLevelItem(TopItem);
+	Data_TreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);//ctrl + 多选
+	Data_TreeWidget->setSelectionMode(QAbstractItemView::ContiguousSelection);//shift + 多选
+	Data_TreeWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);//禁止编辑
+
+	Data_TreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	Data_TreeWidget->setRootIsDecorated(true);
+	Data_TreeWidget->setMinimumSize(250, 200);
+
+	connect(Data_TreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(RefreshTreeWidget(QTreeWidgetItem*, int)));
+	connect(Data_TreeWidget, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(RefreshTreeWidget(QTreeWidgetItem*, int)));
+	connect(Data_TreeWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(RefreshTreeWidget(QTreeWidgetItem*, int)));
+
+	Dock_Data_Widget = new QDockWidget();
+	Dock_Data_Widget->setWidget(Data_TreeWidget);
+	Dock_Data_Widget->setFont(QFont("Arial", 10, QFont::Bold, false));
+	Dock_Data_Widget->setWindowTitle(tr("Data Manager"));
+	Dock_Data_Widget->setFeatures(QDockWidget::AllDockWidgetFeatures);
+
+	this->addDockWidget(Qt::LeftDockWidgetArea, Dock_Data_Widget);
+}
+
+void OsgQtTest::AddNodeToDataTree(const std::string & nodeName, int type) {
+	QTreeWidgetItem * witem = new QTreeWidgetItem;
+	witem->setText(0, nodeName.c_str());
+	witem->setCheckState(0, Qt::Checked);
+	QString Icon_file;
+	if (type == 1)	{
+		Icon_file = Icon_Path + QString("cloud.png");
+	}
+	else if (type == 2)	{
+		Icon_file = Icon_Path + QString("model.png");
+	}
+
+	witem->setIcon(0, QIcon(Icon_file));
+	witem->setFlags(witem->flags() | Qt::ItemIsEditable);
+
+	Data_TreeWidget->topLevelItem(0)->addChild(witem);
+	slot_RefreshData_TreeWidget(witem, 0);
+}
+
+void OsgQtTest::slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col) {
+
+}
+
+void OsgQtTest::Init_Data_Info_Widget() {
+	if (DataInfo_TableWidget){
+		DataInfo_TableWidget->clear();
+	}
+	else{
+		DataInfo_TableWidget = new QTableWidget(15, 2, this);
+		DataInfo_TableWidget->setVisible(true);
+		DataInfo_TableWidget->setMinimumSize(250, 300);
+	}
+
+	DataInfo_TableWidget->clearSpans();
+
+	QStringList qs;
+	QString name1("Property");
+	QString name2("State/Value");
+
+	qs.push_back(name1);
+	qs.push_back(name2);
+
+	DataInfo_TableWidget->setHorizontalHeaderLabels(qs);
+
+	DataInfo_TableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	DataInfo_TableWidget->horizontalHeader()->setVisible(true);
+	DataInfo_TableWidget->verticalHeader()->setVisible(false);
+	DataInfo_TableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+	DataInfo_TableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+	DataInfo_TableWidget->setStyleSheet("selection-background-color:pink");
+	DataInfo_TableWidget->setShowGrid(false);
+	DataInfo_TableWidget->horizontalHeader()->setStretchLastSection(true);//最右侧列与窗口宽度对齐
+	//DataInfo_TableWidget->resizeColumnsToContents();
+	//DataInfo_TableWidget->resizeRowsToContents();
+
+	QTableWidgetItem * t_item1 = new QTableWidgetItem;
+	t_item1->setText(tr("Property"));
+	t_item1->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+	QTableWidgetItem * t_item2 = new QTableWidgetItem;
+	t_item2->setText(tr("State/Value"));
+	t_item2->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+	QTableWidgetItem * t_item3 = new QTableWidgetItem;
+	t_item3->setText(tr("Object Info"));
+	t_item3->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	t_item3->setBackgroundColor(QColor(220, 220, 220, 220));
+	DataInfo_TableWidget->setSpan(0, 0, 1, 2);
+
+	QTableWidgetItem * t_item4 = new QTableWidgetItem;
+	t_item4->setText(tr("Name"));
+	t_item4->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+	QTableWidgetItem * t_item5 = new QTableWidgetItem;
+	t_item5->setText(tr("Type"));
+	t_item5->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+	QTableWidgetItem * t_item6 = new QTableWidgetItem;
+	t_item6->setText(tr("Box Center"));
+	t_item6->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setSpan(3, 0, 3, 1);
+
+	QTableWidgetItem * t_item7 = new QTableWidgetItem;
+	t_item7->setText(tr("Box Size"));
+	t_item7->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setSpan(6, 0, 3, 1);
+
+	QTableWidgetItem * t_item8 = new QTableWidgetItem;
+	t_item8->setText(tr("Information"));
+	t_item8->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+	DataInfo_TableWidget->setItem(0, 0, t_item1);
+	DataInfo_TableWidget->setItem(0, 1, t_item2);
+	DataInfo_TableWidget->setItem(0, 0, t_item3);
+	DataInfo_TableWidget->setItem(1, 0, t_item4);
+	DataInfo_TableWidget->setItem(2, 0, t_item5);
+	DataInfo_TableWidget->setItem(3, 0, t_item6);
+	DataInfo_TableWidget->setItem(6, 0, t_item7);
+	DataInfo_TableWidget->setItem(9, 0, t_item8);
+
+	Dock_DataInfo_Widget = new QDockWidget();
+	Dock_DataInfo_Widget->setWidget(DataInfo_TableWidget);
+	Dock_DataInfo_Widget->setFont(QFont("Arial", 10, QFont::Bold, false));
+	Dock_DataInfo_Widget->setWindowTitle(tr("Data Info"));
+	Dock_DataInfo_Widget->setFeatures(QDockWidget::AllDockWidgetFeatures);
+
+	this->addDockWidget(Qt::LeftDockWidgetArea, Dock_DataInfo_Widget);
 }
 
 void OsgQtTest::AddToConsoleSlot(const QString & show_text){
@@ -480,6 +626,7 @@ void OsgQtTest::ReadLasData(const std::string & fileName) {
 	
 		if (pointNum < MaxUsingThreadReadNum) {
 			scene_Pcloud->readLasData(fileName);
+			AddNodeToDataTree(fileName);
 			SetCamerToObjectCenter(scene_Pcloud);
 			float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
 			QString read_time_text = "[Time] Read file <" + QString::fromStdString(fileName) + "> " + "[" +
@@ -537,7 +684,6 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 	PointCloud * scene_Pcloud = PCloudManager::Instance()->addPointCloud(fileName);
 	scene_Pcloud->setType(isOnlyXYZ ? POINT_FILE_TYPE::TXT : POINT_FILE_TYPE::TXT_COLOR);
 	scene_Pcloud->setPointNum(line_count);
-
 	
 	WorkerThread *readData_thread = new WorkerThread(scene_Pcloud, progressMinValue, progressMaxValue, this);
 	connect(&read_timer, SIGNAL(timeout()), readData_thread, SLOT(updateRate()));
@@ -600,6 +746,7 @@ void OsgQtTest::slot_FisishReadProgress() {
 		read_timer.stop();
 		PointCloud * curPcloud = PCloudManager::Instance()->getPointCloud(readDataProgressDlg->objectName().toStdString());
 		SetCamerToObjectCenter(curPcloud);
+		AddNodeToDataTree(readDataProgressDlg->objectName().toStdString());
 		float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
 		QString read_time_text = "[I/O] Load file <" + readDataProgressDlg->objectName() + "> "
 								+ "[" + QString::number(curPcloud->getPointNum()) + "] points cost "

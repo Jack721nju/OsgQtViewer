@@ -7,6 +7,7 @@
 #include <QtGui>
 #include <QMainWindow>
 #include <QDockWidget>
+#include <QTableWidget>
 #include <QDialog>
 #include <QTreeWidget>
 #include <QSizePolicy>
@@ -23,6 +24,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFileDialog>
+#include <QHeaderView>
 
 #include <Windows.h>
 
@@ -94,6 +96,10 @@ private:
 
 	void Init_Console_Frame();
 
+	void Init_Data_Manager_Widget();
+
+	void Init_Data_Info_Widget();
+
 	void Init_ReadProgressDlg(const std::string fileName);
 
 private:
@@ -107,6 +113,12 @@ private:
 
 	QDockWidget* Dock_Console_Widget;
 
+	QTreeWidget* Data_TreeWidget;
+	QDockWidget* Dock_Data_Widget;
+
+	QTableWidget* DataInfo_TableWidget;
+	QDockWidget* Dock_DataInfo_Widget;
+
 	QFrame* Console_Frame;
 
 	QTextEdit* Console_edit;
@@ -118,8 +130,8 @@ private:
 private:
 	void AddToConsoleSlot(const QString& show_text);
 
-
-
+	void AddNodeToDataTree(const std::string & nodeName, int type = 1);
+	
 private:
 	osg::ref_ptr<osg::Group> mainView_root{nullptr};
 
@@ -132,6 +144,8 @@ public slots:
 	void slot_UpdateProgress(int progressValue);
 	void slot_FisishReadProgress();
 	void slot_CancelReadProgress();
+
+	void slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col);
 
 public:
 	void ReadLasData(const std::string & fileName);

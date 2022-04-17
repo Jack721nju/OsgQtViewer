@@ -149,7 +149,6 @@ public:
 		PointCloud * pcloud = new PointCloud();
 		pcloud->setName(pName);
 		all_pcloud_map.emplace(pcloud->getName(), pcloud);
-		selected_pcloud_list.emplace_back(pcloud);
 		if (m_root) {
 			m_root->addChild(pcloud);
 		}
@@ -271,22 +270,6 @@ public:
 			writer->close();
 			delete writer;
 			writer = nullptr;
-
-			//liblas::Header * header = new liblas::Header;
-			//header->SetVersionMajor(1);
-			//header->SetVersionMinor(2);
-			//header->SetDataFormatId(liblas::ePointFormat3);
-			//header->SetScale(0.001, 0.001, 0.001);
-			//header->SetPointRecordsCount(allPointNum);
-
-			//liblas::Point curPoint(header);
-			//liblas::Writer *writer = new liblas::Writer(outf, *header);
-			//for (const auto & curVert : *vertAll) {
-			//	curPoint.SetCoordinates(curVert.x(), curVert.y(), curVert.z());
-			//	writer->WritePoint(curPoint);
-			//}
-			//writer->SetHeader(*header);
-			//writer->WriteHeader();
 		}
 
 		outf.flush();

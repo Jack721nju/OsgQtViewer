@@ -193,6 +193,13 @@ public:
 		return nullptr;
 	};
 
+	void clearSelectedState() {
+		for (const auto & item : selected_pcloud_list) {
+			item->setSelected(false);
+		}
+		selected_pcloud_list.clear();
+	}
+
 	bool setSelectState(const std::string & pName, bool isSelected) {
 		if (pName.empty()) {
 			return false;

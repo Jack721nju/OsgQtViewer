@@ -414,9 +414,9 @@ void OsgQtTest::Init_Data_Manager_Widget() {
 	Data_TreeWidget->setRootIsDecorated(true);
 	Data_TreeWidget->setMinimumSize(250, 200);
 
-	connect(Data_TreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(RefreshTreeWidget(QTreeWidgetItem*, int)));
-	connect(Data_TreeWidget, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(RefreshTreeWidget(QTreeWidgetItem*, int)));
-	connect(Data_TreeWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(RefreshTreeWidget(QTreeWidgetItem*, int)));
+	connect(Data_TreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(slot_RefreshData_TreeWidget(QTreeWidgetItem*, int)));
+	connect(Data_TreeWidget, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(slot_RefreshData_TreeWidget(QTreeWidgetItem*, int)));
+	connect(Data_TreeWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(slot_RefreshData_TreeWidget(QTreeWidgetItem*, int)));
 
 	Dock_Data_Widget = new QDockWidget();
 	Dock_Data_Widget->setWidget(Data_TreeWidget);
@@ -442,12 +442,21 @@ void OsgQtTest::AddNodeToDataTree(const std::string & nodeName, int type) {
 	witem->setIcon(0, QIcon(Icon_file));
 	witem->setFlags(witem->flags() | Qt::ItemIsEditable);
 
-	Data_TreeWidget->topLevelItem(0)->addChild(witem);
+	QTreeWidgetItem * topItem = Data_TreeWidget->topLevelItem(0);
+	if (topItem) {
+		topItem->addChild(witem);
+		Data_TreeWidget->setItemExpanded(topItem, true);
+	}
 	slot_RefreshData_TreeWidget(witem, 0);
 }
 
-void OsgQtTest::slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col) {
+void OsgQtTest::slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col) {	
+	PCloudManager::Instance()->clearSelectedState();
 
+	for (const auto & item : Data_TreeWidget->selectedItems()) {
+		const std::string & curName = item->text(0).toStdString();
+		PCloudManager::Instance()->setSelectState(curName, true);
+	}
 }
 
 void OsgQtTest::Init_Data_Info_Widget() {
@@ -551,18 +560,19 @@ bool OsgQtTest::hasSelectedPcloud() {
 }
 
 void OsgQtTest::slot_SaveData() {
-	const QString &saveFileName =  QFileDialog::getSaveFileName(0, tr("Save data name:"), Data_Path, "Screen files(*.txt *.las)");
-	const std::string &save_name = saveFileName.toStdString();
-
 	//判断是否已选择目标点云
-	if (false == hasSelectedPcloud()){
-		this->AddToConsoleSlot("[WARING] No data has been selected");
+	if (false == hasSelectedPcloud()) {
+		this->AddToConsoleSlot("[WARING] Can not save, no data selected");
 		return;
 	}
-
+	const QString &saveFileName =  QFileDialog::getSaveFileName(0, tr("Save data name:"), Data_Path, "Screen files(*.txt *.las)");
+	if (saveFileName.isEmpty()) {
+		this->AddToConsoleSlot(QString("[I/O] Cancel save file"));
+		return;
+	}
+	
 	_timerClock.start();//开始计时
-
-	PCloudManager::Instance()->saveSelectedToFile(save_name);
+	PCloudManager::Instance()->saveSelectedToFile(saveFileName.toStdString());
 	float saveTime = _timerClock.getTime<Ms>() * 0.001;
 	this->AddToConsoleSlot(QString("[I/O] Save file <") + saveFileName + QString("> successfully cost ") + QString::number(saveTime, 'f', 2) + "s");
 }

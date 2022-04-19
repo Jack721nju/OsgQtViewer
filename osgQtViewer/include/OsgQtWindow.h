@@ -77,6 +77,8 @@ public:
 		frame();
 	}
 
+	bool eventFilter(QObject * obj, QEvent * event);
+
 private:
 	QWidget* addViewWidget(osgQt::GraphicsWindowQt* gw, osg::ref_ptr<osg::Group> scence);
 	

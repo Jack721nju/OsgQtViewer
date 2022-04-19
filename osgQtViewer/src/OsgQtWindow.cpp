@@ -395,6 +395,24 @@ void OsgQtTest::Init_Console_Frame()
 	this->addDockWidget(Qt::BottomDockWidgetArea, Dock_Console_Widget);
 }
 
+bool OsgQtTest::eventFilter(QObject * obj, QEvent * event) {
+	if (obj == Data_TreeWidget->viewport()) {
+		if (event->type() == QEvent::MouseButtonPress) {
+			QMouseEvent * mouseEvent = (QMouseEvent*)event;
+			if (mouseEvent->buttons() & Qt::LeftButton) {
+				QModelIndex index = Data_TreeWidget->indexAt(mouseEvent->pos());
+				if (!index.isValid()) {
+					//取消界面所有选中状态
+					Data_TreeWidget->setCurrentIndex(QModelIndex());
+					//清空所有点云的选中状态
+					PCloudManager::Instance()->clearSelectedState();
+				}
+			}
+		}
+	}
+	return QObject::eventFilter(obj, event);
+}
+
 void OsgQtTest::Init_Data_Manager_Widget() {
 	Data_TreeWidget = new QTreeWidget(this);
 	Data_TreeWidget->setHeaderHidden(true);
@@ -417,6 +435,8 @@ void OsgQtTest::Init_Data_Manager_Widget() {
 	connect(Data_TreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(slot_RefreshData_TreeWidget(QTreeWidgetItem*, int)));
 	connect(Data_TreeWidget, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(slot_RefreshData_TreeWidget(QTreeWidgetItem*, int)));
 	connect(Data_TreeWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(slot_RefreshData_TreeWidget(QTreeWidgetItem*, int)));
+
+	Data_TreeWidget->viewport()->installEventFilter(this);
 
 	Dock_Data_Widget = new QDockWidget();
 	Dock_Data_Widget->setWidget(Data_TreeWidget);
@@ -453,10 +473,21 @@ void OsgQtTest::AddNodeToDataTree(const std::string & nodeName, int type) {
 void OsgQtTest::slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col) {	
 	PCloudManager::Instance()->clearSelectedState();
 
-	for (const auto & item : Data_TreeWidget->selectedItems()) {
-		const std::string & curName = item->text(0).toStdString();
+	for (const auto & selectedItem : Data_TreeWidget->selectedItems()) {
+		const std::string & curName = selectedItem->text(0).toStdString();
 		PCloudManager::Instance()->setSelectState(curName, true);
 	}
+
+	if (item) {
+		if (item->checkState(0) == Qt::Unchecked) {
+			PCloudManager::Instance()->setShowPointCloud(item->text(0).toStdString(), false);
+		}
+		else if (item->checkState(0) == Qt::Checked) {
+			PCloudManager::Instance()->setShowPointCloud(item->text(0).toStdString(), true);
+		}
+	}
+
+
 }
 
 void OsgQtTest::Init_Data_Info_Widget() {
@@ -565,6 +596,7 @@ void OsgQtTest::slot_SaveData() {
 		this->AddToConsoleSlot("[WARING] Can not save, no data selected");
 		return;
 	}
+
 	const QString &saveFileName =  QFileDialog::getSaveFileName(0, tr("Save data name:"), Data_Path, "Screen files(*.txt *.las)");
 	if (saveFileName.isEmpty()) {
 		this->AddToConsoleSlot(QString("[I/O] Cancel save file"));

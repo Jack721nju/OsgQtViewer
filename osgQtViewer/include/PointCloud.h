@@ -70,7 +70,11 @@ private:
 	size_t point_num;//点数量
 	float point_size;
 	std::string point_name;
+
 	osg::ref_ptr<osg::Geometry> geo_point;//点数据几何体指针
+
+	osg::ref_ptr<osg::Geode> geo_bounding_node;
+	osg::ref_ptr<osg::Geometry> geo_bounding_box;//外接矩形框几何体指针
 
 	QColor point_color;
 	POINT_FILE_TYPE m_Type;
@@ -82,9 +86,14 @@ private:
 		geo_point = nullptr;
 	}
 
+	void initBoundingBox();
+
+	void setShowBoundingBox(bool isShow);
+
 public:
 	void setSelected(bool isSelected) {
 		b_isSelected = isSelected;
+		setShowBoundingBox(isSelected);
 	}
 
 	bool isSelected() const {
@@ -126,14 +135,9 @@ public:
 
 class PCloudManager {
 private:
-	PCloudManager(osg::ref_ptr<osg::Group> root = nullptr): m_root(root){
-	};
+	PCloudManager(osg::ref_ptr<osg::Group> root = nullptr);
 
-	~PCloudManager(){ 
-		all_pcloud_map.clear();
-		selected_pcloud_list.clear();
-		m_root = nullptr;
-	};
+	~PCloudManager();
 
 	PCloudManager(const PCloudManager& other) {	};
 
@@ -145,143 +149,25 @@ public:
 		return &instance;
 	}
 
-	PointCloud * addPointCloud(const std::string & pName) {
-		PointCloud * pcloud = new PointCloud();
-		pcloud->setName(pName);
-		all_pcloud_map.emplace(pcloud->getName(), pcloud);
-		if (m_root) {
-			m_root->addChild(pcloud);
-		}
-		return pcloud;
-	}
+	PointCloud * addPointCloud(const std::string & pName);
 
-	void removePointCloud(PointCloud* pcloud) {
-		if (pcloud) {
-			auto iter = all_pcloud_map.begin();
-			while (iter != all_pcloud_map.end()) {
-				if (iter->first == pcloud->getName()) {
-					all_pcloud_map.erase(iter++);
-					break;
-				}
-				iter++;
-			}
-			m_root->removeChild(pcloud);
-		}
-	};
+	void removePointCloud(PointCloud* pcloud);
 
-	void removePointCloud(const std::string & pName) {
-		if (!pName.empty()) {
-			auto iter = all_pcloud_map.begin();
-			while (iter != all_pcloud_map.end()) {
-				if (iter->first == pName) {
-					all_pcloud_map.erase(iter++);
-					break;
-				}
-				iter++;
-			}
-		}
-	};
+	void removePointCloud(const std::string & pName);
 
-	PointCloud* getPointCloud(const std::string & pName) {
-		if (pName.empty()) {
-			return nullptr;
-		}
-		auto iter = all_pcloud_map.find(pName);
-		if (iter != all_pcloud_map.end()) {
-			return iter->second;
-		}
-		return nullptr;
-	};
+	void setShowPointCloud(const std::string & pName, bool isShow);
 
-	void clearSelectedState() {
-		for (const auto & item : selected_pcloud_list) {
-			item->setSelected(false);
-		}
-		selected_pcloud_list.clear();
-	}
+	void setShowBox(const std::string & pName, bool isShow);
 
-	bool setSelectState(const std::string & pName, bool isSelected) {
-		if (pName.empty()) {
-			return false;
-		}
-		PointCloud * curPCl = getPointCloud(pName);
-		if (curPCl) {
-			curPCl->setSelected(isSelected);
-			if (isSelected) {
-				selected_pcloud_list.emplace_back(curPCl);
-			}
-			else{
-				selected_pcloud_list.remove(curPCl);
-			}
-			return true;
-		}		
-		return false;
-	};
+	PointCloud* getPointCloud(const std::string & pName);
 
-	size_t selectedPcloudNum() const {
-		return selected_pcloud_list.size();
-	}
+	void clearSelectedState();
 
-	void saveSelectedToFile(const std::string & saveFileName) {
-		if (saveFileName.empty() || saveFileName.find_last_of(".") < 0) {
-			return;
-		}
-		
-		std::ofstream outf(saveFileName, std::ios::out | std::ios::binary);
-		if (!outf.is_open()) {
-			return;
-		}
+	bool setSelectState(const std::string & pName, bool isSelected);
 
-		osg::Vec3f singP;
-		osg::ref_ptr<osg::Vec3Array> vertAll  = new osg::Vec3Array;
-		size_t allPointNum = 0;
-		for (const auto item : selected_pcloud_list) {
-			osg::Vec3Array* vertices = dynamic_cast<osg::Vec3Array*>(item->geo_point->getVertexArray());
-			allPointNum += item->getPointNum();
-			vertAll->resizeArray(allPointNum);
-			vertAll->assign(vertices->begin(), vertices->end());
-		}
+	size_t selectedPcloudNum() const;
 
-		int pos = saveFileName.find_last_of('.');
-		const std::string &fileFormat = saveFileName.substr(pos + 1);
-		if (fileFormat == "txt") {			
-			for (const auto & curVert : *vertAll) {
-				outf << curVert.x() << " " << curVert.y() << " " << curVert.z() << " " << std::endl;
-			}
-		}
-		else if (fileFormat == "las") {		
-			LASwriteOpener writerOpener;
-			writerOpener.set_file_name(saveFileName.c_str());
-			LASheader header;
-			header.x_scale_factor = 0.001;
-			header.y_scale_factor = 0.001;
-			header.z_scale_factor = 0.001;
-			header.point_data_format = 1;
-			header.point_data_record_length = 28;
-			header.number_of_point_records = allPointNum;
-			LASwriter *writer = writerOpener.open(&header);
-			//header.set_bounding_box();
-
-			LASpoint point;
-			point.init(&header, header.point_data_format, header.point_data_record_length, nullptr);
-
-			for (const auto & curVert : *vertAll) {
-				point.set_x(curVert.x());
-				point.set_y(curVert.y());
-				point.set_z(curVert.z());
-				writer->write_point(&point);
-				writer->update_inventory(&point);
-			}
-
-			writer->update_header(&header, true);
-			writer->close();
-			delete writer;
-			writer = nullptr;
-		}
-
-		outf.flush();
-		outf.close();
-	}
+	void saveSelectedToFile(const std::string & saveFileName);
 
 public:
 	osg::ref_ptr<osg::Group> m_root;

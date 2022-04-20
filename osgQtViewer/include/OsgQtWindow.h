@@ -15,8 +15,10 @@
 #include <QProgressDialog>
 #include <QThread>
 #include <QPaintEvent>
+#include <QPushButton>
 #include <QLayout>
 #include <QMenu>
+#include <QLabel>
 #include <QMenuBar>
 #include <QAction>
 #include <QToolBar>
@@ -25,6 +27,7 @@
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QHeaderView>
+#include <QColorDialog>
 
 #include <Windows.h>
 
@@ -100,9 +103,11 @@ private:
 
 	void Init_Data_Manager_Widget();
 
-	void Init_Data_Info_Widget();
+	void Init_Dock_Data_Info_Widget();
 
-	void Init_ReadProgressDlg(const std::string fileName);
+	void Init_ReadProgressDlg(const std::string &fileName);
+
+	void Init_Point_Info_Widget(const std::string &itemName);
 
 private:
 	OsgContainer* MainWidget;
@@ -127,6 +132,9 @@ private:
 
 	QProgressDialog *readDataProgressDlg;
 
+	QSlider* m_slider;
+	QLabel *m_slider_value;
+
 	QTimer read_timer;
 
 private:
@@ -148,6 +156,14 @@ public slots:
 	void slot_CancelReadProgress();
 
 	void slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col);
+
+	void slot_Update_Data_Info_Widget(QTreeWidgetItem* item, int col);
+
+	void slot_setPcloudPointSize(int size);
+
+	void slot_setPointCloudColor();
+
+	void slot_Clear_Data_Info_Widget();
 
 public:
 	void ReadLasData(const std::string & fileName);

@@ -49,7 +49,7 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMai
 	Init_Data_Manager_Widget();
 
 	//初始化数据信息窗口
-	Init_Data_Info_Widget();
+	Init_Dock_Data_Info_Widget();
 
 	//设置读取数据进度条计时器
 	read_timer.setSingleShot(false);
@@ -406,6 +406,8 @@ bool OsgQtTest::eventFilter(QObject * obj, QEvent * event) {
 					Data_TreeWidget->setCurrentIndex(QModelIndex());
 					//清空所有点云的选中状态
 					PCloudManager::Instance()->clearSelectedState();
+					//清空数据信息显示窗口
+					slot_Clear_Data_Info_Widget();
 				}
 			}
 		}
@@ -435,6 +437,7 @@ void OsgQtTest::Init_Data_Manager_Widget() {
 	connect(Data_TreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(slot_RefreshData_TreeWidget(QTreeWidgetItem*, int)));
 	connect(Data_TreeWidget, SIGNAL(itemPressed(QTreeWidgetItem*, int)), this, SLOT(slot_RefreshData_TreeWidget(QTreeWidgetItem*, int)));
 	connect(Data_TreeWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(slot_RefreshData_TreeWidget(QTreeWidgetItem*, int)));
+	connect(Data_TreeWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(slot_Update_Data_Info_Widget(QTreeWidgetItem*, int)));
 
 	Data_TreeWidget->viewport()->installEventFilter(this);
 
@@ -490,14 +493,194 @@ void OsgQtTest::slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col) {
 
 }
 
-void OsgQtTest::Init_Data_Info_Widget() {
-	if (DataInfo_TableWidget){
-		DataInfo_TableWidget->clear();
+void OsgQtTest::slot_Clear_Data_Info_Widget() {
+	DataInfo_TableWidget->clear();
+	DataInfo_TableWidget->horizontalHeader()->setVisible(false);
+	DataInfo_TableWidget->verticalHeader()->setVisible(false);
+}
+
+void OsgQtTest::Init_Dock_Data_Info_Widget() {
+	Dock_DataInfo_Widget = new QDockWidget();
+	Dock_DataInfo_Widget->setFont(QFont("Arial", 10, QFont::Bold, false));
+	Dock_DataInfo_Widget->setWindowTitle(tr("Data Info"));
+	Dock_DataInfo_Widget->setFeatures(QDockWidget::AllDockWidgetFeatures);
+}
+
+void OsgQtTest::Init_Point_Info_Widget(const std::string & itemName) {
+
+	if (DataInfo_TableWidget == nullptr) {
+		return;
 	}
-	else{
+
+	PointCloud* curPcloud = PCloudManager::Instance()->getPointCloud(itemName);
+	if (curPcloud == nullptr) {
+		return;
+	}
+
+	QString point_name = QString::fromStdString(itemName).section(".", 0, 0);
+	QTableWidgetItem * t_item_name = new QTableWidgetItem;
+	t_item_name->setText(point_name);
+	t_item_name->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(1, 1, t_item_name);
+
+	QString type_name = QString::fromStdString(itemName).section(".", 1, 1);
+	QTableWidgetItem * t_item_type = new QTableWidgetItem;
+	t_item_type->setText(type_name);
+	t_item_type->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(2, 1, t_item_type);
+
+	osg::Vec3 box_center = curPcloud->getBoundingBox().center();
+
+	QString center_x = QString::number(box_center.x());
+	QTableWidgetItem * t_item_centerX = new QTableWidgetItem;
+	t_item_centerX->setText(center_x);
+	t_item_centerX->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(3, 1, t_item_centerX);
+
+	QString center_y = QString::number(box_center.y());
+	QTableWidgetItem * t_item_centerY = new QTableWidgetItem;
+	t_item_centerY->setText(center_y);
+	t_item_centerY->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(4, 1, t_item_centerY);
+
+	QString center_z = QString::number(box_center.z());
+	QTableWidgetItem * t_item_centerZ = new QTableWidgetItem;
+	t_item_centerZ->setText(center_z);
+	t_item_centerZ->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(5, 1, t_item_centerZ);
+
+	float length = (curPcloud->getBoundingBox().xMax()) - (curPcloud->getBoundingBox().xMin());
+	float width = (curPcloud->getBoundingBox().yMax()) - (curPcloud->getBoundingBox().yMin());
+	float height = (curPcloud->getBoundingBox().zMax()) - (curPcloud->getBoundingBox().zMin());
+
+	QString size_length = QString::number(length);
+	QTableWidgetItem * t_item_sizeX = new QTableWidgetItem;
+	t_item_sizeX->setText(size_length);
+	t_item_sizeX->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(6, 1, t_item_sizeX);
+
+	QString size_width = QString::number(width);
+	QTableWidgetItem * t_item_sizeY = new QTableWidgetItem;
+	t_item_sizeY->setText(size_width);
+	t_item_sizeY->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(7, 1, t_item_sizeY);
+
+	QString size_height = QString::number(height);
+	QTableWidgetItem * t_item_sizeZ = new QTableWidgetItem;
+	t_item_sizeZ->setText(size_height);
+	t_item_sizeZ->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(8, 1, t_item_sizeZ);
+
+	QString full_path = QString::fromStdString(curPcloud->getName());
+	QTableWidgetItem * t_item_fullpath = new QTableWidgetItem;
+	t_item_fullpath->setText(full_path);
+	t_item_fullpath->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(9, 1, t_item_fullpath);
+
+	QTableWidgetItem * t_item9 = new QTableWidgetItem;
+	t_item9->setText(tr("Cloud"));
+	t_item9->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	t_item9->setBackgroundColor(QColor(220, 220, 220, 220));
+	DataInfo_TableWidget->setSpan(10, 0, 1, 2);
+	DataInfo_TableWidget->setItem(10, 0, t_item9);
+
+	QTableWidgetItem * t_item10 = new QTableWidgetItem;
+	t_item10->setText(tr("Points Num"));
+	t_item10->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(11, 0, t_item10);
+
+	QString point_num = QString::number(curPcloud->getPointNum());
+	QTableWidgetItem * t_item_pnum = new QTableWidgetItem;
+	t_item_pnum->setText(point_num);
+	t_item_pnum->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(11, 1, t_item_pnum);
+
+	QTableWidgetItem * t_item11 = new QTableWidgetItem;
+	t_item11->setText(tr("Points Size"));
+	t_item11->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(12, 0, t_item11);
+
+	QString point_size = QString::number(curPcloud->getPointSize());
+
+	m_slider = new QSlider(Qt::Horizontal, DataInfo_TableWidget);
+	m_slider->setMinimum(1);
+	m_slider->setMaximum(8);
+	m_slider->setValue(curPcloud->getPointSize());
+	m_slider->setMinimumSize(80, 20);
+	connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(slot_setPcloudPointSize(int)));
+
+	m_slider_value = new QLabel();
+	m_slider_value->setMinimumHeight(20);
+	m_slider_value->setText(point_size);
+
+	QWidget *point_size_widget = new QWidget();
+	QHBoxLayout *size_layout = new QHBoxLayout();
+	size_layout->addWidget(m_slider, Qt::AlignVCenter);
+	size_layout->addWidget(m_slider_value, Qt::AlignVCenter);
+	point_size_widget->setLayout(size_layout);
+	DataInfo_TableWidget->setCellWidget(12, 1, point_size_widget);
+
+
+	QTableWidgetItem * t_item12 = new QTableWidgetItem;
+	t_item12->setText(tr("Points Color"));
+	t_item12->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	DataInfo_TableWidget->setItem(13, 0, t_item12);
+
+	QPushButton *point_color_button = new QPushButton();
+	connect(point_color_button, SIGNAL(clicked()), this, SLOT(slot_setPointCloudColor()));
+	point_color_button->setIcon(QIcon(Icon_Path + QString("point_color.png")));
+	point_color_button->setIconSize(QSize(25, 25));
+	point_color_button->setText(QString("Set Color"));
+	point_color_button->setMinimumHeight(20);
+	DataInfo_TableWidget->setCellWidget(13, 1, point_color_button);	
+}
+
+void OsgQtTest::slot_setPointCloudColor() {
+	if (!hasSelectedPcloud()) {
+		this->AddToConsoleSlot("[WARING] No point is selected!");
+		return;
+	}
+
+	QColorDialog *palette = new QColorDialog(DataInfo_TableWidget);
+	const QColor &new_color = palette->getColor();//设置当前颜色，并获取新设置颜色
+
+	if (new_color.isValid())//新设置颜色为非空
+	{
+		PCloudManager::Instance()->setSelectPointColor(new_color);
+	}
+}
+
+void OsgQtTest::slot_setPcloudPointSize(int size) {
+
+	QString str = QString("%1").arg(size);
+	m_slider_value->setText(str);
+
+	if (!hasSelectedPcloud()) {
+		AddToConsoleSlot("[WARING] No points is selected!");
+		return;
+	}
+
+	PCloudManager::Instance()->setSelectPointSize(size);
+}
+
+void OsgQtTest::slot_Update_Data_Info_Widget(QTreeWidgetItem* item, int col) {
+	if (item == nullptr) {
+		return;
+	}
+
+	if (DataInfo_TableWidget){
+		slot_Clear_Data_Info_Widget();
+		if (item == Data_TreeWidget->topLevelItem(0)) {
+			return;
+		}
+	} else {
 		DataInfo_TableWidget = new QTableWidget(15, 2, this);
 		DataInfo_TableWidget->setVisible(true);
 		DataInfo_TableWidget->setMinimumSize(250, 300);
+		if (Dock_DataInfo_Widget) {
+			Dock_DataInfo_Widget->setWidget(DataInfo_TableWidget);
+			this->addDockWidget(Qt::LeftDockWidgetArea, Dock_DataInfo_Widget);
+		}
 	}
 
 	DataInfo_TableWidget->clearSpans();
@@ -519,8 +702,6 @@ void OsgQtTest::Init_Data_Info_Widget() {
 	DataInfo_TableWidget->setStyleSheet("selection-background-color:pink");
 	DataInfo_TableWidget->setShowGrid(false);
 	DataInfo_TableWidget->horizontalHeader()->setStretchLastSection(true);//最右侧列与窗口宽度对齐
-	//DataInfo_TableWidget->resizeColumnsToContents();
-	//DataInfo_TableWidget->resizeRowsToContents();
 
 	QTableWidgetItem * t_item1 = new QTableWidgetItem;
 	t_item1->setText(tr("Property"));
@@ -565,15 +746,10 @@ void OsgQtTest::Init_Data_Info_Widget() {
 	DataInfo_TableWidget->setItem(2, 0, t_item5);
 	DataInfo_TableWidget->setItem(3, 0, t_item6);
 	DataInfo_TableWidget->setItem(6, 0, t_item7);
-	DataInfo_TableWidget->setItem(9, 0, t_item8);
+	DataInfo_TableWidget->setItem(9, 0, t_item8);	
 
-	Dock_DataInfo_Widget = new QDockWidget();
-	Dock_DataInfo_Widget->setWidget(DataInfo_TableWidget);
-	Dock_DataInfo_Widget->setFont(QFont("Arial", 10, QFont::Bold, false));
-	Dock_DataInfo_Widget->setWindowTitle(tr("Data Info"));
-	Dock_DataInfo_Widget->setFeatures(QDockWidget::AllDockWidgetFeatures);
+	Init_Point_Info_Widget(item->text(0).toStdString());
 
-	this->addDockWidget(Qt::LeftDockWidgetArea, Dock_DataInfo_Widget);
 }
 
 void OsgQtTest::AddToConsoleSlot(const QString & show_text){
@@ -738,7 +914,7 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 	}
 }
 
-void OsgQtTest::Init_ReadProgressDlg(const std::string fileName) {
+void OsgQtTest::Init_ReadProgressDlg(const std::string & fileName) {
 	readDataProgressDlg = new QProgressDialog();
 	readDataProgressDlg->setObjectName(QString::fromStdString(fileName));
 	readDataProgressDlg->setWindowTitle(QString("Loading"));

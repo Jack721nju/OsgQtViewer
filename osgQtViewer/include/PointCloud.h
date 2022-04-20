@@ -68,7 +68,7 @@ private:
 	
 private:
 	size_t point_num;//点数量
-	float point_size;
+	size_t point_size;
 	std::string point_name;
 
 	osg::ref_ptr<osg::Geometry> geo_point;//点数据几何体指针
@@ -124,6 +124,34 @@ public:
 		return point_num;
 	};
 
+	const size_t getPointSize() {
+		return point_size;
+	}
+
+	const QColor & getPointColor() {
+		return point_color;
+	}
+
+	void setPointColor(const QColor & color) {
+		if (geo_point)
+		{
+			osg::ref_ptr<osg::Vec4Array> colorList = new osg::Vec4Array;//创建颜色数组,逆时针排序
+			osg::Vec4 new_color(color.red() / 255., color.green() / 255., color.blue() / 255., color.alpha() / 255.);
+			colorList->push_back(new_color);
+
+			geo_point->setColorArray(colorList);
+			geo_point->setColorBinding(osg::Geometry::BIND_OVERALL);
+			point_color = color;
+		}
+	}
+
+	void setPointSize(size_t size) {
+		osg::Point * point = new osg::Point();
+		point->setSize(size);
+		this->getOrCreateStateSet()->setAttribute(point);
+		point_size = size;
+	}
+
 	void readLasData(const std::string & openfileName);
 
 	void PointCloud::readLasDataByLibLas(const std::string & openfileName);
@@ -168,6 +196,10 @@ public:
 	size_t selectedPcloudNum() const;
 
 	void saveSelectedToFile(const std::string & saveFileName);
+
+	void setSelectPointSize(size_t size);
+
+	void setSelectPointColor(const QColor & color);
 
 public:
 	osg::ref_ptr<osg::Group> m_root;

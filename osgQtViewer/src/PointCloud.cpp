@@ -461,6 +461,17 @@ void PointCloud::initBoundingBox() {
 	geo_bounding_box->addPrimitiveSet(quad);
 	geo_bounding_node->addDrawable(geo_bounding_box.get());
 	this->addChild(geo_bounding_node.get());
+
+	osg::ref_ptr<osg::StateSet> stateset = geo_bounding_box->getOrCreateStateSet();
+	stateset->setMode(GL_BLEND, osg::StateAttribute::ON);//开启Alpha混合，实现透明度
+	stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);//设置渲染模式		
+	stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);//取消深度测试
+	stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);//关闭关照效果，这样任意面均可实现半透明效果
+	osg::ref_ptr<osg::PolygonMode> polyMode = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);//设置网格模式
+	stateset->setAttribute(polyMode);
+
+	osg::ref_ptr<osg::LineWidth> line_width = new osg::LineWidth(1.0);
+	stateset->setAttribute(line_width);
 }
 
 
@@ -624,4 +635,16 @@ void PCloudManager::saveSelectedToFile(const std::string & saveFileName) {
 
 	outf.flush();
 	outf.close();
+}
+
+void PCloudManager::setSelectPointSize(size_t size) {
+	for (auto curP : selected_pcloud_list) {
+		curP->setPointSize(size);
+	}
+}
+
+void PCloudManager::setSelectPointColor(const QColor & color) {
+	for (auto curP : selected_pcloud_list) {
+		curP->setPointColor(color);
+	}
 }

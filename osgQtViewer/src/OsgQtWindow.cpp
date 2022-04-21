@@ -6,6 +6,8 @@ static QString Data_Path = "E:/Data/";
 static int progressMinValue = 0;
 static int progressMaxValue = 100;
 
+static float eye_distance_rate = 5;
+
 #define MaxUsingThreadReadNum 5000000
 
 using namespace std;
@@ -135,16 +137,17 @@ void OsgQtTest::SetCamerToObjectCenter(osg::ref_ptr<osg::Node> cur_node)
 		return;
 	}
 
-	float object_radius = cur_node->getBound().radius();
-	float view_Distance = object_radius * 5.0;
+	auto boundSphere = cur_node->getBound();
+
+	osg::Vec3 view_center = boundSphere.center();//相机盯着的目标点，不一定是物体中心，视情况而定
+	float object_radius = boundSphere.radius();
+	float view_Distance = object_radius * eye_distance_rate;
 
 	//方向向上
 	osg::Vec3 view_up = osg::Z_AXIS;
 
 	osg::Vec3 view_Direction(0.0, -5.0, 1.0);//从物体中心看向相机中心的向量，默认为俯视图
 	view_Direction.normalize();
-
-	osg::Vec3 view_center = cur_node->getBound().center();//相机盯着的目标点，不一定是物体中心，视情况而定
 
 	osg::Vec3 camer_eye = view_center + view_Direction * view_Distance;//相机的眼镜位置
 
@@ -258,7 +261,7 @@ void OsgQtTest::Init_Tool_Bar() {
 	tool_bar->addAction(tool_action10);
 
 	QAction * tool_action11 = new QAction(QIcon(Icon_Path + QString("zoom_to_screen.png")), QString::fromLocal8Bit("&Zoom"), tool_bar);
-	tool_action11->connect(tool_action11, SIGNAL(triggered()), this, SLOT(ZoomToScreen()));
+	tool_action11->connect(tool_action11, SIGNAL(triggered()), this, SLOT(slot_ZoomToScreen()));
 	tool_action11->setToolTip(tr("Zoom object to screen center"));
 	tool_bar->addAction(tool_action11);
 
@@ -338,37 +341,37 @@ void OsgQtTest::Init_View_Bar() {
 	view_bar->setAllowedAreas(Qt::LeftToolBarArea);
 
 	QAction * view_action1 = new QAction(QIcon(Icon_Path + QString("view_top.png")), QString::fromLocal8Bit("&Top"), view_bar);
-	view_action1->connect(view_action1, SIGNAL(triggered()), this, SLOT(SetTopDirection()));
+	view_action1->connect(view_action1, SIGNAL(triggered()), this, SLOT(slot_SetTopDirection()));
 	view_action1->setToolTip(tr("Set the Top view"));
 	view_bar->addAction(view_action1);
 
 	QAction * view_action2 = new QAction(QIcon(Icon_Path + QString("view_down.png")), QString::fromLocal8Bit("&Down"), view_bar);
-	view_action2->connect(view_action2, SIGNAL(triggered()), this, SLOT(SetDownDirection()));
+	view_action2->connect(view_action2, SIGNAL(triggered()), this, SLOT(slot_SetDownDirection()));
 	view_action2->setToolTip(tr("Set the Down view"));
 	view_bar->addAction(view_action2);
 
 	QAction * view_action3 = new QAction(QIcon(Icon_Path + QString("view_left.png")), QString::fromLocal8Bit("&Left"), view_bar);
-	view_action3->connect(view_action3, SIGNAL(triggered()), this, SLOT(SetLeftDirection()));
+	view_action3->connect(view_action3, SIGNAL(triggered()), this, SLOT(slot_SetLeftDirection()));
 	view_action3->setToolTip(tr("Set the Left view"));
 	view_bar->addAction(view_action3);
 
 	QAction * view_action4 = new QAction(QIcon(Icon_Path + QString("view_right.png")), QString::fromLocal8Bit("&Right"), view_bar);
-	view_action4->connect(view_action4, SIGNAL(triggered()), this, SLOT(SetRightDirection()));
+	view_action4->connect(view_action4, SIGNAL(triggered()), this, SLOT(slot_SetRightDirection()));
 	view_action4->setToolTip(tr("Set the Right view"));
 	view_bar->addAction(view_action4);
 
 	QAction * view_action5 = new QAction(QIcon(Icon_Path + QString("view_front.png")), QString::fromLocal8Bit("&Front"), view_bar);
-	view_action5->connect(view_action5, SIGNAL(triggered()), this, SLOT(SetFrontDirection()));
+	view_action5->connect(view_action5, SIGNAL(triggered()), this, SLOT(slot_SetFrontDirection()));
 	view_action5->setToolTip(tr("Set the Front view"));
 	view_bar->addAction(view_action5);
 
 	QAction * view_action6 = new QAction(QIcon(Icon_Path + QString("view_back.png")), QString::fromLocal8Bit("&Back"), view_bar);
-	view_action6->connect(view_action6, SIGNAL(triggered()), this, SLOT(SetBackDirection()));
+	view_action6->connect(view_action6, SIGNAL(triggered()), this, SLOT(slot_SetBackDirection()));
 	view_action6->setToolTip(tr("Set the Back view"));
 	view_bar->addAction(view_action6);
 
 	QAction * view_action7 = new QAction(QIcon(Icon_Path + QString("color_height.png")), QString::fromLocal8Bit("&Color"), view_bar);
-	view_action7->connect(view_action7, SIGNAL(triggered()), this, SLOT(SetPointColorByHeight()));
+	view_action7->connect(view_action7, SIGNAL(triggered()), this, SLOT(slot_setPointColorByHeight()));
 	view_action7->setToolTip(tr("Set color by height"));
 	view_bar->addAction(view_action7);
 }
@@ -494,9 +497,17 @@ void OsgQtTest::slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col) {
 }
 
 void OsgQtTest::slot_Clear_Data_Info_Widget() {
-	DataInfo_TableWidget->clear();
-	DataInfo_TableWidget->horizontalHeader()->setVisible(false);
-	DataInfo_TableWidget->verticalHeader()->setVisible(false);
+	if (DataInfo_TableWidget) {
+		DataInfo_TableWidget->clear();
+
+		if (DataInfo_TableWidget->horizontalHeader()) {
+			DataInfo_TableWidget->horizontalHeader()->setVisible(false);
+		}
+
+		if (DataInfo_TableWidget->verticalHeader()) {
+			DataInfo_TableWidget->verticalHeader()->setVisible(false);
+		}
+	}
 }
 
 void OsgQtTest::Init_Dock_Data_Info_Widget() {
@@ -529,43 +540,47 @@ void OsgQtTest::Init_Point_Info_Widget(const std::string & itemName) {
 	t_item_type->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 	DataInfo_TableWidget->setItem(2, 1, t_item_type);
 
-	osg::Vec3 box_center = curPcloud->getBoundingBox().center();
+	auto geoPointPtr = curPcloud->getGeoPoint();
+	if (geoPointPtr == nullptr) {
+		return;
+	}
+	osg::Vec3 box_center = geoPointPtr->getBoundingBox().center();
 
-	QString center_x = QString::number(box_center.x());
+	QString center_x = "X: " + QString::number(box_center.x());
 	QTableWidgetItem * t_item_centerX = new QTableWidgetItem;
 	t_item_centerX->setText(center_x);
 	t_item_centerX->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 	DataInfo_TableWidget->setItem(3, 1, t_item_centerX);
 
-	QString center_y = QString::number(box_center.y());
+	QString center_y = "Y: " + QString::number(box_center.y());
 	QTableWidgetItem * t_item_centerY = new QTableWidgetItem;
 	t_item_centerY->setText(center_y);
 	t_item_centerY->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 	DataInfo_TableWidget->setItem(4, 1, t_item_centerY);
 
-	QString center_z = QString::number(box_center.z());
+	QString center_z = "Z: " + QString::number(box_center.z());
 	QTableWidgetItem * t_item_centerZ = new QTableWidgetItem;
 	t_item_centerZ->setText(center_z);
 	t_item_centerZ->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 	DataInfo_TableWidget->setItem(5, 1, t_item_centerZ);
 
-	float length = (curPcloud->getBoundingBox().xMax()) - (curPcloud->getBoundingBox().xMin());
-	float width = (curPcloud->getBoundingBox().yMax()) - (curPcloud->getBoundingBox().yMin());
-	float height = (curPcloud->getBoundingBox().zMax()) - (curPcloud->getBoundingBox().zMin());
+	float length = (geoPointPtr->getBoundingBox().xMax()) - (geoPointPtr->getBoundingBox().xMin());
+	float width = (geoPointPtr->getBoundingBox().yMax()) - (geoPointPtr->getBoundingBox().yMin());
+	float height = (geoPointPtr->getBoundingBox().zMax()) - (geoPointPtr->getBoundingBox().zMin());
 
-	QString size_length = QString::number(length);
+	QString size_length = "Len: " + QString::number(length);
 	QTableWidgetItem * t_item_sizeX = new QTableWidgetItem;
 	t_item_sizeX->setText(size_length);
 	t_item_sizeX->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 	DataInfo_TableWidget->setItem(6, 1, t_item_sizeX);
 
-	QString size_width = QString::number(width);
+	QString size_width = "Wid: " + QString::number(width);
 	QTableWidgetItem * t_item_sizeY = new QTableWidgetItem;
 	t_item_sizeY->setText(size_width);
 	t_item_sizeY->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 	DataInfo_TableWidget->setItem(7, 1, t_item_sizeY);
 
-	QString size_height = QString::number(height);
+	QString size_height = "Hei: " + QString::number(height);
 	QTableWidgetItem * t_item_sizeZ = new QTableWidgetItem;
 	t_item_sizeZ->setText(size_height);
 	t_item_sizeZ->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -642,10 +657,11 @@ void OsgQtTest::slot_setPointCloudColor() {
 	}
 
 	QColorDialog *palette = new QColorDialog(DataInfo_TableWidget);
-	const QColor &new_color = palette->getColor();//设置当前颜色，并获取新设置颜色
+	//设置当前颜色，并获取新设置颜色
+	const QColor &new_color = palette->getColor();
 
-	if (new_color.isValid())//新设置颜色为非空
-	{
+	//新设置颜色为非空
+	if (new_color.isValid()) {
 		PCloudManager::Instance()->setSelectPointColor(new_color);
 	}
 }
@@ -845,7 +861,7 @@ void OsgQtTest::ReadLasData(const std::string & fileName) {
 		if (pointNum < MaxUsingThreadReadNum) {
 			scene_Pcloud->readLasData(fileName);
 			AddNodeToDataTree(fileName);
-			SetCamerToObjectCenter(scene_Pcloud);
+			SetCamerToObjectCenter(scene_Pcloud->getGeoPoint());
 			float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
 			QString read_time_text = "[Time] Read file <" + QString::fromStdString(fileName) + "> " + "[" +
 				QString::number(scene_Pcloud->getPointNum()) + "] points cost " + QString::number(showTime, 'f', 2) + "s";
@@ -963,7 +979,7 @@ void OsgQtTest::slot_FisishReadProgress() {
 	if (readDataProgressDlg) {
 		read_timer.stop();
 		PointCloud * curPcloud = PCloudManager::Instance()->getPointCloud(readDataProgressDlg->objectName().toStdString());
-		SetCamerToObjectCenter(curPcloud);
+		SetCamerToObjectCenter(curPcloud->getGeoPoint());
 		AddNodeToDataTree(readDataProgressDlg->objectName().toStdString());
 		float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
 		QString read_time_text = "[I/O] Load file <" + readDataProgressDlg->objectName() + "> "
@@ -971,4 +987,200 @@ void OsgQtTest::slot_FisishReadProgress() {
 								+ QString::number(showTime, 'f', 2) + "s";
 		this->AddToConsoleSlot(read_time_text);
 	}
+}
+
+osg::Node * OsgQtTest::createScalarBar_HUD(osgSim::ColorRange* cr) {
+	osgSim::ScalarBar * geode_color_bar = new osgSim::ScalarBar(20, 11, cr, "ScalarBar");
+	osgSim::ScalarBar::TextProperties tp;
+	tp._fontFile = "fonts/arial.ttf";
+	tp._characterSize = 0.06;
+	tp._color = osg::Vec4(0.0, 0.0, 0.0, 0.8);
+	tp._fontResolution.first = 60;
+	tp._fontResolution.second = 60;
+
+	geode_color_bar->setTextProperties(tp);
+	osg::StateSet * stateset = geode_color_bar->getOrCreateStateSet();
+	stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+	stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+	stateset->setRenderBinDetails(11, "RenderBin");
+
+	osg::MatrixTransform * modelview = new osg::MatrixTransform;
+	modelview->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+
+	osg::Vec3 center = modelview->getBound().center();
+	osg::Quat quat(osg::PI_2, osg::Z_AXIS);
+	osg::Matrixd matrix(osg::Matrixd::translate(-center)* osg::Matrixd::scale(600, 300, 500) *
+		osg::Matrix::rotate(quat)* osg::Matrixd::translate(1200, 300, 0)* osg::Matrixd::translate(center)); // I've played with these values a lot and it seems to work, but I have no idea why
+
+	modelview->setMatrix(matrix);
+	modelview->addChild(geode_color_bar);
+
+	colorBar_projection = new osg::Projection;
+	colorBar_projection->setMatrix(osg::Matrix::ortho2D(0, 1280, 0, 1024)); // or whatever the OSG window res is
+	colorBar_projection->addChild(modelview);
+
+	return colorBar_projection; //make sure you delete the return sb line
+}
+
+void OsgQtTest::slot_setPointColorByHeight() {
+	if (!hasSelectedPcloud()) {
+		this->AddToConsoleSlot(QString("No point cloud is selected now"));
+		return;
+	}
+	
+	if (PCloudManager::Instance()->selectedPcloudNum() > 1) {
+		this->AddToConsoleSlot(QString("More than one point cloud is selected now"));
+		return;
+	}
+
+	PointCloud *cur_Pcloud = *(PCloudManager::Instance()->selected_pcloud_list.begin());
+
+	if (cur_Pcloud == nullptr) {
+		return;
+	}
+
+	if (colorBar_projection.get()) {
+		bool isShow = colorBar_projection->getNodeMask();
+		if (isShow) {
+			colorBar_projection->setNodeMask(false);
+			this->mainView_root->removeChild(colorBar_projection);
+			colorBar_projection = nullptr;
+			cur_Pcloud->setPointColor(cur_Pcloud->getPointColor());
+			return;
+		}
+	}	
+
+	float height_Max = cur_Pcloud->getBoundingBox().zMax();
+	float height_Min = cur_Pcloud->getBoundingBox().zMin();
+	float delt_height = std::fabsf(height_Max - height_Min);
+
+	if (cur_Pcloud) {
+		auto geoP = cur_Pcloud->getGeoPoint();
+		if (geoP == nullptr) {
+			return;
+		}
+
+		std::vector<osg::Vec4> cs;
+		cs.push_back(osg::Vec4(0.0f, 0.0f, 1.0f, 1.0f));   // R
+		cs.push_back(osg::Vec4(0.0f, 1.0f, 0.5f, 1.0f));   // G
+		cs.push_back(osg::Vec4(0.5f, 1.0f, 0.0f, 1.0f));   // G
+		cs.push_back(osg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));   // B
+		cs.push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));   // R
+
+		osgSim::ColorRange * colorRange = new osgSim::ColorRange(0.0f, 1.0f, cs);	
+		osg::ref_ptr<osg::Vec4Array> colorList = new osg::Vec4Array;//创建颜色数组,逆时针排序
+
+		osg::Vec3Array * pointList = dynamic_cast<osg::Vec3Array*>(geoP->getVertexArray());
+		for (auto curP : *pointList) {
+			float height_rate = std::abs(curP.z() - height_Min) / delt_height;
+			colorList->push_back(colorRange->getColor(height_rate));
+		}
+
+		cur_Pcloud->setPointColorArry(colorList);
+		this->mainView_root->addChild(createScalarBar_HUD(colorRange));
+	}	
+}
+
+void OsgQtTest::SetCameraDirection(int direct_type) {
+	if (!hasSelectedPcloud()) {
+		this->AddToConsoleSlot(QString("[WARING] Please selected point cloud!"));
+		return;
+	}
+
+	if (PCloudManager::Instance()->selectedPcloudNum() > 1) {
+		this->AddToConsoleSlot(QString("[WARING] More than one object is selected!"));
+		return;
+	}
+
+	auto curPcloud = *(PCloudManager::Instance()->selected_pcloud_list.begin());
+	if (curPcloud == nullptr) {
+		return;
+	}
+
+	auto boundSphere = curPcloud->getGeoPoint()->getBound();
+	float object_radius = boundSphere.radius();
+	float view_Distance = object_radius * eye_distance_rate;
+
+	osg::Vec3d view_center = boundSphere.center();//相机盯着的目标点，不一定是物体中心，视情况而定
+	osg::Vec3d view_Direction(0.0, -2.0, 1.0);//从物体中心看向相机中心的向量
+
+	switch (direct_type) {
+		case 1:
+			view_Direction.set(0.0, 0.0, 1.0);//顶视图
+			break;
+		case 2:
+			view_Direction.set(0.0, 0.0, -1.0);//底视图
+			break;
+		case 3:
+			view_Direction.set(-1.0, 0.0, 0.0);//左视图
+			break;
+		case 4:
+			view_Direction.set(1.0, 0.0, 0.0);//右视图
+			break;
+		case 5:
+			view_Direction.set(0.0, -1.0, 0.0);//前视图
+			break;
+		case 6:
+			view_Direction.set(0.0, 1.0, 0.0);//后视图
+			break;
+		default:
+			view_Direction.set(0.0, -2.0, 1.0);//俯视图
+			break;
+	}
+
+	//方向向上
+	osg::Vec3d view_up = osg::Z_AXIS;
+	osg::Vec3d camer_eye = view_center + view_Direction * view_Distance;//相机的眼镜位置
+
+	if (MainWidget) {
+		MainWidget->getCameraManipulator()->setHomePosition(camer_eye, view_center, view_up);
+		MainWidget->home();
+	}
+}
+
+void OsgQtTest::slot_SetTopDirection() {
+	SetCameraDirection(1);
+}
+
+void OsgQtTest::slot_SetDownDirection() {
+	SetCameraDirection(2);
+}
+
+void OsgQtTest::slot_SetLeftDirection() {
+	SetCameraDirection(3);
+}
+
+void OsgQtTest::slot_SetRightDirection() {
+	SetCameraDirection(4);
+}
+
+void OsgQtTest::slot_SetFrontDirection() {
+	SetCameraDirection(5);
+}
+
+void OsgQtTest::slot_SetBackDirection() {
+	SetCameraDirection(6);
+}
+
+void OsgQtTest::slot_ZoomToScreen(){
+	if (!hasSelectedPcloud()) {
+		this->AddToConsoleSlot(QString("[WARING] Please selected point cloud!"));
+		return;
+	}
+
+	if (PCloudManager::Instance()->selectedPcloudNum() > 1) {
+		this->AddToConsoleSlot(QString("[WARING] More than one object is selected!"));
+		return;
+	}
+
+	auto curPcloud = *(PCloudManager::Instance()->selected_pcloud_list.begin());
+	if (curPcloud == nullptr) {
+		return;
+	}
+
+	this->SetCamerToObjectCenter(curPcloud->getGeoPoint());
+
+	QString node_name = QString::fromStdString(curPcloud->getName());
+
+	this->AddToConsoleSlot(QString("[NOTICE] Object ") + node_name + QString(" is set to screen center!"));
 }

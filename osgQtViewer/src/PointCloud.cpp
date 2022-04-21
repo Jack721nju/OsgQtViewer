@@ -413,7 +413,7 @@ void PointCloud::initBoundingBox() {
 	vert->push_back(p6);
 	vert->push_back(p7);
 
-	for (int k = 0; k < 8; k++)	{
+	for (int k = 0; k < 8; ++k)	{
 		color->push_back(out_line_color);
 	}
 
@@ -465,7 +465,7 @@ void PointCloud::initBoundingBox() {
 	osg::ref_ptr<osg::StateSet> stateset = geo_bounding_box->getOrCreateStateSet();
 	stateset->setMode(GL_BLEND, osg::StateAttribute::ON);//开启Alpha混合，实现透明度
 	stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);//设置渲染模式		
-	stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);//取消深度测试
+	stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);//取消深度测试
 	stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);//关闭关照效果，这样任意面均可实现半透明效果
 	osg::ref_ptr<osg::PolygonMode> polyMode = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);//设置网格模式
 	stateset->setAttribute(polyMode);

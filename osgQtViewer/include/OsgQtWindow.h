@@ -137,10 +137,16 @@ private:
 
 	QTimer read_timer;
 
+	osg::ref_ptr<osg::Projection> colorBar_projection{nullptr};
+
 private:
 	void AddToConsoleSlot(const QString& show_text);
 
 	void AddNodeToDataTree(const std::string & nodeName, int type = 1);
+
+	void SetCameraDirection(int direct_type);
+
+	osg::Node * createScalarBar_HUD(osgSim::ColorRange* cr);
 	
 private:
 	osg::ref_ptr<osg::Group> mainView_root{nullptr};
@@ -164,6 +170,17 @@ public slots:
 	void slot_setPointCloudColor();
 
 	void slot_Clear_Data_Info_Widget();
+
+	void slot_setPointColorByHeight();
+
+	void slot_SetTopDirection();
+	void slot_SetDownDirection();
+	void slot_SetLeftDirection();
+	void slot_SetRightDirection();
+	void slot_SetFrontDirection();
+	void slot_SetBackDirection();
+
+	void slot_ZoomToScreen();
 
 public:
 	void ReadLasData(const std::string & fileName);

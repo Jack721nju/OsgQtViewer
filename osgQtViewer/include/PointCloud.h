@@ -91,6 +91,10 @@ private:
 	void setShowBoundingBox(bool isShow);
 
 public:
+	osg::Geometry * getGeoPoint() {
+		return geo_point.get();
+	}
+
 	void setSelected(bool isSelected) {
 		b_isSelected = isSelected;
 		setShowBoundingBox(isSelected);
@@ -142,6 +146,13 @@ public:
 			geo_point->setColorArray(colorList);
 			geo_point->setColorBinding(osg::Geometry::BIND_OVERALL);
 			point_color = color;
+		}
+	}
+
+	void setPointColorArry(osg::ref_ptr<osg::Vec4Array> colorList) {
+		if (geo_point) {
+			geo_point->setColorArray(colorList);
+			geo_point->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
 		}
 	}
 

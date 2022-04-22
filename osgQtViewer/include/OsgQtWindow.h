@@ -10,6 +10,7 @@
 #include "OsgContainer.h"
 #include "WorkerThread.h"
 #include "TimerClock.h"
+#include "ProjectToXY.h"
 
 class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer//¶àÊÓ¾°Æ÷
 {
@@ -82,6 +83,8 @@ private:
 	QTimer read_timer;
 
 	osg::ref_ptr<osg::Projection> colorBar_projection{nullptr};
+
+	QDialog * ProjectToXY_dialog;
 
 private:
 	void AddToConsoleSlot(const QString& show_text);

@@ -321,7 +321,7 @@ void OsgQtTest::Init_Tool_Bar() {
 	tool_bar->addAction(tool_action22);
 
 	QAction * tool_action23 = new QAction(QIcon(Icon_Path + QString("Project2D.png")), QString::fromLocal8Bit("&Points Projecting"), tool_bar);
-	tool_action23->connect(tool_action23, SIGNAL(triggered()), this, SLOT(Init_Project_Dialog()));
+	tool_action23->connect(tool_action23, SIGNAL(triggered()), this, SLOT(slot_Init_Project_Dialog()));
 	tool_action23->setToolTip(tr("Project 3D point to 2D plane"));
 	tool_bar->addAction(tool_action23);
 
@@ -1022,10 +1022,6 @@ osg::Node * OsgQtTest::createScalarBar_HUD(osgSim::ColorRange* cr) {
 	return colorBar_projection; //make sure you delete the return sb line
 }
 
-void OsgQtTest::slot_Init_Project_Dialog() {
-
-}
-
 void OsgQtTest::slot_setPointColorByHeight() {
 	if (!hasSelectedPcloud()) {
 		this->AddToConsoleSlot(QString("No point cloud is selected now"));
@@ -1059,8 +1055,7 @@ void OsgQtTest::slot_setPointColorByHeight() {
 	float delt_height = std::fabsf(height_Max - height_Min);
 
 	if (cur_Pcloud) {
-		auto geoP = cur_Pcloud->getGeoPoint();
-		if (geoP == nullptr) {
+		if (cur_Pcloud->getGeoPoint() == nullptr) {
 			return;
 		}
 
@@ -1074,8 +1069,8 @@ void OsgQtTest::slot_setPointColorByHeight() {
 		osgSim::ColorRange * colorRange = new osgSim::ColorRange(0.0f, 1.0f, cs);	
 		osg::ref_ptr<osg::Vec4Array> colorList = new osg::Vec4Array;//´´½¨ÑÕÉ«Êý×é,ÄæÊ±ÕëÅÅÐò
 
-		osg::Vec3Array * pointList = dynamic_cast<osg::Vec3Array*>(geoP->getVertexArray());
-		for (auto curP : *pointList) {
+		osg::Vec3Array * pointList = cur_Pcloud->getVertArry<osg::Vec3Array>();
+		for (const auto & curP : *pointList) {
 			float height_rate = std::abs(curP.z() - height_Min) / delt_height;
 			colorList->push_back(colorRange->getColor(height_rate));
 		}
@@ -1187,4 +1182,186 @@ void OsgQtTest::slot_ZoomToScreen(){
 	QString node_name = QString::fromStdString(curPcloud->getName());
 
 	this->AddToConsoleSlot(QString("[NOTICE] Object ") + node_name + QString(" is set to screen center!"));
+}
+
+void OsgQtTest::slot_Init_Project_Dialog() {
+	
+	if (ProjectToXY_dialog)	{
+		ProjectToXY_dialog->close();
+		ProjectToXY_dialog = nullptr;
+		return;
+	}
+
+	if (!hasSelectedPcloud()) {
+		this->AddToConsoleSlot(QString("[WARING] No Point Cloud is selected!"));
+		return;
+	}
+
+	if (PCloudManager::Instance()->selectedPcloudNum() > 1) {
+		this->AddToConsoleSlot(QString("[WARING] More than one cloud are selected!"));
+		return;
+	}
+	osg::ref_ptr<PointCloud> cur_Pcloud = *PCloudManager::Instance()->selected_pcloud_list.begin();
+
+	if (cur_Pcloud == nullptr) {
+		return;
+	}
+
+	ProjectToXY_dialog = new QDialog(this);
+	ProjectToXY_dialog->setVisible(true);
+	ProjectToXY_dialog->setWindowTitle(QString::fromStdString(cur_Pcloud->getName()));
+	ProjectToXY_dialog->setWindowModality(Qt::WindowModal);
+	ProjectToXY_dialog->setAttribute(Qt::WA_DeleteOnClose);
+	//±³¾°´°¿Ú·¶Î§
+	ProjectToXY_dialog->setFixedSize(1000, 660);
+
+	PaintArea * Project_widget = new PaintArea(ProjectToXY_dialog);
+	//»æÍ¼ÇøÓò·¶Î§
+	Project_widget->setFixedSize(600, 600);
+	Project_widget->setVisible(true);
+	Project_widget->drawAxis();
+	
+
+	int num = cur_Pcloud->getPointNum();
+
+	point_MAXMIN* MMM = new point_MAXMIN;
+	MMM = cur_Pcloud->getMinMaxXYZ_POINTS();
+
+	float x_min = MMM->xmin;
+	float y_min = MMM->ymin;
+
+	float x_max = MMM->xmax;
+	float y_max = MMM->ymax;
+
+	float delt_x = x_max - x_min;
+	float delt_y = y_max - y_min;
+
+	float x_y_value = max(delt_x, delt_y);
+	float ratio_pixel_x = Project_widget->axis_width * 1.0 / x_y_value;
+	float ratio_pixel_y = Project_widget->axis_height * 1.0 / x_y_value;
+
+	float move_x = delt_x - x_max;
+	float move_y = delt_y - y_max;
+
+	QPointF *point = new QPointF[num];
+
+	vector<osg::Vec2> point2D_list_AlphaShape;
+	vector<osg::Vec3> pointlist_bulidGrid2D;
+
+	osg::Vec3Array * pointArry = cur_Pcloud->getVertArry<osg::Vec3Array>();
+
+	int id = -1;
+	for (const auto & curP : *pointArry) {
+		float Qpoint_x = (curP.x() - x_min) * ratio_pixel_x;
+		float Qpoint_y = (curP.y() - y_min) * ratio_pixel_y;
+
+		Qpoint_y = 430 - Qpoint_y;
+
+		QPointF each_point(Qpoint_x + 50, Qpoint_y + 50);
+		osg::Vec2 point2D(Qpoint_x + 50, Qpoint_y + 50);
+
+		point[++id] = each_point;
+		point2D_list_AlphaShape.emplace_back(point2D);
+
+		osg::Vec3 point3D(point2D, curP.z());
+		pointlist_bulidGrid2D.emplace_back(point3D);
+	}
+
+	Project_widget->drawPoints(point, num);
+	Project_widget->drawDegreeLines(QString("X"), QString("Y"), x_min, y_min, delt_x, delt_y);
+	
+	QVBoxLayout *v_layout = new QVBoxLayout();
+	v_layout->addWidget(Project_widget, 0);
+
+	QVBoxLayout *VV_layout = new QVBoxLayout();
+
+	QLabel *m_label_radius = new QLabel(ProjectToXY_dialog);
+	m_label_radius->setText("Radius:");
+	m_label_radius->setFixedSize(100, 30);
+
+	QLineEdit *m_radius = new QLineEdit(ProjectToXY_dialog);
+	m_label_radius->setFixedSize(100, 30);
+
+	QPushButton * detect_shape_edge = new QPushButton("Alpha Shape", ProjectToXY_dialog);
+	detect_shape_edge->setFixedSize(150, 50);
+	connect(detect_shape_edge, SIGNAL(clicked()), this, SLOT(DetectPointShape()));
+
+	QPushButton * detect_shape_using_GridNet = new QPushButton("Grid Shape", ProjectToXY_dialog);
+	detect_shape_using_GridNet->setFixedSize(150, 50);
+	connect(detect_shape_using_GridNet, SIGNAL(clicked()), this, SLOT(DetectPointShapeUsingGridNet()));
+
+	QLabel *m_label_num = new QLabel(ProjectToXY_dialog);
+	m_label_num->setText("Point Num:");
+	m_label_num->setFixedSize(100, 30);
+
+	QLineEdit * m_point_num = new QLineEdit(ProjectToXY_dialog);
+	m_point_num->setFixedSize(100, 30);
+
+	QPushButton * detect_shape_using_Circle = new QPushButton("Circle Shape", ProjectToXY_dialog);
+	detect_shape_using_Circle->setFixedSize(150, 50);
+	connect(detect_shape_using_Circle, SIGNAL(clicked()), this, SLOT(DetectPointShapeUsingCircle()));
+
+	QPushButton * detect_symmetry = new QPushButton("Symmetry", ProjectToXY_dialog);
+	detect_symmetry->setFixedSize(150, 50);
+	connect(detect_symmetry, SIGNAL(clicked()), this, SLOT(DetectPointSymmtery()));
+
+	QPushButton * curvue_fit = new QPushButton("Curve Fit", ProjectToXY_dialog);
+	curvue_fit->setFixedSize(150, 50);
+	connect(curvue_fit, SIGNAL(clicked()), this, SLOT(PointFitCurve()));
+
+	QLabel *m_label_grid_Row = new QLabel(ProjectToXY_dialog);
+	m_label_grid_Row->setText("Row Num:");
+	m_label_grid_Row->setFixedSize(100, 30);
+
+	QLineEdit * m_Grid_X_num = new QLineEdit(ProjectToXY_dialog);
+	m_Grid_X_num->setFixedSize(100, 30);
+
+	QLabel *m_label_grid_Col = new QLabel(ProjectToXY_dialog);
+	m_label_grid_Col->setText("Col Num:");
+	m_label_grid_Col->setFixedSize(100, 30);
+
+	QLineEdit * m_Grid_Y_num = new QLineEdit(ProjectToXY_dialog);
+	m_Grid_Y_num->setFixedSize(100, 30);
+
+	QPushButton * build_grid = new QPushButton("Build Grid", ProjectToXY_dialog);
+	build_grid->setFixedSize(150, 50);
+	connect(build_grid, SIGNAL(clicked()), this, SLOT(Build2DGridForPoints()));
+
+	VV_layout->addStretch(2);
+	VV_layout->addWidget(m_label_radius, 0);
+	VV_layout->addStretch(0);
+	VV_layout->addWidget(m_radius, 0);
+	VV_layout->addStretch(1);
+	VV_layout->addWidget(detect_shape_edge, 0);
+	VV_layout->addStretch(1);
+	VV_layout->addWidget(detect_shape_using_GridNet, 0);
+	VV_layout->addStretch(1);
+	VV_layout->addWidget(m_label_num, 0);
+	VV_layout->addStretch(1);
+	VV_layout->addWidget(m_point_num, 0);
+	VV_layout->addStretch(1);
+	VV_layout->addWidget(detect_shape_using_Circle, 0);
+	VV_layout->addStretch(2);
+	VV_layout->addWidget(detect_symmetry, 0);
+	VV_layout->addStretch(2);
+	VV_layout->addWidget(curvue_fit, 0);
+	VV_layout->addStretch(2);
+	VV_layout->addWidget(m_label_grid_Row, 0);
+	VV_layout->addStretch(0);
+	VV_layout->addWidget(m_Grid_X_num, 0);
+	VV_layout->addStretch(0);
+	VV_layout->addWidget(m_label_grid_Col, 0);
+	VV_layout->addStretch(0);
+	VV_layout->addWidget(m_Grid_Y_num, 0);
+	VV_layout->addStretch(0);
+	VV_layout->addWidget(build_grid, 0);
+	VV_layout->addStretch(5);
+
+	QHBoxLayout *layout = new QHBoxLayout();
+	layout->addLayout(v_layout);
+	layout->addStretch(1);
+	layout->addLayout(VV_layout);
+	layout->addStretch(1);
+
+	ProjectToXY_dialog->setLayout(layout);
 }

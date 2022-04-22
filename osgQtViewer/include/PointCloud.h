@@ -80,6 +80,8 @@ private:
 	POINT_FILE_TYPE m_Type;
 	bool b_isSelected;
 
+	point_MAXMIN * Max_area{ nullptr };
+
 private:
 	void clearData() {
 		this->removeDrawables(0, this->getNumDrawables());//剔除节点内所有的几何体
@@ -91,6 +93,17 @@ private:
 	void setShowBoundingBox(bool isShow);
 
 public:
+	//获取给定点云数据的最大最小范围
+	point_MAXMIN* getMinMaxXYZ_POINTS();
+
+	template <typename type>
+	auto getVertArry() {
+		if (geo_point == nullptr) {
+			return (type *)nullptr;
+		}
+		return dynamic_cast<type *>(geo_point->getVertexArray());
+	}
+
 	osg::Geometry * getGeoPoint() {
 		return geo_point.get();
 	}

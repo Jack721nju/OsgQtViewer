@@ -474,6 +474,43 @@ void PointCloud::initBoundingBox() {
 	stateset->setAttribute(line_width);
 }
 
+//获取给点云数据的最大最小范围
+point_MAXMIN* PointCloud::getMinMaxXYZ_POINTS() {
+	if (Max_area) {
+		return Max_area;
+	}
+
+	Max_area = new point_MAXMIN;
+	vector<float> x_list, y_list, z_list;
+	osg::Vec3Array * pointArry = this->getVertArry<osg::Vec3Array>();
+
+	if (pointArry == nullptr) {
+		return nullptr;
+	}
+
+	for (const auto & curP : *pointArry) {
+		x_list.push_back(curP.x());
+		y_list.push_back(curP.y());
+		z_list.push_back(curP.z());
+	}
+
+	vector<float>::iterator xmax = max_element(begin(x_list), end(x_list));
+	vector<float>::iterator ymax = max_element(begin(y_list), end(y_list));
+	vector<float>::iterator zmax = max_element(begin(z_list), end(z_list));
+
+	vector<float>::iterator xmin = min_element(begin(x_list), end(x_list));
+	vector<float>::iterator ymin = min_element(begin(y_list), end(y_list));
+	vector<float>::iterator zmin = min_element(begin(z_list), end(z_list));
+
+	Max_area->xmax = *xmax;
+	Max_area->ymax = *ymax;
+	Max_area->zmax = *zmax;
+	Max_area->xmin = *xmin;
+	Max_area->ymin = *ymin;
+	Max_area->zmin = *zmin;
+
+	return Max_area;
+}
 
 PCloudManager::PCloudManager(osg::ref_ptr<osg::Group> root) {
 	m_root = root;
@@ -590,7 +627,7 @@ void PCloudManager::saveSelectedToFile(const std::string & saveFileName) {
 	osg::ref_ptr<osg::Vec3Array> vertAll = new osg::Vec3Array;
 	size_t allPointNum = 0;
 	for (const auto item : selected_pcloud_list) {
-		osg::Vec3Array* vertices = dynamic_cast<osg::Vec3Array*>(item->geo_point->getVertexArray());
+		osg::Vec3Array* vertices = item->getVertArry<osg::Vec3Array>();
 		allPointNum += item->getPointNum();
 		vertAll->resizeArray(allPointNum);
 		vertAll->assign(vertices->begin(), vertices->end());

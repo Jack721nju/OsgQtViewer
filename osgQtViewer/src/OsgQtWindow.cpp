@@ -1022,6 +1022,10 @@ osg::Node * OsgQtTest::createScalarBar_HUD(osgSim::ColorRange* cr) {
 	return colorBar_projection; //make sure you delete the return sb line
 }
 
+void OsgQtTest::slot_Init_Project_Dialog() {
+
+}
+
 void OsgQtTest::slot_setPointColorByHeight() {
 	if (!hasSelectedPcloud()) {
 		this->AddToConsoleSlot(QString("No point cloud is selected now"));

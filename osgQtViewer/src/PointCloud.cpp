@@ -252,25 +252,25 @@ void PointCloud::readLasData(const std::string & openfileName, int & rate, bool 
 
 void PointCloud::readPoints(const std::string & openfileName, int & rate, bool & isCancel) {
 	QFile text_file(QString::fromStdString(openfileName));
-	if (!text_file.open(QFile::ReadOnly | QIODevice::Text))	{
+	if (!text_file.open(QFile::ReadOnly | QIODevice::Text)) {
 		return;
 	}
 
 	if (isCancel) {
 		return;
 	}
-		
+
 	geo_point = new osg::Geometry;//创建一个几何体对象
 	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
 	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//创建顶点数组,逆时针排序
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
 
-	size_t numInterval = (size_t)(this->point_num / 100);
+	size_t numInterval = (size_t)(this->getPointNum() / 100);
 	int m_Rate = 1;
 	size_t point_count = 0;
 	uchar * fpr = text_file.map(0, text_file.size());
-		
+
 	char *ss = strdup((char*)fpr);
 	char delim[] = " ,";
 	char *ppp;
@@ -339,8 +339,8 @@ void PointCloud::readPoints(const std::string & openfileName, int & rate, bool &
 			}
 			substr = strtok_s(nullptr, "\n", &ppp);
 		}
-	}	
-	
+	}
+
 	if (isCancel) {
 		clearData();
 		return;
@@ -349,6 +349,7 @@ void PointCloud::readPoints(const std::string & openfileName, int & rate, bool &
 	if (rate < 100) {
 		rate = 100;
 	}
+
 	this->setPointNum(point_count);
 
 	normal->push_back(osg::Vec3(0.0, 0.0, 1.0));
@@ -638,9 +639,10 @@ void PCloudManager::saveSelectedToFile(const std::string & saveFileName) {
 
 	int pos = saveFileName.find_last_of('.');
 	const std::string &fileFormat = saveFileName.substr(pos + 1);
+	outf.setf(std::ios::fixed, ios::floatfield);
 	if (fileFormat == "txt") {
 		for (const auto & curVert : *vertAll) {
-			outf << curVert.x() << " " << curVert.y() << " " << curVert.z() << " " << std::endl;
+			outf << setiosflags(std::ios::left) << setprecision(3) << curVert.x() << " " << curVert.y() << " " << curVert.z() << " " << std::endl;
 		}
 	}
 	else if (fileFormat == "las") {

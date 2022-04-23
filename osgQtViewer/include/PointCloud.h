@@ -40,6 +40,7 @@
 #include <sstream>
 #include <fstream>
 #include <ostream>
+#include <iomanip>
 
 #include <liblas/liblas.hpp>
 #include <liblas/reader.hpp>

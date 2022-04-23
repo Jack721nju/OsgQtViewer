@@ -340,12 +340,15 @@ void PointCloud::readPoints(const std::string & openfileName, int & rate, bool &
 			substr = strtok_s(nullptr, "\n", &ppp);
 		}
 	}	
-
+	
 	if (isCancel) {
 		clearData();
 		return;
 	}
 
+	if (rate < 100) {
+		rate = 100;
+	}
 	this->setPointNum(point_count);
 
 	normal->push_back(osg::Vec3(0.0, 0.0, 1.0));

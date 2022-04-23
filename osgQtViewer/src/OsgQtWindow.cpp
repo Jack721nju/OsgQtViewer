@@ -886,32 +886,44 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 	QFile text_file(QString::fromStdString(fileName));
 	if (!text_file.open(QFile::ReadOnly | QIODevice::Text)) {
 		return;
+	}	
+
+	//_timerClock.start();
+	size_t line_count = 0;
+	size_t line_row = 0;
+	size_t line_bytes = 0;
+	uint16_t countNum = 0;
+
+	QRegExp regep("[,;' ']");
+	QTextStream stream(&text_file);
+
+	while (!stream.atEnd()) {
+		const QString & curLine = stream.readLine();		
+		const QStringList & row_parts = curLine.split(regep, QString::SkipEmptyParts);
+		line_row = row_parts.size();//文件的列数，一般表示点云是否含有颜色或者法向量等参数	
+		line_bytes += curLine.size();
+		if (++countNum >= 256) {
+			break;
+		}
 	}
 
-	Init_ReadProgressDlg(fileName);
-	QTextStream stream(&text_file);
-	const QString & allLine = stream.readAll();
-	QChar pp = '\n';
-	const QStringList & allparts = allLine.split(pp, QString::SkipEmptyParts);
-	size_t line_count = allparts.size();//文件的行数，一般约为点数量
+	line_count = (size_t)((text_file.size() << 8) / line_bytes);//约为点数量
 	
+	//size_t costTome = _timerClock.getTime<Ms>();	
+
 	if (line_count == 0) {
 		return;
 	}
 
-	const QString &firstLine = allparts[0];
+	Init_ReadProgressDlg(fileName);
 	this->setMaxReadPointNum(line_count);
-
-	QRegExp regep("[,;' ']");
-	const QStringList & row_parts = firstLine.split(regep, QString::SkipEmptyParts);
-	size_t row = row_parts.size();//文件的列数，一般表示点云是否含有颜色或者法向量等参数
 	
-	if (row < 3) {
+	if (line_row < 3) {
 		return;
 	}
 
 	bool isOnlyXYZ = true;
-	if (row > 3) {
+	if (line_row > 3) {
 		isOnlyXYZ = false;
 	}
 

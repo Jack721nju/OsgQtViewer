@@ -1,29 +1,25 @@
 #include "ProjectToXY.h"
 
-PaintArea::PaintArea(QWidget* parent) : QWidget(parent)
-{
+PaintArea::PaintArea(QWidget* parent) : QWidget(parent) {
 	//初始化绘制区域范围
 	image = new QImage(600, 600, QImage::Format_RGB32);
 	QColor backcolor = qRgb(255, 255, 255);
 	image->fill(backcolor);
 }
 
-PaintArea::PaintArea(int widthX, int heightY)
-{
+PaintArea::PaintArea(int widthX, int heightY) {
 	//初始化绘制区域范围
 	image = new QImage(widthX, heightY, QImage::Format_RGB32);
 	QColor backcolor = qRgb(255, 255, 255);
 	image->fill(backcolor);
 }
 
-void PaintArea::paintEvent(QPaintEvent *)
-{
+void PaintArea::paintEvent(QPaintEvent *) {
 	QPainter painter(this);
 	painter.drawImage(20, 20, *image);
 }
 
-void PaintArea::drawPoints(QPointF points[], int point_num, int point_size, QColor point_color)
-{
+void PaintArea::drawPoints(QPointF points[], int point_num, int point_size, QColor point_color) {
 	if (!image)
 		return;
 
@@ -44,8 +40,7 @@ void PaintArea::drawPoints(QPointF points[], int point_num, int point_size, QCol
 	painter.drawPoints(points, point_num);
 }
 
-void PaintArea::drawText(QPointF pos, QString text)
-{
+void PaintArea::drawText(QPointF pos, QString text) {
 	if (!image)
 		return;
 
@@ -60,8 +55,7 @@ void PaintArea::drawText(QPointF pos, QString text)
 	painter.drawText(pos, text);
 }
 
-void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, QColor curGridColor)
-{
+void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, QColor curGridColor) {
 	if (!image)
 		return;
 
@@ -93,8 +87,7 @@ void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, QColor curGridColo
 
 }
 
-void PaintArea::drawGrid(SingleGrid2D* eachGrid)
-{
+void PaintArea::drawGrid(SingleGrid2D* eachGrid) {
 	if (!image)
 		return;
 
@@ -120,8 +113,7 @@ void PaintArea::drawGrid(SingleGrid2D* eachGrid)
 
 }
 
-void PaintArea::drawLines(vector<Edge> line_list)
-{
+void PaintArea::drawLines(vector<Edge> line_list) {
 	if (!image)
 		return;
 
@@ -134,8 +126,7 @@ void PaintArea::drawLines(vector<Edge> line_list)
 	painter.setRenderHint(QPainter::Antialiasing, true);//设置反锯齿模式
 	painter.setPen(pen);
 
-	for (int k = 0; k < line_list.size(); k++)
-	{
+	for (int k = 0; k < line_list.size(); k++)	{
 		QPoint pointA(line_list[k].point_A.x(), line_list[k].point_A.y());
 		QPoint pointB(line_list[k].point_B.x(), line_list[k].point_B.y());
 
@@ -143,8 +134,7 @@ void PaintArea::drawLines(vector<Edge> line_list)
 	}
 }
 
-void PaintArea::drawCircles(vector<osg::Vec2> center_list, int radius)
-{
+void PaintArea::drawCircles(const vector<osg::Vec2> &center_list, int radius) {
 	if (!image)
 		return;
 
@@ -164,8 +154,7 @@ void PaintArea::drawCircles(vector<osg::Vec2> center_list, int radius)
 	}
 }
 
-void PaintArea::drawCircles(vector<osg::Vec3> circle_list, vector<int> Size_List)
-{
+void PaintArea::drawCircles(const vector<osg::Vec3> &circle_list, const vector<int> &Size_List) {
 	if (!image)
 		return;
 
@@ -173,11 +162,9 @@ void PaintArea::drawCircles(vector<osg::Vec3> circle_list, vector<int> Size_List
 	pen.setWidth(1);
 	pen.setStyle(Qt::SolidLine);
 
-
 	QPainter painter(image);
 	painter.setRenderHint(QPainter::Antialiasing, true);//设置反锯齿模式
-
-
+	
 	for (int i = 0; i < circle_list.size(); i++)
 	{
 		QPoint center(circle_list[i].x(), circle_list[i].y());
@@ -203,8 +190,7 @@ void PaintArea::drawCircles(vector<osg::Vec3> circle_list, vector<int> Size_List
 	}
 }
 
-void PaintArea::drawAxis()
-{
+void PaintArea::drawAxis() {
 	if (!image)
 		return;
 

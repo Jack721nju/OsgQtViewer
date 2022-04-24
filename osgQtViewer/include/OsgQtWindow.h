@@ -86,6 +86,12 @@ private:
 
 	QDialog * ProjectToXY_dialog;
 
+	PaintArea * Project_widget;
+
+	QLineEdit *m_radius;
+
+	vector<osg::Vec2> point2D_list_AlphaShape;
+
 private:
 	void AddToConsoleSlot(const QString& show_text);
 
@@ -130,6 +136,10 @@ public slots:
 	void slot_ZoomToScreen();
 
 	void slot_Init_Project_Dialog();
+
+	void slot_SetBackGroundColor();
+
+	void slot_DetectPointShape();
 
 public:
 	void ReadLasData(const std::string & fileName);

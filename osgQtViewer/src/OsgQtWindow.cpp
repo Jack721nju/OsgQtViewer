@@ -193,7 +193,7 @@ void OsgQtTest::Init_Mian_Menu() {
 
 	QMenu * menu_Display = menu_bar->addMenu("Display");
 	QAction * display_action1 = new QAction(QString::fromLocal8Bit("&Set BackGround Color"), menu_Display);
-	display_action1->connect(display_action1, SIGNAL(triggered()), this, SLOT(SetBackGroundColor()));
+	display_action1->connect(display_action1, SIGNAL(triggered()), this, SLOT(slot_SetBackGroundColor()));
 	menu_Display->addAction(display_action1);
 
 	QMenu * menu_Help = menu_bar->addMenu("Help");
@@ -1196,12 +1196,23 @@ void OsgQtTest::slot_ZoomToScreen(){
 	this->AddToConsoleSlot(QString("[NOTICE] Object ") + node_name + QString(" is set to screen center!"));
 }
 
+void OsgQtTest::slot_SetBackGroundColor() {
+	if (MainWidget == nullptr) {
+		return;
+	}
+	QColorDialog *palette = new QColorDialog(MainWidget);
+	QColor color = palette->getColor();
+	MainWidget->getCamera()->setClearColor(osg::Vec4(color.red() / 255., color.green() / 255., color.blue() / 255., color.alpha() / 255.));
+}
+
 void OsgQtTest::slot_Init_Project_Dialog() {
 	
 	if (ProjectToXY_dialog)	{
-		ProjectToXY_dialog->close();
-		ProjectToXY_dialog = nullptr;
-		return;
+		if (ProjectToXY_dialog->isVisible()) {
+			ProjectToXY_dialog->close();
+			ProjectToXY_dialog = nullptr;
+			return;
+		}
 	}
 
 	if (!hasSelectedPcloud()) {
@@ -1227,7 +1238,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	//背景窗口范围
 	ProjectToXY_dialog->setFixedSize(1000, 660);
 
-	PaintArea * Project_widget = new PaintArea(ProjectToXY_dialog);
+	Project_widget = new PaintArea(ProjectToXY_dialog);
 	//绘图区域范围
 	Project_widget->setFixedSize(600, 600);
 	Project_widget->setVisible(true);
@@ -1257,7 +1268,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 
 	QPointF *point = new QPointF[num];
 
-	vector<osg::Vec2> point2D_list_AlphaShape;
+	point2D_list_AlphaShape;
 	vector<osg::Vec3> pointlist_bulidGrid2D;
 
 	osg::Vec3Array * pointArry = cur_Pcloud->getVertArry<osg::Vec3Array>();
@@ -1291,12 +1302,12 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	m_label_radius->setText("Radius:");
 	m_label_radius->setFixedSize(100, 30);
 
-	QLineEdit *m_radius = new QLineEdit(ProjectToXY_dialog);
+	m_radius = new QLineEdit(ProjectToXY_dialog);
 	m_label_radius->setFixedSize(100, 30);
 
 	QPushButton * detect_shape_edge = new QPushButton("Alpha Shape", ProjectToXY_dialog);
 	detect_shape_edge->setFixedSize(150, 50);
-	connect(detect_shape_edge, SIGNAL(clicked()), this, SLOT(DetectPointShape()));
+	connect(detect_shape_edge, SIGNAL(clicked()), this, SLOT(slot_DetectPointShape()));
 
 	QPushButton * detect_shape_using_GridNet = new QPushButton("Grid Shape", ProjectToXY_dialog);
 	detect_shape_using_GridNet->setFixedSize(150, 50);
@@ -1376,4 +1387,91 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	layout->addStretch(1);
 
 	ProjectToXY_dialog->setLayout(layout);
+}
+
+void OsgQtTest::slot_DetectPointShape() {
+
+	if (ProjectToXY_dialog == nullptr || Project_widget == nullptr) {
+		this->AddToConsoleSlot(QString("[WARING] No project point!"));
+		return;
+	}
+
+	PaintArea *Project_widget_Circle_And_Edge = new PaintArea(ProjectToXY_dialog);
+	Project_widget_Circle_And_Edge->setAttribute(Qt::WA_DeleteOnClose);
+	Project_widget_Circle_And_Edge->setFixedSize(660, 660);
+	Project_widget_Circle_And_Edge->setVisible(true);
+	Project_widget_Circle_And_Edge->drawAxis();
+
+	PaintArea *Project_widget_Point = new PaintArea(ProjectToXY_dialog);
+	Project_widget_Point->setAttribute(Qt::WA_DeleteOnClose);
+	Project_widget_Point->setFixedSize(660, 660);
+	Project_widget_Point->setVisible(true);
+	Project_widget_Point->drawAxis();
+
+	AlphaShape * alpha = new AlphaShape(point2D_list_AlphaShape);
+
+	float radius = 0.0;
+	if (m_radius) {
+		radius = m_radius->text().toFloat();
+	}
+
+	_timerClock.start();
+
+	//Run progress
+	alpha->Detect_Shape_line(radius);
+
+	//计算Alpha Shapes算法耗费时间
+	float runTime = _timerClock.getTime<Ms>() / 1000.0;
+	QString cost_time = QString::number(runTime);
+	this->AddToConsoleSlot(QString("The cost time of detecting Contour by default is :  ") + cost_time + QString("s"));
+
+	//计算小于滚动圆直径长度的点对比例
+	QString cost_scale = QString::number(alpha->point_pair_scale, 'f', 3);
+	this->AddToConsoleSlot(QString("The scale of detecting Contour by default is :  ") + cost_scale);
+
+	vector<osg::Vec2> center_list;
+
+	for (int i = 0; i < alpha->m_circles.size(); i++) {
+		osg::Vec2 center_P = alpha->m_circles[i].m_center;
+		center_list.emplace_back(center_P);
+	}
+
+	Project_widget_Circle_And_Edge->drawCircles(center_list, radius);
+	Project_widget_Circle_And_Edge->drawLines(alpha->m_edges);
+	
+	int shape_num = alpha->m_shape_points.size();
+	QPointF *shape_point = new QPointF[shape_num];
+
+	//point2D_AlphaShape_Result.clear();
+	//point2D_AlphaShape_Result.assign(alpha->m_shape_points.begin(), alpha->m_shape_points.end());
+
+	for (int i = 0; i < shape_num; i++)	{
+		float Qpoint_x = alpha->m_shape_points[i].x();
+		float Qpoint_y = alpha->m_shape_points[i].y();
+
+		QPointF each_point(Qpoint_x, Qpoint_y);
+		shape_point[i] = each_point;
+	}
+
+	Project_widget->drawLines(alpha->m_edges);
+	Project_widget->drawPoints(shape_point, shape_num, 3, Qt::black);
+	Project_widget_Point->drawPoints(shape_point, shape_num, 2, Qt::red);
+
+	ofstream outf;
+	double x, y, z = 0.0;
+	outf.open("E:/Data/test/Select/OutlinePoint_UsingAlpha.txt", ios::out);
+
+	if (!outf.is_open()) {
+		return;
+	}
+
+	for (int i = 0; i < shape_num; i++)	{
+		x = alpha->m_shape_points[i].x();
+		y = alpha->m_shape_points[i].y();
+		z = 0.0;
+
+		outf << std::fixed << setprecision(3) << x << " " << y << " " << z << " " << std::endl;
+	}
+
+	outf.close();
 }

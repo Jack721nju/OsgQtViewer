@@ -586,26 +586,18 @@ AlphaShape::AlphaShape()
 	m_points.clear();
 }
 
-float AlphaShape::Distance_point(osg::Vec2 pointA, osg::Vec2 pointB)
-{
-	float dist_X = abs(pointA.x() - pointB.x());
-	float dist_Y = abs(pointA.y() - pointB.y());
-
-	float dist = sqrt(dist_X*dist_X + dist_Y*dist_Y);
-	return abs(dist);
+float AlphaShape::Distance_point(osg::Vec2 pointA, osg::Vec2 pointB) {
+	return std::sqrt(std::pow(pointA.x() - pointB.x(), 2) + std::pow(pointA.y() - pointB.y(), 2));
 }
 
 
-
-bool sortFun(const float & angle1, const float & angle2)
-{
+bool sortFun(const float & angle1, const float & angle2) {
 	return angle1 < angle2;
 }
 
 
 //计算每个点为中心的包裹圆，统计落在圆形内部的点的数量,通过数量对中心点是否属于边界点进行判断
-void AlphaShape::Detect_Shape_By_PackCirlce(GridNet* curGridNet, float radius, int pointMaxNum)
-{
+void AlphaShape::Detect_Shape_By_PackCirlce(GridNet* curGridNet, float radius, int pointMaxNum) {
 	this->m_shape_points.clear();
 
 	//遍历所有网格
@@ -1203,8 +1195,8 @@ void AlphaShape::Detect_Shape_line_by_Grid(vector<osg::Vec2> near_point_list, ve
 				{
 					Circle each_circle;
 
-					each_circle.point_center = center1;
-					each_circle.radius = m_radius;
+					each_circle.m_center = center1;
+					each_circle.m_radius = m_radius;
 					m_circles.push_back(each_circle);
 				}
 
@@ -1212,8 +1204,8 @@ void AlphaShape::Detect_Shape_line_by_Grid(vector<osg::Vec2> near_point_list, ve
 				{
 					Circle each_circle;
 
-					each_circle.point_center = center2;
-					each_circle.radius = m_radius;
+					each_circle.m_center = center2;
+					each_circle.m_radius = m_radius;
 					m_circles.push_back(each_circle);
 				}
 			}
@@ -1489,8 +1481,8 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, vector<
 						{
 							Circle each_circle;
 
-							each_circle.point_center = center1;
-							each_circle.radius = m_radius;
+							each_circle.m_center = center1;
+							each_circle.m_radius = m_radius;
 							each_circle.size = circleSize;
 
 							m_circles.push_back(each_circle);
@@ -1500,8 +1492,8 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, vector<
 						{
 							Circle each_circle;
 
-							each_circle.point_center = center2;
-							each_circle.radius = m_radius;
+							each_circle.m_center = center2;
+							each_circle.m_radius = m_radius;
 							each_circle.size = circleSize;
 
 							m_circles.push_back(each_circle);
@@ -1516,163 +1508,126 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, vector<
 }
 
 
-
 //常规的Alpha Shapes算法
-void AlphaShape::Detect_Shape_line(float radius)
-{
+void AlphaShape::Detect_Shape_line(float radius) {
 	m_radius = radius;
-
 	int point_pair_N = 0;
-
 	this->point_pair_scale = 0.0;
-
 	int point_num = m_points.size();
 
-	for (int i = 0; i < m_points.size(); i++)
-	{
-		for (int k = i + 1; k < m_points.size(); k++)
-		{
+	for (int i = 0; i < point_num; ++i){
+		for (int k = i + 1; k < point_num; ++k) {
 			//判断任意两点的点对距离是否大于滚动圆的直径大小
-			if (Distance_point(m_points[i], m_points[k]) > 2 * m_radius)
-			{
+			if (Distance_point(m_points[i], m_points[k]) > 2 * m_radius){
 				continue;
 			}
 
-			point_pair_N++;
+			++point_pair_N;
 
-			osg::Vec2 center1, center2;//两外接圆圆心
-
-			osg::Vec2 mid_point = (m_points[i] + m_points[k]) / 2;//线段中点
-
-			osg::Vec2 vector_line = m_points[i] - m_points[k];//线段的方向向量
+			
+			const osg::Vec2 &mid_point = (m_points[i] + m_points[k]) / 2;//线段中点
+			const osg::Vec2 &vector_line = m_points[i] - m_points[k];//线段的方向向量
 
 			float a = 1.0, b = 1.0;
-			osg::Vec2 normal;
+			
 
-			if (abs(vector_line.x() - 0) < 0.01)
-			{
+			if (abs(vector_line.x() - 0) < 0.01) {
 				b = 0.0;
-			}
-			else
-			{
+			}else {
 				a = (-b * vector_line.y()) / vector_line.x();
 			}
 
-			normal.set(a, b);//线段的垂直向量
+			//线段的垂直向量
+			osg::Vec2 normal(a, b);
 			normal.normalize();//单位向量化
 
 			float line_length = vector_line.length() / 2.0;
+			float length = sqrt(std::pow(m_radius, 2) - std::pow(line_length,2));
 
-			float length = sqrt(m_radius*m_radius - line_length*line_length);
-			center1 = mid_point + normal*length;
-			center2 = mid_point - normal*length;
+			//两外接圆圆心
+			const osg::Vec2 &center1 = mid_point + normal*length;
+			const osg::Vec2 &center2 = mid_point - normal*length;
 
 			bool hasPointInCircle1 = false, hasPointInCircle2 = false;
 
 			vector<osg::Vec2> within_Points_Area_1;
 			vector<osg::Vec2> within_Points_Area_2;
 
-			for (int m = 0; m < m_points.size(); m++)
-			{
-				if (m == i || m == k)
-				{
+			for (int m = 0; m < point_num; ++m) {
+				if (m == i || m == k) {
 					continue;
 				}
 
-				if (hasPointInCircle1&&hasPointInCircle2)
-				{
+				if (hasPointInCircle1&&hasPointInCircle2){
 					break;
 				}
 
-				if (!hasPointInCircle1 && Distance_point(m_points[m], center1) < m_radius)
-				{
-					within_Points_Area_1.push_back(m_points[m]);
+				if (!hasPointInCircle1 && Distance_point(m_points[m], center1) < m_radius){
+					within_Points_Area_1.emplace_back(m_points[m]);
 					hasPointInCircle1 = true;
 				}
 
-				if (!hasPointInCircle2 && Distance_point(m_points[m], center2) < m_radius)
-				{
-					within_Points_Area_2.push_back(m_points[m]);
+				if (!hasPointInCircle2 && Distance_point(m_points[m], center2) < m_radius){
+					within_Points_Area_2.emplace_back(m_points[m]);
 					hasPointInCircle2 = true;
 				}
 			}
 
-			osg::Vec2 vector_to_center1 = center1 - mid_point;
-			osg::Vec2 vector_to_center2 = center2 - mid_point;
+			const osg::Vec2 &vector_to_center1 = center1 - mid_point;
+			const osg::Vec2 &vector_to_center2 = center2 - mid_point;
 
 			bool addCircle1 = true;
 			bool addCircle2 = true;
 
-			if (hasPointInCircle1 && hasPointInCircle2)
-			{
+			if (hasPointInCircle1 && hasPointInCircle2){
 				continue;
 			}
 
-			if (hasPointInCircle1 != true || hasPointInCircle2 != true)
-			{
-				Edge each_edge;
+			if (hasPointInCircle1 != true || hasPointInCircle2 != true){
 
-				each_edge.point_A = m_points[i];
-				each_edge.point_B = m_points[k];
-				m_edges.push_back(each_edge);
+				m_edges.emplace_back(Edge(m_points[i], m_points[k]));
 
 				bool hasPointA = false;
 				bool hasPointB = false;
 
-				for (int j = 0; j < m_shape_id.size(); j++)
-				{
+				for (int j = 0; j < m_shape_id.size(); ++j)	{
 					if (hasPointA&&hasPointB)
 					{
 						break;
 					}
 
-					if (m_shape_id[j] == i && !hasPointA)
-					{
+					if (m_shape_id[j] == i && !hasPointA){
 						hasPointA = true;
 					}
 
-					if (m_shape_id[j] == k && !hasPointB)
-					{
+					if (m_shape_id[j] == k && !hasPointB){
 						hasPointB = true;
 					}
 				}
 
-				if (!hasPointA)
-				{
+				if (!hasPointA){
 					m_shape_id.push_back(i);
 				}
 
-				if (!hasPointB)
-				{
+				if (!hasPointB)	{
 					m_shape_id.push_back(k);
 				}
 
-				if (hasPointInCircle1 != true)
-				{
-					Circle each_circle;
-
-					each_circle.point_center = center1;
-					each_circle.radius = m_radius;
-					m_circles.push_back(each_circle);
+				if (hasPointInCircle1 != true){
+					m_circles.emplace_back(Circle(center1, m_radius));
 				}
 
-				if (hasPointInCircle2 != true)
-				{
-					Circle each_circle;
-
-					each_circle.point_center = center2;
-					each_circle.radius = m_radius;
-					m_circles.push_back(each_circle);
+				if (hasPointInCircle2 != true){
+					m_circles.emplace_back(Circle(center2, m_radius));
 				}
 			}
 		}
 	}
 
-	for (int k = 0; k < m_shape_id.size(); k++)
-	{
-		m_shape_points.push_back(m_points[m_shape_id[k]]);
+	for (int t = 0; t < m_shape_id.size(); ++t) {
+		m_shape_points.emplace_back(m_points[m_shape_id[t]]);
 	}
 
-	this->point_pair_scale = 2.0 * point_pair_N / (point_num*(point_num - 1));
+	this->point_pair_scale = (point_pair_N << 1)/ (point_num*(point_num - 1));
 }
 

@@ -1,7 +1,11 @@
 bin/
 data/
-include/
 lib/
+include/3rdparty
+include/Boost
+include/json
+include/LAS
+include/OSG
 osgQtViewer/.vs/
 osgQtViewer/moc_osgcontainer.cpp
 osgQtViewer/moc_osgqtwindow.cpp

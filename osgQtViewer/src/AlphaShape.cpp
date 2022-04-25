@@ -1630,4 +1630,3 @@ void AlphaShape::Detect_Shape_line(float radius) {
 
 	this->point_pair_scale = (point_pair_N << 1)/ (point_num*(point_num - 1));
 }
-

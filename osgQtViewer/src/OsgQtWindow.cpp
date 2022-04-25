@@ -55,6 +55,8 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMai
 
 	//设置读取数据进度条计时器
 	read_timer.setSingleShot(false);
+	
+	//1ms
 	read_timer.setInterval(100);
 
 	//初始化点云数据管理器，单例模式
@@ -891,7 +893,7 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 	//_timerClock.start();
 	size_t line_count = 0;
 	size_t line_row = 0;
-	size_t line_bytes = 0;
+	size_t single_line_bytes = 0;
 	uint16_t countNum = 0;
 
 	QRegExp regep("[,;' ']");
@@ -901,13 +903,13 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 		const QString & curLine = stream.readLine();		
 		const QStringList & row_parts = curLine.split(regep, QString::SkipEmptyParts);
 		line_row = row_parts.size();//文件的列数，一般表示点云是否含有颜色或者法向量等参数	
-		line_bytes += curLine.size();
+		single_line_bytes += curLine.size();
 		if (++countNum >= 256) {
 			break;
 		}
 	}
 
-	line_count = (size_t)((text_file.size() << 8) / line_bytes);//约为点数量
+	line_count = (size_t)((text_file.size() << 8) / single_line_bytes);//约为点数量
 	
 	//size_t costTome = _timerClock.getTime<Ms>();	
 
@@ -1205,8 +1207,7 @@ void OsgQtTest::slot_SetBackGroundColor() {
 	MainWidget->getCamera()->setClearColor(osg::Vec4(color.red() / 255., color.green() / 255., color.blue() / 255., color.alpha() / 255.));
 }
 
-void OsgQtTest::slot_Init_Project_Dialog() {
-	
+void OsgQtTest::slot_Init_Project_Dialog() {	
 	if (ProjectToXY_dialog)	{
 		if (ProjectToXY_dialog->isVisible()) {
 			ProjectToXY_dialog->close();
@@ -1242,8 +1243,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	//绘图区域范围
 	Project_widget->setFixedSize(600, 600);
 	Project_widget->setVisible(true);
-	Project_widget->drawAxis();
-	
+	Project_widget->drawAxis();	
 
 	int num = cur_Pcloud->getPointNum();
 

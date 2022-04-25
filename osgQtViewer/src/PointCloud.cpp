@@ -260,14 +260,7 @@ void PointCloud::readPoints(const std::string & openfileName, int & rate, bool &
 		return;
 	}
 
-	geo_point = new osg::Geometry;//创建一个几何体对象
-	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
-	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//创建顶点数组,逆时针排序
-	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
-	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
-
 	size_t numInterval = (size_t)(this->getPointNum() / 100);
-	int m_Rate = 1;
 	size_t point_count = 0;
 	uchar * fpr = text_file.map(0, text_file.size());
 
@@ -282,13 +275,20 @@ void PointCloud::readPoints(const std::string & openfileName, int & rate, bool &
 	char * substr = strtok_s(ss, "\n", &ppp);
 	vector<float> xyz_list;
 
+	geo_point = new osg::Geometry;//创建一个几何体对象
+	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
+	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//创建顶点数组,逆时针排序
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
+	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
+
+	size_t curInterval = numInterval;
 	bool isOnlyXYZ = (this->getType() == TXT_COLOR ? false : true);
 	if (isOnlyXYZ) {
 		QColor curColor = Qt::blue;
 		point_color = curColor;
 		color->push_back(single_color);
-
-		while (substr) {
+		
+		while (substr = strtok_s(nullptr, "\n", &ppp)) {
 			if (isCancel) {
 				break;
 			}
@@ -306,14 +306,14 @@ void PointCloud::readPoints(const std::string & openfileName, int & rate, bool &
 			single_point.set(xyz_list[0], xyz_list[1], xyz_list[2]);
 			vert->push_back(single_point);
 
-			if (++point_count > numInterval * m_Rate) {
-				rate = m_Rate++;
+			if (++point_count > curInterval) {
+				++rate;
+				curInterval += numInterval;
 			}
-			substr = strtok_s(NULL, "\n", &ppp);
 		}
 	}
 	else {
-		while (substr) {
+		while (substr = strtok_s(nullptr, "\n", &ppp)) {
 			if (isCancel) {
 				break;
 			}
@@ -334,12 +334,14 @@ void PointCloud::readPoints(const std::string & openfileName, int & rate, bool &
 			vert->push_back(single_point);
 			color->push_back(single_color);
 
-			if (++point_count > numInterval * m_Rate) {
-				rate = m_Rate++;
+			if (++point_count > curInterval) {
+				++rate;
+				curInterval += numInterval;
 			}
-			substr = strtok_s(nullptr, "\n", &ppp);
 		}
 	}
+	
+	free(ss);
 
 	if (isCancel) {
 		clearData();

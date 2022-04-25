@@ -7,6 +7,8 @@
 #include <osgViewer/ViewerEventHandlers>
 #include <QApplication>
 
+#include "JsonMgr.h"
+
 OsgContainer::OsgContainer(QWidget *parent)
 	: QOpenGLWidget(parent) {
 	init3D();
@@ -200,7 +202,7 @@ void OsgContainer::init3D() {
 
 osg::ref_ptr<osg::Camera> OsgContainer::createCamera(int x, int y, int w, int h) {
 	window = new osgViewer::GraphicsWindowEmbedded(x, y, w, h);
-	//    osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
+	// osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
 	traits->windowDecoration = true;
 	traits->x = x;
@@ -214,9 +216,15 @@ osg::ref_ptr<osg::Camera> OsgContainer::createCamera(int x, int y, int w, int h)
 	camera->setGraphicsContext(window);
 	camera->setViewport(new osg::Viewport(0, 0, traits->width, traits->height));
 	camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	camera->setProjectionMatrixAsPerspective(
-		30.0f, double(traits->width) / double(traits->height), 1.0f, 10000.0f);
-	camera->setClearColor(osg::Vec4(0.9, 0.9, 0.9, 1.0));
+	camera->setProjectionMatrixAsPerspective(30.0f, double(traits->width) / double(traits->height), 1.0f, 10000.0f);
+	
+	Json::Value colorValue = JsonMgr::getReadValue("etc/config.json");
 
+	float colorR = colorValue["backcolor"]["Red"].asInt() / 255.0;
+	float colorG = colorValue["backcolor"]["Green"].asInt() / 255.0;
+	float colorB = colorValue["backcolor"]["Blue"].asInt() / 255.0;
+	float colorA = colorValue["backcolor"]["Alpha"].asInt() / 255.0;
+	
+	camera->setClearColor(osg::Vec4(colorR, colorG, colorB, colorA));
 	return camera.release();
 }

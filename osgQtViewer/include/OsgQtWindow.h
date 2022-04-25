@@ -5,15 +5,14 @@
 #include <liblas/liblas.hpp>
 
 #include "osgQt.h"
-
 #include "PointCloud.h"
 #include "OsgContainer.h"
 #include "WorkerThread.h"
 #include "TimerClock.h"
 #include "ProjectToXY.h"
 
-class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer//多视景器
-{
+//多视景器
+class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {
 	Q_OBJECT
 
 public:
@@ -66,9 +65,11 @@ private:
 	QDockWidget* Dock_Console_Widget;
 
 	QTreeWidget* Data_TreeWidget;
+
 	QDockWidget* Dock_Data_Widget;
 
 	QTableWidget* DataInfo_TableWidget;
+
 	QDockWidget* Dock_DataInfo_Widget;
 
 	QFrame* Console_Frame;
@@ -78,6 +79,7 @@ private:
 	QProgressDialog *readDataProgressDlg;
 
 	QSlider* m_slider;
+
 	QLabel *m_slider_value;
 
 	QTimer read_timer;
@@ -108,10 +110,13 @@ private:
 
 public slots:
 	void slot_OpenData();
+
 	void slot_SaveData();
 
 	void slot_UpdateProgress(int progressValue);
+
 	void slot_FisishReadProgress();
+
 	void slot_CancelReadProgress();
 
 	void slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col);
@@ -127,10 +132,15 @@ public slots:
 	void slot_setPointColorByHeight();
 
 	void slot_SetTopDirection();
+
 	void slot_SetDownDirection();
+
 	void slot_SetLeftDirection();
+
 	void slot_SetRightDirection();
+
 	void slot_SetFrontDirection();
+
 	void slot_SetBackDirection();
 
 	void slot_ZoomToScreen();
@@ -143,7 +153,9 @@ public slots:
 
 public:
 	void ReadLasData(const std::string & fileName);
+
 	void ReadTxtData(const std::string & fileName);
+
 	void setMaxReadPointNum(int MaxValue);
 
 public:

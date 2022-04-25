@@ -30,6 +30,12 @@
 #include <QHeaderView>
 #include <QColorDialog>
 #include <QLineEdit>
+#include <QTime>
+#include <QFile>
+#include <QTextStream>
+#include <QColor>
+
+#include <osgQt/GraphicsWindowQt>
 
 #include <osg/Point>
 #include <osg/ShapeDrawable>
@@ -38,6 +44,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/MatrixTransform>
 #include <osg/LineWidth>
+#include <osg/AnimationPath>
 #include <osg/ComputeBoundsVisitor>
 
 #include <osgSim/ColorRange>
@@ -48,12 +55,19 @@
 #include <osgUtil/DelaunayTriangulator>
 #include <osgUtil/Optimizer>
 
+#include <osgViewer/Viewer>
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
 
 #include <osgGA/Trackballmanipulator>
 #include <osgGA/StateSetManipulator>
 #include <osgGA/GUIEventHandler>
+#include <osgGA/KeySwitchMatrixManipulator>
 
 #include <osgDB/ReadFile>
-#include <osgQt/GraphicsWindowQt>
+
+#include <osgText/Text>
+#include <osgText/Font>
+
+#include <osgManipulator/Selection>
+#include <osgManipulator/Dragger>

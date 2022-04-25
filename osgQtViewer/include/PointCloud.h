@@ -1,38 +1,9 @@
 #pragma once
 
 #include "struct.h"
+#include "osgQt.h"
 
 #include <Windows.h>
-#include <osgViewer/Viewer>
-#include <osgViewer/CompositeViewer>
-#include <osgGA/GUIEventHandler>
-#include <osgGA/KeySwitchMatrixManipulator>
-#include <osg/Group>
-#include <osg/MatrixTransform>
-#include <osg/AnimationPath>
-#include <osg/LineWidth>
-#include <osg/ComputeBoundsVisitor>
-#include <osg/PolygonMode>
-#include <osg/Point>
-
-#include <osg/ShapeDrawable>
-#include <osgSim/ColorRange>
-#include <osgSim/ScalarBar>
-
-#include <osgDB/readFile>
-#include <osgGA/TrackballManipulator>
-#include <osgUtil/LineSegmentIntersector>
-
-#include <osgText/Text>
-#include <osgText/Font>
-
-#include <osgManipulator/Selection>
-#include <osgManipulator/Dragger>
-
-#include <QTime>
-#include <QFile>
-#include <QTextStream>
-#include <QColor>
 
 #include <iostream>
 #include <stdio.h>
@@ -41,6 +12,8 @@
 #include <fstream>
 #include <ostream>
 #include <iomanip>
+
+#include "TimerClock.h"
 
 #include <liblas/liblas.hpp>
 #include <liblas/reader.hpp>

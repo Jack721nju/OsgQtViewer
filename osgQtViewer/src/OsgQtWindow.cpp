@@ -1,6 +1,6 @@
 #include "OsgQtWindow.h"
 
-const QString Icon_Path = "E:/Project/data/Icon/";
+const QString Icon_Path = "E:/Project/Icon/";
 static QString Data_Path = "E:/Data/";
 
 static int progressMinValue = 0;

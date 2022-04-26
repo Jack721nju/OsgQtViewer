@@ -94,11 +94,21 @@ void OsgContainer::keyReleaseEvent(QKeyEvent *event) {
 void OsgContainer::mousePressEvent(QMouseEvent *event) {
 	int button = 0;
 	switch (event->button()) {
-	case Qt::LeftButton: button = 1; break;
-	case Qt::MidButton: button = 2; break;
-	case Qt::RightButton: button = 3; break;
-	case Qt::NoButton: button = 0; break;
-	default: button = 0; break;
+	case Qt::LeftButton:
+		button = 1;
+		break;
+	case Qt::MidButton:
+		button = 2;
+		break;
+	case Qt::RightButton:
+		button = 3;
+		break;
+	case Qt::NoButton:
+		button = 0;
+		break;
+	default:
+		button = 0;
+		break;
 	}
 	setKeyboardModifiers(event);
 	window->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
@@ -108,15 +118,24 @@ void OsgContainer::mousePressEvent(QMouseEvent *event) {
 void OsgContainer::mouseReleaseEvent(QMouseEvent *event) {
 	int button = 0;
 	switch (event->button()) {
-	case Qt::LeftButton: button = 1; break;
-	case Qt::MidButton: button = 2; break;
-	case Qt::RightButton: button = 3; break;
-	case Qt::NoButton: button = 0; break;
-	default: button = 0; break;
+		case Qt::LeftButton: 
+			button = 1; 
+			break;
+		case Qt::MidButton:
+			button = 2; 
+			break;
+		case Qt::RightButton:
+			button = 3;
+			break;
+		case Qt::NoButton:
+			button = 0; 
+			break;
+		default: 
+			button = 0; 
+			break;
 	}
 	setKeyboardModifiers(event);
 	window->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
-
 	QOpenGLWidget::mouseReleaseEvent(event);
 	update();
 }
@@ -218,7 +237,7 @@ osg::ref_ptr<osg::Camera> OsgContainer::createCamera(int x, int y, int w, int h)
 	camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	camera->setProjectionMatrixAsPerspective(30.0f, double(traits->width) / double(traits->height), 1.0f, 10000.0f);
 	
-	Json::Value colorValue = JsonMgr::getReadValue("etc/config.json");
+	Json::Value colorValue = JsonMgr::getReadValue();
 
 	float colorR = colorValue["backcolor"]["Red"].asInt() / 255.0;
 	float colorG = colorValue["backcolor"]["Green"].asInt() / 255.0;

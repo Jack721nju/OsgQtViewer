@@ -1,8 +1,14 @@
 {
-  "backcolor" : {
-     "Red"   : 222,
-     "Green" : 222,
-     "Blue"  : 222,
-     "Alpha" : 255
+  "backcolor": {
+    "Red": 222,
+    "Green": 222,
+    "Blue": 222,
+    "Alpha": 255
+  },
+  "WindowSize": {
+    "startX" : 500,
+    "startY" : 200,
+    "width"  : 1600,
+    "height" : 1000
   }
 }

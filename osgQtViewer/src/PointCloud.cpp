@@ -341,7 +341,7 @@ void PointCloud::readPoints(const std::string & openfileName, int & rate, bool &
 		}
 	}
 	
-	free(ss);
+	//free(ss);
 
 	if (isCancel) {
 		clearData();

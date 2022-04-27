@@ -404,8 +404,6 @@ void GridNet::getVectorOfOutSideGrid()
 }
 
 
-
-
 static float AngleBetweenVector(osg::Vec2 vector1, osg::Vec2 vector2)
 {
 	double sin = vector1.x() * vector2.y() - vector2.x() * vector1.y();
@@ -1628,5 +1626,5 @@ void AlphaShape::Detect_Shape_line(float radius) {
 		m_shape_points.emplace_back(m_points[m_shape_id[t]]);
 	}
 
-	this->point_pair_scale = (point_pair_N << 1)/ (point_num*(point_num - 1));
+	this->point_pair_scale = (float)(point_pair_N * 2)/ (point_num*(point_num - 1));
 }

@@ -1,7 +1,8 @@
 #include "OsgQtWindow.h"
+#include "JsonMgr.h"
 
-const QString Icon_Path = "E:/Project/Icon/";
-static QString Data_Path = "E:/Data/";
+const QString &Icon_Path = QString::fromStdString(JsonMgr::getReadValue()["IconPath"].asString());
+const QString &Data_Path = QString::fromStdString(JsonMgr::getReadValue()["DataPath"].asString());
 
 static int progressMinValue = 0;
 static int progressMaxValue = 100;
@@ -12,8 +13,7 @@ static float eye_distance_rate = 5;
 
 using namespace std;
 
-OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMainWindow() {
-	
+OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMainWindow() {	
 	setThreadingModel(threadingModel);
 	setKeyEventSetsDone(0);//禁用Escape关闭视图
 	setAcceptDrops(true);//开启拖拽功能
@@ -1390,7 +1390,6 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 }
 
 void OsgQtTest::slot_DetectPointShape() {
-
 	if (ProjectToXY_dialog == nullptr || Project_widget == nullptr) {
 		this->AddToConsoleSlot(QString("[WARING] No project point!"));
 		return;

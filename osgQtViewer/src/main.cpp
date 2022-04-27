@@ -3,15 +3,16 @@
 
 int main(int argc, char* argv[]) {
 	QApplication a(argc, argv);
+	const Json::Value &curValue = JsonMgr::getReadValue();
 
-	QPixmap loadingMap("../Icon/Load/loading.png");
+	std::string &iconPath = curValue["IconPath"].asString();
+	QPixmap loadingMap(QString::fromStdString(iconPath.append("Load/loading.png")));
 	QSplashScreen splash(loadingMap);
 	splash.show();
 	a.processEvents();
 
 	Sleep(300);
 	
-	Json::Value curValue = JsonMgr::getReadValue();
 	int startX = curValue["WindowSize"]["startX"].asInt();
 	int startY = curValue["WindowSize"]["startY"].asInt();
 	int width = curValue["WindowSize"]["width"].asInt();

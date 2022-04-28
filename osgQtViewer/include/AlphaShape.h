@@ -8,6 +8,7 @@
 #include "struct.h"
 
 using namespace std;
+typedef std::vector<osg::Vec3> PointV3List;
 
 //检测边界线的信息
 struct Edge {
@@ -22,8 +23,7 @@ struct Edge {
 };
 
 //检测圆的信息
-struct Circle
-{
+struct Circle {
 	osg::Vec2 m_center;
 	float m_radius;
 	int size;
@@ -37,8 +37,7 @@ struct Circle
 };
 
 //单一网格的信息
-struct GridInfo
-{
+struct GridInfo {
 	float Min_X;
 	float Min_Y;
 	float Max_X;
@@ -53,8 +52,7 @@ struct GridInfo
 };
 
 //单个二维网格类
-class SingleGrid2D
-{
+class SingleGrid2D {
 public:
 	//根据网格长宽生成
 	SingleGrid2D(float Grid_X, float Grid_Y);
@@ -64,7 +62,7 @@ public:
 
 public:
 	//网格内含有的点列表
-	std::vector<osg::Vec3> PointList;
+	PointV3List PointList;
 
 	//网格内的点数量
 	unsigned int cur_PointNum;
@@ -104,15 +102,14 @@ public:
 };
 
 //二维格网类
-class GridNet
-{
+class GridNet {
 public:
 	//根据点云生成当前的二维网格
-	GridNet(std::vector<osg::Vec3> Point_List);
+	GridNet(PointV3List Point_List);
 
 public:
 	//所有点的列表
-	std::vector<osg::Vec3> Points_List;
+	PointV3List Points_List;
 
 	//所有二维网格列表
 	std::vector<SingleGrid2D*> Grid_list;

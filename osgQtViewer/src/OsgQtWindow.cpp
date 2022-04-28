@@ -1269,7 +1269,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	QPointF *point = new QPointF[num];
 
 	point2D_list_AlphaShape;
-	vector<osg::Vec3> pointlist_bulidGrid2D;
+	PointV3List pointlist_bulidGrid2D;
 
 	osg::Vec3Array * pointArry = cur_Pcloud->getVertArry<osg::Vec3Array>();
 

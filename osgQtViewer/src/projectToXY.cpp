@@ -154,7 +154,7 @@ void PaintArea::drawCircles(const vector<osg::Vec2> &center_list, int radius) {
 	}
 }
 
-void PaintArea::drawCircles(const vector<osg::Vec3> &circle_list, const vector<int> &Size_List) {
+void PaintArea::drawCircles(const PointV3List &circle_list, const vector<int> &Size_List) {
 	if (!image)
 		return;
 

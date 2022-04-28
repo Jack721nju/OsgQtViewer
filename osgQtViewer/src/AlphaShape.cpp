@@ -3,8 +3,7 @@
 using namespace std;
 
 //获取给定点云数据的最大最小范围
-point_MAXMIN* getMinMaxXYZ(vector<osg::Vec3> all_list)
-{
+point_MAXMIN* getMinMaxXYZ(PointV3List all_list) {
 	point_MAXMIN * Max_area = new point_MAXMIN;
 	vector<float> x_list, y_list, z_list;
 	for (int i = 0; i < all_list.size(); i++)
@@ -63,7 +62,7 @@ SingleGrid2D::SingleGrid2D(GridInfo curGrid)
 	curGridInfo = curGrid;
 }
 
-GridNet::GridNet(vector<osg::Vec3> Point_List)
+GridNet::GridNet(PointV3List Point_List)
 {
 	Points_List.assign(Point_List.begin(), Point_List.end());
 	Grid_list.clear();
@@ -305,8 +304,6 @@ void GridNet::getCenterPoint()
 
 	this->GridWithPoint_Num = haspointGridNum;
 	this->GridOutside_Num = GridOutsideNum;
-
-
 }
 
 

@@ -31,8 +31,7 @@ point_MAXMIN* getMinMaxXYZ(PointV3List all_list) {
 }
 
 
-SingleGrid2D::SingleGrid2D(float Grid_X, float Grid_Y)
-{
+SingleGrid2D::SingleGrid2D(float Grid_X, float Grid_Y){
 	cur_PointNum = 0;
 	hasPoint = false;
 	heightDifference = 0;
@@ -46,8 +45,7 @@ SingleGrid2D::SingleGrid2D(float Grid_X, float Grid_Y)
 }
 
 
-SingleGrid2D::SingleGrid2D(GridInfo curGrid)
-{
+SingleGrid2D::SingleGrid2D(GridInfo curGrid) {
 	cur_PointNum = 0;
 	hasPoint = false;
 	heightDifference = 0;
@@ -62,8 +60,7 @@ SingleGrid2D::SingleGrid2D(GridInfo curGrid)
 	curGridInfo = curGrid;
 }
 
-GridNet::GridNet(PointV3List Point_List)
-{
+GridNet::GridNet(PointV3List Point_List) {
 	Points_List.assign(Point_List.begin(), Point_List.end());
 	Grid_list.clear();
 	pointMMM = getMinMaxXYZ(Point_List);
@@ -76,8 +73,7 @@ GridNet::GridNet(PointV3List Point_List)
 	Row_Num = 0;
 }
 
-SingleGrid2D* GridNet::getGridByRowAndCol(int RowID, int ColID)
-{
+SingleGrid2D* GridNet::getGridByRowAndCol(int RowID, int ColID) {
 	for (int i = 0; i < this->Grid_Num; i++)
 	{
 		SingleGrid2D* curGrid = this->Grid_list[i];
@@ -96,8 +92,7 @@ SingleGrid2D* GridNet::getGridByRowAndCol(int RowID, int ColID)
 
 }
 
-bool GridNet::isPointInGrid(osg::Vec3 curPoint, SingleGrid2D *test_Grid)
-{
+bool GridNet::isPointInGrid(osg::Vec3 curPoint, SingleGrid2D *test_Grid){
 	float cur_P_X = curPoint.x();
 	float cur_P_Y = curPoint.y();
 
@@ -120,8 +115,7 @@ bool GridNet::isPointInGrid(osg::Vec3 curPoint, SingleGrid2D *test_Grid)
 }
 
 //检测每个二维网格的八领域连通的网格，并逐一判断网格内是否有点
-void GridNet::detectGridWithConnection()
-{
+void GridNet::detectGridWithConnection(){
 	int id = 0;
 
 	for (int i = 0; i < (Row_Num + 2); i++)
@@ -176,8 +170,7 @@ void GridNet::detectGridWithConnection()
 }
 
 //根据网格数量构建网格
-void GridNet::buildNetByNum(int RowNum, int ColNum)
-{
+void GridNet::buildNetByNum(int RowNum, int ColNum){
 	this->Row_Num = (unsigned int)(RowNum);
 	this->Col_Num = (unsigned int)(ColNum);
 
@@ -192,8 +185,7 @@ void GridNet::buildNetByNum(int RowNum, int ColNum)
 	MinPointNum_InOneGrid = 9999999;
 
 	//向外部扩张一层级的网格，便于后续的领域搜索
-	for (int i = 0; i < (Row_Num + 2); i++)
-	{
+	for (int i = 0; i < (Row_Num + 2); i++)	{
 		for (int j = 0; j < (Col_Num + 2); j++)
 		{
 			GridInfo cur_grid;
@@ -246,8 +238,7 @@ void GridNet::buildNetByNum(int RowNum, int ColNum)
 }
 
 //根据网格大小构建二维格网
-void GridNet::buildNetBySize(float SizeX, float SizeY)
-{
+void GridNet::buildNetBySize(float SizeX, float SizeY){
 	Grid_X = SizeX;
 	Grid_Y = SizeY;
 
@@ -263,8 +254,7 @@ void GridNet::buildNetBySize(float SizeX, float SizeY)
 }
 
 //获取网格内离散点的中心点
-void GridNet::getCenterPoint()
-{
+void GridNet::getCenterPoint(){
 	int haspointGridNum = 0;
 	int GridOutsideNum = 0;
 
@@ -308,8 +298,7 @@ void GridNet::getCenterPoint()
 
 
 //获取网格内离散点的中心点与领域网格中心点的连接向量
-void GridNet::getVectorOfOutSideGrid()
-{
+void GridNet::getVectorOfOutSideGrid(){
 	this->MaxVector_Grid = 0.0;
 	this->MinVector_Grid = 999999999.0;
 
@@ -401,8 +390,7 @@ void GridNet::getVectorOfOutSideGrid()
 }
 
 
-static float AngleBetweenVector(osg::Vec2 vector1, osg::Vec2 vector2)
-{
+static float AngleBetweenVector(osg::Vec2 vector1, osg::Vec2 vector2){
 	double sin = vector1.x() * vector2.y() - vector2.x() * vector1.y();
 	double cos = vector1.x() * vector2.x() + vector1.y() * vector2.y();
 
@@ -410,8 +398,7 @@ static float AngleBetweenVector(osg::Vec2 vector1, osg::Vec2 vector2)
 }
 
 //检测外部边界网格的平滑度，筛选出不平滑的网格，用于单独处理
-void GridNet::DetectSmoothForOutSideGrid()
-{
+void GridNet::DetectSmoothForOutSideGrid(){
 	for (int i = 0; i < this->Grid_Num; i++)
 	{
 		SingleGrid2D* curGrid = this->Grid_list[i];
@@ -548,13 +535,11 @@ void GridNet::DetectSmoothForOutSideGrid()
 			curGrid->isSmoothGrid = false;
 			curGrid->SmoothDegree = 1;
 		}
-
 	}
 }
 
 
-AlphaShape::AlphaShape(vector<osg::Vec2> point_list)
-{
+AlphaShape::AlphaShape(vector<osg::Vec2> point_list){
 	m_radius = 0.0;
 
 	m_points.clear();
@@ -567,8 +552,7 @@ AlphaShape::AlphaShape(vector<osg::Vec2> point_list)
 	m_points.assign(point_list.begin(), point_list.end());
 }
 
-AlphaShape::AlphaShape()
-{
+AlphaShape::AlphaShape(){
 	m_radius = 0.0;
 
 	m_points.clear();
@@ -1061,8 +1045,7 @@ void AlphaShape::Detect_Shape_By_GridNet_New(GridNet* curGridNet, float radius)
 }
 
 
-void AlphaShape::Detect_Shape_line_by_Grid(vector<osg::Vec2> near_point_list, vector<osg::Vec2> detect_point_list, float radius)
-{	
+void AlphaShape::Detect_Shape_line_by_Grid(vector<osg::Vec2> near_point_list, vector<osg::Vec2> detect_point_list, float radius){	
 	m_shape_id.clear();
 
 	m_radius = radius;
@@ -1214,8 +1197,7 @@ void AlphaShape::Detect_Shape_line_by_Grid(vector<osg::Vec2> near_point_list, ve
 }
 
 
-void AlphaShape::Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, vector<SingleGrid2D*> nearGrid_List, float radius)
-{
+void AlphaShape::Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, vector<SingleGrid2D*> nearGrid_List, float radius){
 	m_radius = radius;
 
 	int circleSize = 0;
@@ -1344,8 +1326,7 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, vector<
 		}
 		
 		//逐一判断领域网格与中心网格的离散点的主副点
-		for (int i = 0; i < m_points.size(); i++)
-		{
+		for (int i = 0; i < m_points.size(); i++){
 			for (int k = 0; k < near_point_list.size(); k++)
 			{
 				float m_distance = Distance_point(m_points[i], near_point_list[k]);
@@ -1425,14 +1406,12 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, vector<
 				bool addCircle2 = true;
 
 				//若内、外侧圆均含有落点，则直接跳过
-				if (hasPointInCircle1 && hasPointInCircle2)
-				{
+				if (hasPointInCircle1 && hasPointInCircle2)	{
 					continue;
 				}
 
 				//若没有落点在圆内，则继续操作
-				if (hasPointInCircle1 != true || hasPointInCircle2 != true)
-				{
+				if (hasPointInCircle1 != true || hasPointInCircle2 != true)	{
 					bool hasPointA = false;
 					bool hasPointB = false;
 				
@@ -1518,13 +1497,11 @@ void AlphaShape::Detect_Shape_line(float radius) {
 			}
 
 			++point_pair_N;
-
 			
 			const osg::Vec2 &mid_point = (m_points[i] + m_points[k]) / 2;//线段中点
 			const osg::Vec2 &vector_line = m_points[i] - m_points[k];//线段的方向向量
 
-			float a = 1.0, b = 1.0;
-			
+			float a = 1.0, b = 1.0;			
 
 			if (abs(vector_line.x() - 0) < 0.01) {
 				b = 0.0;
@@ -1579,7 +1556,6 @@ void AlphaShape::Detect_Shape_line(float radius) {
 			}
 
 			if (hasPointInCircle1 != true || hasPointInCircle2 != true){
-
 				m_edges.emplace_back(Edge(m_points[i], m_points[k]));
 
 				bool hasPointA = false;

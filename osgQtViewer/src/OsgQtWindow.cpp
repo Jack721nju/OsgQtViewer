@@ -1278,10 +1278,10 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 		float Qpoint_x = (curP.x() - x_min) * ratio_pixel_x;
 		float Qpoint_y = (curP.y() - y_min) * ratio_pixel_y;
 
-		Qpoint_y = 430 - Qpoint_y;
+		Qpoint_y = 500 - Qpoint_y;
 
-		QPointF each_point(Qpoint_x + 50, Qpoint_y + 50);
-		osg::Vec2 point2D(Qpoint_x + 50, Qpoint_y + 50);
+		QPointF each_point(Qpoint_x + 60, Qpoint_y + 10);
+		osg::Vec2 point2D(Qpoint_x + 60, Qpoint_y + 10);
 
 		point[++id] = each_point;
 		point2D_list_AlphaShape.emplace_back(point2D);

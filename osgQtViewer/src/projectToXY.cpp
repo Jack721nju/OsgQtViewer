@@ -177,6 +177,7 @@ void PaintArea::drawCircles(const PointV3List &circle_list, const vector<int> &S
 	}
 }
 
+//绘制坐标轴
 void PaintArea::drawAxis() {
 	if (!image)
 		return;
@@ -191,16 +192,17 @@ void PaintArea::drawAxis() {
 	painter.setPen(pen);
 
 	origin_point_X = 50;
-	origin_point_Y = 500;//坐标系原点
+	origin_point_Y = 530;//坐标系原点
 
 	axis_width = 500;//确定坐标轴长度
 	axis_height = 500;//高度
 
 	//painter.drawRect(5, 5, 520 - 5, 520 - 5);//绘制区域的矩形范围，保留5左右的间隙
-	painter.drawLine(origin_point_X - 20, origin_point_Y, axis_width + origin_point_X, origin_point_Y);//绘制坐标轴X
+	painter.drawLine(origin_point_X - 20, origin_point_Y, origin_point_X + axis_width, origin_point_Y);//绘制坐标轴X
 	painter.drawLine(origin_point_X, origin_point_Y + 20, origin_point_X, origin_point_Y - axis_height);//绘制坐标轴Y
 }
 
+//绘制坐标轴刻度线
 void PaintArea::drawDegreeLines(QString x_axis_name, QString y_axis_name, float base_x, float base_y, float delt_x, float delt_y) {
 	if (!image)
 		return;
@@ -211,8 +213,8 @@ void PaintArea::drawDegreeLines(QString x_axis_name, QString y_axis_name, float 
 
 	QPainter painter(image);
 	painter.setPen(pen_text);
-	painter.drawText(QPoint(280, 530), x_axis_name);
-	painter.drawText(QPoint(10, 250), y_axis_name);
+	painter.drawText(QPoint(280, 560), x_axis_name);
+	painter.drawText(QPoint(10, 280), y_axis_name);
 
 	//绘制刻度线
 	QPen penDegree;
@@ -224,11 +226,11 @@ void PaintArea::drawDegreeLines(QString x_axis_name, QString y_axis_name, float 
 
 	for (int i = 0; i < divde_num; ++i)	{
 		painter.drawLine((i + 1)*axis_width / divde_num, origin_point_Y, (i + 1)*axis_width / divde_num, origin_point_Y + 3);
-		painter.drawText((i + 1)*axis_width / divde_num - 7, origin_point_Y + 15, QString::number((int)(base_x + (i + 1) * (abs(delt_x)) / divde_num)));
+		painter.drawText((i + 1)*axis_width / divde_num - 7, origin_point_Y + 18, QString::number((int)(base_x + (i + 1) * (abs(delt_x)) / divde_num)));
 	}
 
 	for (int i = 0; i < divde_num; ++i ) {
 		painter.drawLine(origin_point_X, axis_height - (i + 1)*axis_height / divde_num, origin_point_X - 3, axis_height - (i + 1)*axis_height / divde_num);
-		painter.drawText(origin_point_X - 15, axis_height - (i + 1)*axis_height / divde_num + 10, QString::number((int)(base_y + (i + 1) * (abs(delt_y)) / divde_num)));
+		painter.drawText(origin_point_X - 30, axis_height - (i + 1)*axis_height / divde_num + 10, QString::number((int)(base_y + (i + 1) * (abs(delt_y)) / divde_num)));
 	}
 }

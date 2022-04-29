@@ -1395,13 +1395,13 @@ void OsgQtTest::slot_DetectPointShape() {
 		return;
 	}
 
-	PaintArea *Project_widget_Circle_And_Edge = new PaintArea(ProjectToXY_dialog);
+	PaintArea *Project_widget_Circle_And_Edge = new PaintArea();
 	Project_widget_Circle_And_Edge->setAttribute(Qt::WA_DeleteOnClose);
 	Project_widget_Circle_And_Edge->setFixedSize(660, 660);
 	Project_widget_Circle_And_Edge->setVisible(true);
 	Project_widget_Circle_And_Edge->drawAxis();
 
-	PaintArea *Project_widget_Point = new PaintArea(ProjectToXY_dialog);
+	PaintArea *Project_widget_Point = new PaintArea();
 	Project_widget_Point->setAttribute(Qt::WA_DeleteOnClose);
 	Project_widget_Point->setFixedSize(660, 660);
 	Project_widget_Point->setVisible(true);
@@ -1430,7 +1430,7 @@ void OsgQtTest::slot_DetectPointShape() {
 
 	vector<osg::Vec2> center_list;
 
-	for (int i = 0; i < alpha->m_circles.size(); i++) {
+	for (int i = 0; i < alpha->m_circles.size(); ++i) {
 		osg::Vec2 center_P = alpha->m_circles[i].m_center;
 		center_list.emplace_back(center_P);
 	}
@@ -1444,7 +1444,7 @@ void OsgQtTest::slot_DetectPointShape() {
 	//point2D_AlphaShape_Result.clear();
 	//point2D_AlphaShape_Result.assign(alpha->m_shape_points.begin(), alpha->m_shape_points.end());
 
-	for (int i = 0; i < shape_num; i++)	{
+	for (int i = 0; i < shape_num; ++i)	{
 		float Qpoint_x = alpha->m_shape_points[i].x();
 		float Qpoint_y = alpha->m_shape_points[i].y();
 
@@ -1464,7 +1464,7 @@ void OsgQtTest::slot_DetectPointShape() {
 		return;
 	}
 
-	for (int i = 0; i < shape_num; i++)	{
+	for (int i = 0; i < shape_num; ++i)	{
 		x = alpha->m_shape_points[i].x();
 		y = alpha->m_shape_points[i].y();
 		z = 0.0;

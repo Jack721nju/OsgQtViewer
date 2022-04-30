@@ -114,7 +114,7 @@ bool GridNet::isPointInGrid(osg::Vec3 curPoint, SingleGrid2D *test_Grid){
 	}
 }
 
-//检测每个二维网格的八领域连通的网格，并逐一判断网格内是否有点
+//检测每个二维网格的八邻域连通的网格，并逐一判断网格内是否有点
 void GridNet::detectGridWithConnection(){
 	int id = 0;
 
@@ -184,7 +184,7 @@ void GridNet::buildNetByNum(int RowNum, int ColNum){
 	MaxPointNum_InOneGrid = 0;
 	MinPointNum_InOneGrid = 9999999;
 
-	//向外部扩张一层级的网格，便于后续的领域搜索
+	//向外部扩张一层级的网格，便于后续的邻域搜索
 	for (int i = 0; i < (Row_Num + 2); i++)	{
 		for (int j = 0; j < (Col_Num + 2); j++)
 		{
@@ -297,7 +297,7 @@ void GridNet::getCenterPoint(){
 }
 
 
-//获取网格内离散点的中心点与领域网格中心点的连接向量
+//获取网格内离散点的中心点与邻域网格中心点的连接向量
 void GridNet::getVectorOfOutSideGrid(){
 	this->MaxVector_Grid = 0.0;
 	this->MinVector_Grid = 999999999.0;
@@ -319,7 +319,7 @@ void GridNet::getVectorOfOutSideGrid(){
 			continue;
 		}
 
-		//当前网格的八领域网格均含有点
+		//当前网格的八邻域网格均含有点
 		if (curGrid->nearByGridAllWithpoint == true)
 		{
 			continue;
@@ -359,7 +359,7 @@ void GridNet::getVectorOfOutSideGrid(){
 
 				if (nearGrid->hasPoint == true)
 				{
-					//领域网格也属于边界网格
+					//邻域网格也属于边界网格
 					if (nearGrid->nearByGridAllWithpoint == false)
 					{
 						osg::Vec2 nearGridCenterPoint = nearGrid->CenterPoint;
@@ -409,7 +409,7 @@ void GridNet::DetectSmoothForOutSideGrid(){
 			continue;
 		}
 
-		//当前网格的八领域网格均含有点
+		//当前网格的八邻域网格均含有点
 		if (curGrid->nearByGridAllWithpoint == true)
 		{
 			continue;
@@ -599,7 +599,7 @@ void AlphaShape::Detect_Shape_By_PackCirlce(GridNet* curGridNet, float radius, i
 			continue;
 		}
 
-		//当前网格的八领域网格均含有点，说明不是边界网格，直接跳过
+		//当前网格的八邻域网格均含有点，说明不是边界网格，直接跳过
 		if (curGrid->nearByGridAllWithpoint == true)
 		{
 			continue;
@@ -669,7 +669,7 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 			continue;
 		}
 
-		//当前网格的八领域网格均含有点
+		//当前网格的八邻域网格均含有点
 		if (curGrid->nearByGridAllWithpoint == true)
 		{
 			continue;
@@ -815,7 +815,7 @@ void AlphaShape::Detect_Shape_By_GridNet(GridNet* curGridNet, float radius)
 	//用于判断检测圆是否含有点的判断点云
 	vector<osg::Vec2> detect_point_list;
 
-	// 用于检测边界点的领域点云
+	// 用于检测边界点的邻域点云
 	vector<osg::Vec2> near_point_list;
 	
 	for (int i = 0; i < curGridNet->Grid_Num; i++)
@@ -839,7 +839,7 @@ void AlphaShape::Detect_Shape_By_GridNet(GridNet* curGridNet, float radius)
 			continue;
 		}
 
-		//当前网格的八领域网格均含有点
+		//当前网格的八邻域网格均含有点
 		if (curGrid->nearByGridAllWithpoint == true)
 		{
 			continue;
@@ -903,7 +903,7 @@ void AlphaShape::Detect_Shape_By_GridNet(GridNet* curGridNet, float radius)
 					continue;
 				}
 
-				//说明中心网格与该领域网格已经检测过边界点了
+				//说明中心网格与该邻域网格已经检测过边界点了
 				if (nearGrid->hasDetected == true)
 				{
 					//continue;
@@ -955,7 +955,7 @@ void AlphaShape::Detect_Shape_By_GridNet(GridNet* curGridNet, float radius)
 			//m_radius = changeRadius;
 		}
 
-		//该网格领域内的点云分布不平滑，需要更小的检测半径进行检测
+		//该网格邻域内的点云分布不平滑，需要更小的检测半径进行检测
 		if (isNearBySmooth == false)
 		{
 			m_radius = radius* 0.7;
@@ -998,7 +998,7 @@ void AlphaShape::Detect_Shape_By_GridNet_New(GridNet* curGridNet, float radius)
 			continue;
 		}
 
-		//当前网格的八领域网格均含有点
+		//当前网格的八邻域网格均含有点
 		if (CenterGrid->nearByGridAllWithpoint == true)
 		{
 			continue;
@@ -1007,7 +1007,7 @@ void AlphaShape::Detect_Shape_By_GridNet_New(GridNet* curGridNet, float radius)
 		//清空邻域网格列表
 		nearGrid_List.clear();
 
-		//获取当前网格的八领域网以及中心网格
+		//获取当前网格的八邻域网以及中心网格
 		for (int k = curRowID - 1; k <= curRowID + 1; k++)
 		{
 			for (int j = curColID - 1; j <= curColID + 1; j++)
@@ -1065,7 +1065,6 @@ void AlphaShape::Detect_Shape_line_by_Grid(vector<osg::Vec2> near_point_list, ve
 			{
 				continue;
 			}
-
 		
 			osg::Vec2 center1, center2;//两外接圆圆心
 
@@ -1285,13 +1284,13 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, vector<
 
 		near_point_list.clear();//邻域网格的副点列表需要清空
 
-		//当前领域网格点数量为0
+		//当前邻域网格点数量为0
 		if (nearGrid->hasPoint == false)
 		{
 			continue;
 		}
 
-		//当前邻域网格的八领域网格均含有点
+		//当前邻域网格的八邻域网格均含有点
 		if (nearGrid->nearByGridAllWithpoint == true)
 		{
 			//continue;
@@ -1325,7 +1324,7 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, vector<
 			}
 		}
 		
-		//逐一判断领域网格与中心网格的离散点的主副点
+		//逐一判断邻域网格与中心网格的离散点的主副点
 		for (int i = 0; i < m_points.size(); i++){
 			for (int k = 0; k < near_point_list.size(); k++)
 			{
@@ -1488,8 +1487,13 @@ void AlphaShape::Detect_Shape_line(float radius) {
 	int point_pair_N = 0;
 	this->point_pair_scale = 0.0;
 	int point_num = m_points.size();
+
 	std::unordered_set<int> m_shape_id_set;
 	m_shape_id_set.reserve(point_num);
+	m_shape_points.clear();
+	m_shape_points.reserve(point_num);
+
+	m_circles.clear();
 
 	for (int i = 0; i < point_num; ++i){
 		for (int k = i + 1; k < point_num; ++k) {
@@ -1526,10 +1530,6 @@ void AlphaShape::Detect_Shape_line(float radius) {
 
 			for (int m = 0; m < point_num; ++m) {
 				if (m == i || m == k) {
-					continue;
-				}
-
-				if (!m_shape_id_set.empty() && m_shape_id_set.find(m) != m_shape_id_set.end()) {
 					continue;
 				}
 

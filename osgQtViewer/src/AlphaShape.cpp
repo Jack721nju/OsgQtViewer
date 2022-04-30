@@ -1488,6 +1488,8 @@ void AlphaShape::Detect_Shape_line(float radius) {
 	int point_pair_N = 0;
 	this->point_pair_scale = 0.0;
 	int point_num = m_points.size();
+	std::unordered_set<int> m_shape_id_set;
+	m_shape_id_set.reserve(point_num);
 
 	for (int i = 0; i < point_num; ++i){
 		for (int k = i + 1; k < point_num; ++k) {
@@ -1503,7 +1505,7 @@ void AlphaShape::Detect_Shape_line(float radius) {
 
 			float a = 1.0, b = 1.0;			
 
-			if (abs(vector_line.x() - 0) < 0.01) {
+			if (abs(vector_line.x()) < 0.001) {
 				b = 0.0;
 			}else {
 				a = (-b * vector_line.y()) / vector_line.x();
@@ -1514,7 +1516,7 @@ void AlphaShape::Detect_Shape_line(float radius) {
 			normal.normalize();//单位向量化
 
 			float line_length = vector_line.length() / 2.0;
-			float length = sqrt(std::pow(m_radius, 2) - std::pow(line_length,2));
+			float length = sqrt(std::pow(m_radius, 2) - std::pow(line_length, 2));
 
 			//两外接圆圆心
 			const osg::Vec2 &center1 = mid_point + normal*length;
@@ -1522,81 +1524,50 @@ void AlphaShape::Detect_Shape_line(float radius) {
 
 			bool hasPointInCircle1 = false, hasPointInCircle2 = false;
 
-			vector<osg::Vec2> within_Points_Area_1;
-			vector<osg::Vec2> within_Points_Area_2;
-
 			for (int m = 0; m < point_num; ++m) {
 				if (m == i || m == k) {
 					continue;
 				}
 
-				if (hasPointInCircle1&&hasPointInCircle2){
+				if (!m_shape_id_set.empty() && m_shape_id_set.find(m) != m_shape_id_set.end()) {
+					continue;
+				}
+
+				if (hasPointInCircle1 && hasPointInCircle2){
 					break;
 				}
 
 				if (!hasPointInCircle1 && Distance_point(m_points[m], center1) < m_radius){
-					within_Points_Area_1.emplace_back(m_points[m]);
 					hasPointInCircle1 = true;
 				}
 
 				if (!hasPointInCircle2 && Distance_point(m_points[m], center2) < m_radius){
-					within_Points_Area_2.emplace_back(m_points[m]);
 					hasPointInCircle2 = true;
 				}
 			}
 
-			const osg::Vec2 &vector_to_center1 = center1 - mid_point;
-			const osg::Vec2 &vector_to_center2 = center2 - mid_point;
-
-			bool addCircle1 = true;
-			bool addCircle2 = true;
-
-			if (hasPointInCircle1 && hasPointInCircle2){
-				continue;
-			}
-
-			if (hasPointInCircle1 != true || hasPointInCircle2 != true){
+			if (!hasPointInCircle1 || !hasPointInCircle2){
 				m_edges.emplace_back(Edge(m_points[i], m_points[k]));
 
-				bool hasPointA = false;
-				bool hasPointB = false;
-
-				for (int j = 0; j < m_shape_id.size(); ++j)	{
-					if (hasPointA&&hasPointB)
-					{
-						break;
-					}
-
-					if (m_shape_id[j] == i && !hasPointA){
-						hasPointA = true;
-					}
-
-					if (m_shape_id[j] == k && !hasPointB){
-						hasPointB = true;
-					}
-				}
-
-				if (!hasPointA){
-					m_shape_id.push_back(i);
-				}
-
-				if (!hasPointB)	{
-					m_shape_id.push_back(k);
-				}
-
-				if (hasPointInCircle1 != true){
+				if (false == hasPointInCircle1) {
 					m_circles.emplace_back(Circle(center1, m_radius));
 				}
 
-				if (hasPointInCircle2 != true){
+				if (false == hasPointInCircle2) {
 					m_circles.emplace_back(Circle(center2, m_radius));
+				}
+			
+				if (m_shape_id_set.find(i) == m_shape_id_set.end()) {
+					m_shape_id_set.emplace(i);
+					m_shape_points.emplace_back(m_points[i]);
+				}
+				
+				if (m_shape_id_set.find(k) == m_shape_id_set.end()) {
+					m_shape_id_set.emplace(k);
+					m_shape_points.emplace_back(m_points[k]);
 				}
 			}
 		}
-	}
-
-	for (int t = 0; t < m_shape_id.size(); ++t) {
-		m_shape_points.emplace_back(m_points[m_shape_id[t]]);
 	}
 
 	this->point_pair_scale = (float)(point_pair_N * 2)/ (point_num*(point_num - 1));

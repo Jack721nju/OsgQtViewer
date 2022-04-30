@@ -2,8 +2,12 @@
 #include <Windows.h>
 #include <math.h>
 #include <vector>
+#include <map>
+#include <unordered_map>
+#include <unordered_set>
 #include <algorithm>
 #include <osg/Array>
+#include <bitset>
 
 #include "struct.h"
 

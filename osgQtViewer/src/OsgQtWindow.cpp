@@ -1208,12 +1208,10 @@ void OsgQtTest::slot_SetBackGroundColor() {
 }
 
 void OsgQtTest::slot_Init_Project_Dialog() {	
-	if (ProjectToXY_dialog)	{
-		if (ProjectToXY_dialog->isVisible()) {
-			ProjectToXY_dialog->close();
-			ProjectToXY_dialog = nullptr;
-			return;
-		}
+	if (ProjectToXY_dialog)	{		
+		ProjectToXY_dialog->close();
+		ProjectToXY_dialog = nullptr;
+		return;
 	}
 
 	if (!hasSelectedPcloud()) {
@@ -1227,7 +1225,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	}
 	osg::ref_ptr<PointCloud> cur_Pcloud = *PCloudManager::Instance()->selected_pcloud_list.begin();
 
-	if (cur_Pcloud == nullptr) {
+	if (nullptr == cur_Pcloud) {
 		return;
 	}
 
@@ -1239,13 +1237,14 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	//背景窗口范围
 	ProjectToXY_dialog->setFixedSize(1000, 660);
 
+	//在背景窗口上新建绘图区
 	Project_widget = new PaintArea(ProjectToXY_dialog);
 	//绘图区域范围
 	Project_widget->setFixedSize(600, 600);
 	Project_widget->setVisible(true);
 	Project_widget->drawAxis();	
 
-	int num = cur_Pcloud->getPointNum();
+	size_t num = cur_Pcloud->getPointNum();
 
 	point_MAXMIN* MMM = new point_MAXMIN;
 	MMM = cur_Pcloud->getMinMaxXYZ_POINTS();
@@ -1259,7 +1258,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	float delt_x = x_max - x_min;
 	float delt_y = y_max - y_min;
 
-	float x_y_value = max(delt_x, delt_y);
+	float x_y_value = std::max(delt_x, delt_y);
 	float ratio_pixel_x = Project_widget->axis_width * 1.0 / x_y_value;
 	float ratio_pixel_y = Project_widget->axis_height * 1.0 / x_y_value;
 
@@ -1268,10 +1267,13 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 
 	QPointF *point = new QPointF[num];
 
-	point2D_list_AlphaShape;
-	PointV3List pointlist_bulidGrid2D;
+	point2D_list_AlphaShape.clear();
+	pointlist_bulidGrid2D.clear();
 
 	osg::Vec3Array * pointArry = cur_Pcloud->getVertArry<osg::Vec3Array>();
+	if (nullptr == pointArry) {
+		return;
+	}
 
 	int id = -1;
 	for (const auto & curP : *pointArry) {
@@ -1336,19 +1338,19 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	m_label_grid_Row->setText("Row Num:");
 	m_label_grid_Row->setFixedSize(100, 30);
 
-	QLineEdit * m_Grid_X_num = new QLineEdit(ProjectToXY_dialog);
+	m_Grid_X_num = new QLineEdit(ProjectToXY_dialog);
 	m_Grid_X_num->setFixedSize(100, 30);
 
 	QLabel *m_label_grid_Col = new QLabel(ProjectToXY_dialog);
 	m_label_grid_Col->setText("Col Num:");
 	m_label_grid_Col->setFixedSize(100, 30);
 
-	QLineEdit * m_Grid_Y_num = new QLineEdit(ProjectToXY_dialog);
+	m_Grid_Y_num = new QLineEdit(ProjectToXY_dialog);
 	m_Grid_Y_num->setFixedSize(100, 30);
 
 	QPushButton * build_grid = new QPushButton("Build Grid", ProjectToXY_dialog);
 	build_grid->setFixedSize(150, 50);
-	connect(build_grid, SIGNAL(clicked()), this, SLOT(Build2DGridForPoints()));
+	connect(build_grid, SIGNAL(clicked()), this, SLOT(slot_Build2DGridForPoints()));
 
 	VV_layout->addStretch(2);
 	VV_layout->addWidget(m_label_radius, 0);
@@ -1413,7 +1415,7 @@ void OsgQtTest::slot_DetectPointShape() {
 	if (m_radius) {
 		radius = m_radius->text().toFloat();
 	}
-
+	
 	_timerClock.start();
 
 	//Run progress
@@ -1441,15 +1443,9 @@ void OsgQtTest::slot_DetectPointShape() {
 	int shape_num = alpha->m_shape_points.size();
 	QPointF *shape_point = new QPointF[shape_num];
 
-	//point2D_AlphaShape_Result.clear();
-	//point2D_AlphaShape_Result.assign(alpha->m_shape_points.begin(), alpha->m_shape_points.end());
-
 	for (int i = 0; i < shape_num; ++i)	{
-		float Qpoint_x = alpha->m_shape_points[i].x();
-		float Qpoint_y = alpha->m_shape_points[i].y();
-
-		QPointF each_point(Qpoint_x, Qpoint_y);
-		shape_point[i] = each_point;
+		const auto & curP = alpha->m_shape_points[i];
+		shape_point[i] = QPointF (curP.x(), curP.y());
 	}
 
 	Project_widget->drawLines(alpha->m_edges);
@@ -1473,4 +1469,139 @@ void OsgQtTest::slot_DetectPointShape() {
 	}
 
 	outf.close();
+}
+
+void OsgQtTest::slot_Build2DGridForPoints() {
+	if (this->pointlist_bulidGrid2D.size() < 1){
+		return;
+	}
+	if (nullptr == m_Grid_Y_num || nullptr == m_Grid_X_num) {
+		this->AddToConsoleSlot("Input grid col and row num! \n");
+	}
+
+	PaintArea *Project_widget_grid_net = new PaintArea();
+	Project_widget_grid_net->setFixedSize(660, 660);
+	Project_widget_grid_net->setVisible(true);
+	//Project_widget_grid_net->drawAxis();
+	
+	_timerClock.start();
+	
+	GridNet* gridNet = new GridNet(this->pointlist_bulidGrid2D);
+
+	if (nullptr == gridNet) {
+		this->AddToConsoleSlot("Build 2D grid net failed! \n");
+		return;
+	}
+
+	gridNet->buildNetByNum(m_Grid_Y_num->text().toInt(), m_Grid_X_num->text().toInt());
+	
+	//计算单纯生成二维格网的耗时
+	float runTime = _timerClock.getTime<Ms>() / 1000.0;
+	QString cost_time = QString::number(runTime);
+	this->AddToConsoleSlot(QString("The cost time of building 2D grid net is :  ") + cost_time + QString("s"));
+
+	//检测网格的连通性
+	gridNet->detectGridWithConnection();
+
+	//获取网格内点的几何中心
+	gridNet->getCenterPoint();
+
+	//基于网格点的中心点计算网格与邻域网格的合向量
+	gridNet->getVectorOfOutSideGrid();
+
+	//基于合向量，计算网格是否是平滑网格,并统计网格的平滑度
+	gridNet->DetectSmoothForOutSideGrid();
+	
+	vector<QColor> Grid_colorList;//创建颜色数组,逆时针排序
+
+	int girdNum = (int)gridNet->Grid_Num;
+
+	for (int i = 0; i < girdNum; i++){
+		QColor new_color;
+		SingleGrid2D* curGrid = gridNet->Grid_list[i];
+
+		if (curGrid->hasPoint) {
+			if (curGrid->nearByGridAllWithpoint == true){
+				//充实网格，灰色
+				new_color.setRgb(150, 150, 150, 125);
+			}
+			else{
+				//默认为白色
+				int color_R = 0;
+				int color_G = 0;
+				int color_B = 0;
+				int color_W = 0;
+
+				//当前网格不平滑
+				if (curGrid->isSmoothGrid == false){
+					//粗糙度为1的，橙色
+					if (curGrid->SmoothDegree == 1)	{
+						color_R = 250;
+						color_G = 100;
+						color_B = 0;
+						color_W = 155;
+					}
+
+					//粗糙度为2的，红色
+					if (curGrid->SmoothDegree == 2)	{
+						color_R = 250;
+						color_G = 0;
+						color_B = 0;
+						color_W = 155;
+					}
+				} else {
+					//顺滑网格，绿色
+					color_R = 0;
+					color_G = 125;
+					color_B = 0;
+					color_W = 155;
+				}
+				new_color.setRgb(color_R, color_G, color_B, color_W);
+			}
+		} else {
+			//空网格为透明
+			new_color.setRgb(0, 0, 0, 0);
+		}
+
+		Grid_colorList.push_back(new_color);
+	}
+	
+	this->AddToConsoleSlot("The Full 2D grid number is : " + QString::number(gridNet->GridWithPoint_Num));
+
+	int OutSideGridCenterPointNum = gridNet->GridOutside_Num;
+
+	this->AddToConsoleSlot("The OutSide 2D grid number is : " + QString::number(OutSideGridCenterPointNum));
+	
+	QPointF *Grid_CenterPoint = new QPointF[OutSideGridCenterPointNum];
+
+	int k = -1;
+	for (int i = 0; i < girdNum; ++i)	{
+		Project_widget_grid_net->drawGridWithFillColor(gridNet->Grid_list[i], Grid_colorList[i]);
+		
+		if (gridNet->Grid_list[i]->hasPoint){
+			if (gridNet->Grid_list[i]->nearByGridAllWithpoint == false)	{
+				float Qpoint_x = gridNet->Grid_list[i]->CenterPoint.x();
+				float Qpoint_y = gridNet->Grid_list[i]->CenterPoint.y();
+				Grid_CenterPoint[++k] = QPointF (Qpoint_x, Qpoint_y);
+			}
+		}
+	}
+
+	QColor centerPointColor(255, 255, 255, 255);
+
+	//绘制网格内点的几何中心点
+	Project_widget_grid_net->drawPoints(Grid_CenterPoint, OutSideGridCenterPointNum, 5, centerPointColor);
+
+	int allPointNum = gridNet->Points_List.size();
+	QPointF *all_point = new QPointF[allPointNum];
+
+	for (int i = 0; i < allPointNum; ++i)	{
+		float Qpoint_x = gridNet->Points_List[i].x();
+		float Qpoint_y = gridNet->Points_List[i].y();
+		all_point[i] = QPointF(Qpoint_x, Qpoint_y);
+	}
+
+	//绘制所有离散点云
+	QColor points_color(0, 0, 0, 125);//离散点默认颜色为纯黑色
+	Project_widget_grid_net->drawPoints(all_point, allPointNum, 2, points_color);
 }

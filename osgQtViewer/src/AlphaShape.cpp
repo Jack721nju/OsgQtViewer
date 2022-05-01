@@ -2,30 +2,29 @@
 
 using namespace std;
 
-//获取给定点云数据的最大最小范围
-point_MAXMIN* getMinMaxXYZ(PointV3List all_list) {
+//获取给定点云数据的XY最大最小范围
+point_MAXMIN* getMinMaxXYZ(const PointV3List & all_list) {
 	point_MAXMIN * Max_area = new point_MAXMIN;
 	vector<float> x_list, y_list, z_list;
-	for (int i = 0; i < all_list.size(); i++)
-	{
+	for (int i = 0; i < all_list.size(); ++i) {
 		x_list.push_back(all_list[i].x());
 		y_list.push_back(all_list[i].y());
-		z_list.push_back(all_list[i].z());
+		//z_list.push_back(all_list[i].z());
 	}
 	vector<float>::iterator xmax = max_element(begin(x_list), end(x_list));
 	vector<float>::iterator ymax = max_element(begin(y_list), end(y_list));
-	vector<float>::iterator zmax = max_element(begin(z_list), end(z_list));
+	//vector<float>::iterator zmax = max_element(begin(z_list), end(z_list));
 
 	vector<float>::iterator xmin = min_element(begin(x_list), end(x_list));
 	vector<float>::iterator ymin = min_element(begin(y_list), end(y_list));
-	vector<float>::iterator zmin = min_element(begin(z_list), end(z_list));
+	//vector<float>::iterator zmin = min_element(begin(z_list), end(z_list));
 
 	Max_area->xmax = *xmax;
 	Max_area->ymax = *ymax;
-	Max_area->zmax = *zmax;
+	//Max_area->zmax = *zmax;
 	Max_area->xmin = *xmin;
 	Max_area->ymin = *ymin;
-	Max_area->zmin = *zmin;
+	//Max_area->zmin = *zmin;
 
 	return Max_area;
 }
@@ -45,7 +44,7 @@ SingleGrid2D::SingleGrid2D(float Grid_X, float Grid_Y){
 }
 
 
-SingleGrid2D::SingleGrid2D(GridInfo curGrid) {
+SingleGrid2D::SingleGrid2D(const GridInfo & curGrid) {
 	cur_PointNum = 0;
 	hasPoint = false;
 	heightDifference = 0;
@@ -60,7 +59,7 @@ SingleGrid2D::SingleGrid2D(GridInfo curGrid) {
 	curGridInfo = curGrid;
 }
 
-GridNet::GridNet(PointV3List Point_List) {
+GridNet::GridNet(const PointV3List &Point_List) {
 	Points_List.assign(Point_List.begin(), Point_List.end());
 	Grid_list.clear();
 	pointMMM = getMinMaxXYZ(Point_List);
@@ -169,7 +168,7 @@ void GridNet::detectGridWithConnection(){
 
 }
 
-//根据网格数量构建网格
+//根据网格数量构建格网
 void GridNet::buildNetByNum(int RowNum, int ColNum){
 	this->Row_Num = (unsigned int)(RowNum);
 	this->Col_Num = (unsigned int)(ColNum);
@@ -177,17 +176,16 @@ void GridNet::buildNetByNum(int RowNum, int ColNum){
 	float allPointsHeight = pointMMM->ymax - pointMMM->ymin;
 	float allPointsWidth = pointMMM->xmax - pointMMM->xmin;
 
-	this->Grid_X = allPointsWidth / Col_Num;
-	this->Grid_Y = allPointsHeight / Row_Num;
+	this->Grid_X = (float)(allPointsWidth / Col_Num);
+	this->Grid_Y = (float)(allPointsHeight / Row_Num);
 
-	int id = 0;
+	int id = -1;
 	MaxPointNum_InOneGrid = 0;
-	MinPointNum_InOneGrid = 9999999;
+	MinPointNum_InOneGrid = 1 << 31;
 
 	//向外部扩张一层级的网格，便于后续的邻域搜索
-	for (int i = 0; i < (Row_Num + 2); i++)	{
-		for (int j = 0; j < (Col_Num + 2); j++)
-		{
+	for (int i = 0; i < (Row_Num + 2); ++i)	{
+		for (int j = 0; j < (Col_Num + 2); ++j)	{
 			GridInfo cur_grid;
 			cur_grid.Min_X = pointMMM->xmin + Grid_X*(i - 1);
 			cur_grid.Max_X = pointMMM->xmin + Grid_X*(i);
@@ -201,36 +199,29 @@ void GridNet::buildNetByNum(int RowNum, int ColNum){
 
 			SingleGrid2D *curGrid2D = new SingleGrid2D(cur_grid);
 
-			for (int k = 0; k < Points_List.size(); k++)
-			{
-				osg::Vec3 cur_P = Points_List[k];
-				if (isPointInGrid(cur_P, curGrid2D))
-				{
-					curGrid2D->PointList.push_back(cur_P);
+			for (int k = 0; k < Points_List.size(); ++k){
+				const osg::Vec3 &cur_P = Points_List[k];
+				if (isPointInGrid(cur_P, curGrid2D)) {
+					curGrid2D->PointList.emplace_back(cur_P);
 				}
 			}
 
-			curGrid2D->curGridInfo.m_ID = id++;
+			curGrid2D->curGridInfo.m_ID = ++id;
 			Grid_list.push_back(curGrid2D);
 
 			curGrid2D->cur_PointNum = curGrid2D->PointList.size();
 
-			if (curGrid2D->cur_PointNum > 0)
-			{
+			if (curGrid2D->cur_PointNum > 0){
 				curGrid2D->hasPoint = true;
 
-				if (MaxPointNum_InOneGrid < curGrid2D->cur_PointNum)
-				{
+				if (MaxPointNum_InOneGrid < curGrid2D->cur_PointNum){
 					MaxPointNum_InOneGrid = curGrid2D->cur_PointNum;
 				}
 
-				if (MinPointNum_InOneGrid > curGrid2D->cur_PointNum)
-				{
+				if (MinPointNum_InOneGrid > curGrid2D->cur_PointNum){
 					MinPointNum_InOneGrid = curGrid2D->cur_PointNum;
 				}
-
 			}
-
 		}
 	}
 

@@ -94,6 +94,12 @@ private:
 
 	vector<osg::Vec2> point2D_list_AlphaShape;
 
+	PointV3List pointlist_bulidGrid2D;
+
+	QLineEdit *m_Grid_X_num;
+
+	QLineEdit *m_Grid_Y_num;
+
 private:
 	void AddToConsoleSlot(const QString& show_text);
 
@@ -150,6 +156,8 @@ public slots:
 	void slot_SetBackGroundColor();
 
 	void slot_DetectPointShape();
+
+	void slot_Build2DGridForPoints();
 
 public:
 	void ReadLasData(const std::string & fileName);

@@ -118,9 +118,9 @@ void PaintArea::drawLines(vector<Edge> line_list) {
 	painter.setPen(pen);
 
 	for (const auto & curLine : line_list) {
-		QPoint pointA(curLine.point_A.x(), curLine.point_A.y());
-		QPoint pointB(curLine.point_B.x(), curLine.point_B.y());
-		painter.drawLine(pointA, pointB);
+		const auto & pointA = curLine.point_A;
+		const auto & pointB = curLine.point_B;
+		painter.drawLine(QPoint(pointA.x(), pointA.y()), QPoint(pointB.x(), pointB.y()));
 	}
 }
 
@@ -138,8 +138,7 @@ void PaintArea::drawCircles(const vector<osg::Vec2> &center_list, int radius) {
 	painter.setPen(pen);
 
 	for (const auto &curCenter : center_list) {
-		QPoint center(curCenter.x(), curCenter.y());
-		painter.drawEllipse(center, radius, radius);
+		painter.drawEllipse(QPoint(curCenter.x(), curCenter.y()), radius, radius);
 	}
 }
 

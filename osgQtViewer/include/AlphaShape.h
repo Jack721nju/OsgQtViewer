@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <osg/Array>
 #include <bitset>
+#include <climits>
 
 #include "struct.h"
 
@@ -62,7 +63,7 @@ public:
 	SingleGrid2D(float Grid_X, float Grid_Y);
 
 	//根据网格信息生成
-	SingleGrid2D(GridInfo curGrid);
+	SingleGrid2D(const GridInfo &curGrid);
 
 public:
 	//网格内含有的点列表
@@ -109,7 +110,7 @@ public:
 class GridNet {
 public:
 	//根据点云生成当前的二维网格
-	GridNet(PointV3List Point_List);
+	GridNet(const PointV3List & Point_List);
 
 public:
 	//所有点的列表
@@ -171,8 +172,7 @@ public:
 };
 
 //Alpha Shap算法
-class AlphaShape
-{
+class AlphaShape {
 public:
 	AlphaShape(std::vector<osg::Vec2> point_list);
 	AlphaShape();

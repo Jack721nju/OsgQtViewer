@@ -19,7 +19,7 @@ void PaintArea::paintEvent(QPaintEvent *) {
 	painter.drawImage(20, 20, *image);
 }
 
-void PaintArea::drawPoints(QPointF points[], int point_num, int point_size, QColor point_color) {
+void PaintArea::drawPoints(QPointF points[], int point_num, int point_size, const QColor& point_color) {
 	if (!image)
 		return;
 
@@ -48,7 +48,7 @@ void PaintArea::drawText(QPointF pos, QString text) {
 	painter.drawText(pos, text);
 }
 
-void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, QColor curGridColor) {
+void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, const QColor& curGridColor) {
 	if (!image)
 		return;
 
@@ -104,7 +104,7 @@ void PaintArea::drawGrid(SingleGrid2D* eachGrid) {
 	painter.drawLine(point_LeftTop, point_LeftBottom);
 }
 
-void PaintArea::drawLines(vector<Edge> line_list) {
+void PaintArea::drawLines(const vector<Edge> &line_list) {
 	if (!image)
 		return;
 

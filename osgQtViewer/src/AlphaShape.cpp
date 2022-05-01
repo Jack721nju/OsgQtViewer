@@ -91,7 +91,7 @@ SingleGrid2D* GridNet::getGridByRowAndCol(int RowID, int ColID) {
 
 }
 
-bool GridNet::isPointInGrid(osg::Vec3 curPoint, SingleGrid2D *test_Grid){
+bool GridNet::isPointInGrid(const osg::Vec3 & curPoint, SingleGrid2D *test_Grid){
 	float cur_P_X = curPoint.x();
 	float cur_P_Y = curPoint.y();
 
@@ -100,69 +100,56 @@ bool GridNet::isPointInGrid(osg::Vec3 curPoint, SingleGrid2D *test_Grid){
 	float grid_min_x = test_Grid->curGridInfo.Min_X;
 	float grid_min_y = test_Grid->curGridInfo.Min_Y;
 
-	if ((cur_P_X >= grid_min_x)
+	if ((cur_P_X > grid_min_x)
 		&& (cur_P_X < grid_max_x)
-		&& (cur_P_Y >= grid_min_y)
-		&& (cur_P_Y < grid_max_y))
-	{
+		&& (cur_P_Y > grid_min_y)
+		&& (cur_P_Y < grid_max_y))	{
 		return true;
 	}
-	else
-	{
+	else {
 		return false;
 	}
 }
 
 //检测每个二维网格的八邻域连通的网格，并逐一判断网格内是否有点
 void GridNet::detectGridWithConnection(){
-	int id = 0;
+	for (const auto & curGrid2D : this->Grid_list)	{
+		if (curGrid2D->hasPoint == false) {
+			continue;
+		}
 
-	for (int i = 0; i < (Row_Num + 2); i++)
-	{
-		for (int j = 0; j < (Col_Num + 2); j++)
-		{
-			SingleGrid2D *curGrid2D = this->Grid_list[id++];
+		int curGridID = curGrid2D->curGridInfo.m_ID;
+		int curLeftGridID = curGridID - 1;
+		int curRightGridID = curGridID + 1;
 
-			if (i == 0 || (j == 0) || (i == Row_Num + 1) || (j == Col_Num + 1))
-			{
-				//continue;
+		int buttomGridID = curGridID - (this->Col_Num + 2);
+		int buttomLeftGridID = buttomGridID - 1;
+		int buttomRightGridID = buttomGridID + 1;
+
+		int topGridID = curGridID + (this->Col_Num + 2);
+		int topLeftGridID = topGridID - 1;
+		int topRightGridID = topGridID + 1;
+
+		vector<int> idList{ buttomLeftGridID , buttomGridID, buttomRightGridID, curLeftGridID, curRightGridID, topLeftGridID, topGridID, topRightGridID };
+		int countNum = 0;
+		SingleGrid2D *nearGrid2D = nullptr;
+		for (const auto curID : idList) {
+			if (curID < 0 || curID > this->Grid_list.size() - 1) {
+				continue;
 			}
 
-			int countNum = 0;
-
-			for (int xx = curGrid2D->curGridInfo.m_Row - 1; xx < curGrid2D->curGridInfo.m_Row + 2; xx++)
-			{
-				for (int yy = curGrid2D->curGridInfo.m_Col - 1; yy < curGrid2D->curGridInfo.m_Col + 2; yy++)
-				{
-					SingleGrid2D *nearGrid2D;
-
-					for (int k = 0; k < this->Grid_list.size(); k++)
-					{
-						if (k == (id - 1))
-						{
-							continue;
-						}
-
-						nearGrid2D = this->Grid_list[k];
-
-						if ((nearGrid2D->curGridInfo.m_Row == xx) &&
-							(nearGrid2D->curGridInfo.m_Col == yy))
-						{
-							if (nearGrid2D->hasPoint == true)
-							{
-								countNum++;			
-								curGrid2D->connectGridID_List.push_back(nearGrid2D->curGridInfo.m_ID);
-							}
-						}
-					}
-				}
+			nearGrid2D = this->Grid_list[curID];
+			if (nullptr == nearGrid2D) {
+				continue;
 			}
-
-			if (countNum >= 8)
-			{
-				curGrid2D->nearByGridAllWithpoint = true;
+			if (nearGrid2D->hasPoint == true) {
+				++countNum;
+				curGrid2D->connectGridID_List.push_back(nearGrid2D->curGridInfo.m_ID);
 			}
+		}
 
+		if (countNum == 8) {
+			curGrid2D->nearByGridAllWithpoint = true;
 		}
 	}
 
@@ -179,57 +166,50 @@ void GridNet::buildNetByNum(int RowNum, int ColNum){
 	this->Grid_X = (float)(allPointsWidth / Col_Num);
 	this->Grid_Y = (float)(allPointsHeight / Row_Num);
 
-	int id = -1;
-	MaxPointNum_InOneGrid = 0;
-	MinPointNum_InOneGrid = 1 << 31;
+	//MaxPointNum_InOneGrid = 0;
+	//MinPointNum_InOneGrid = 1 << 31;
 
-	//向外部扩张一层级的网格，便于后续的邻域搜索
+	GridInfo cur_grid;
+	cur_grid.Size_X = Grid_X;
+	cur_grid.Size_Y = Grid_Y;
+
+	SingleGrid2D *curGrid2D = nullptr;
+	int gridNum = -1;
+	//向外部扩张一层空的网格，便于后续的邻域搜索
 	for (int i = 0; i < (Row_Num + 2); ++i)	{
 		for (int j = 0; j < (Col_Num + 2); ++j)	{
-			GridInfo cur_grid;
 			cur_grid.Min_X = pointMMM->xmin + Grid_X*(i - 1);
-			cur_grid.Max_X = pointMMM->xmin + Grid_X*(i);
+			cur_grid.Max_X = cur_grid.Min_X + Grid_X;
 			cur_grid.Min_Y = pointMMM->ymin + Grid_Y*(j - 1);
-			cur_grid.Max_Y = pointMMM->ymin + Grid_Y*(j);
-
-			cur_grid.Size_X = Grid_X;
-			cur_grid.Size_Y = Grid_Y;
-			cur_grid.m_Col = j;//列号
+			cur_grid.Max_Y = cur_grid.Min_Y + Grid_Y;
+			
 			cur_grid.m_Row = i;//行号
+			cur_grid.m_Col = j;//列号
 
-			SingleGrid2D *curGrid2D = new SingleGrid2D(cur_grid);
+			curGrid2D = new SingleGrid2D(cur_grid);
 
-			for (int k = 0; k < Points_List.size(); ++k){
-				const osg::Vec3 &cur_P = Points_List[k];
-				if (isPointInGrid(cur_P, curGrid2D)) {
-					curGrid2D->PointList.emplace_back(cur_P);
+			for (const auto & curP : this->Points_List){
+				if (isPointInGrid(curP, curGrid2D)) {
+					curGrid2D->PointList.emplace_back(curP);
 				}
 			}
 
-			curGrid2D->curGridInfo.m_ID = ++id;
-			Grid_list.push_back(curGrid2D);
-
+			curGrid2D->curGridInfo.m_ID = ++gridNum;
 			curGrid2D->cur_PointNum = curGrid2D->PointList.size();
 
 			if (curGrid2D->cur_PointNum > 0){
 				curGrid2D->hasPoint = true;
-
-				if (MaxPointNum_InOneGrid < curGrid2D->cur_PointNum){
-					MaxPointNum_InOneGrid = curGrid2D->cur_PointNum;
-				}
-
-				if (MinPointNum_InOneGrid > curGrid2D->cur_PointNum){
-					MinPointNum_InOneGrid = curGrid2D->cur_PointNum;
-				}
 			}
+
+			Grid_list.emplace_back(curGrid2D);
 		}
 	}
 
-	this->Grid_Num = id;
+	this->Grid_Num = gridNum;
 }
 
 //根据网格大小构建二维格网
-void GridNet::buildNetBySize(float SizeX, float SizeY){
+void GridNet::buildNetBySize(float SizeX, float SizeY) {
 	Grid_X = SizeX;
 	Grid_Y = SizeY;
 

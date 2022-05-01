@@ -9,14 +9,14 @@ public:
 
 	void paintEvent(QPaintEvent *);
 	void drawAxis();
-	void drawPoints(QPointF points[], int point_num, int point_size = 1.0, QColor point_color = Qt::blue);
+	void drawPoints(QPointF points[], int point_num, int point_size = 1.0, const QColor& point_color = Qt::blue);
 	void drawCircles(const std::vector<osg::Vec2> &center_list, int radius);
 	void drawCircles(const PointV3List &circle_list, const std::vector<int> & Size_List);
-	void drawLines(std::vector<Edge> line_list);
+	void drawLines(const vector<Edge> & line_list);
 	void drawText(QPointF pos, QString text);
 
 	void drawGrid(SingleGrid2D* eachGrid);
-	void drawGridWithFillColor(SingleGrid2D* eachGrid, QColor curGridColor);
+	void drawGridWithFillColor(SingleGrid2D* eachGrid, const QColor& curGridColor);
 
 	void drawDegreeLines(QString x_axis_name, QString y_axis_name, float base_x, float base_y, float delt_x, float delt_y);
 	

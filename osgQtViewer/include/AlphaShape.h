@@ -54,6 +54,8 @@ struct GridInfo {
 	int m_ID;
 	int m_Col;
 	int m_Row;
+
+	GridInfo() = default;
 };
 
 //单个二维网格类
@@ -153,7 +155,7 @@ public:
 	void buildNetByNum(int RowNum, int ColNum);
 
 	//判断当前某点是否处于某一网格中
-	bool isPointInGrid(osg::Vec3 curPoint, SingleGrid2D *test_Grid);
+	bool isPointInGrid(const osg::Vec3 &curPoint, SingleGrid2D *test_Grid);
 
 	//获取网格的点的平均中心点
 	void getCenterPoint();

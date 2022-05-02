@@ -176,8 +176,8 @@ public:
 //Alpha Shap算法
 class AlphaShape {
 public:
-	AlphaShape(std::vector<osg::Vec2> point_list);
-	AlphaShape();
+	AlphaShape(const std::vector<osg::Vec2> &point_list);
+	~AlphaShape();
 
 public:
 	//根据设置的半径，检测点云边界线，默认的常规算法，将判断所有点，效率较慢
@@ -187,7 +187,7 @@ public:
 	void Detect_Shape_line_by_Grid(std::vector<osg::Vec2> near_point_list, std::vector<osg::Vec2> detect_point_list, float radius);
 
 	//根据生成的网格和半径，以及邻域点云检测边界线，传递值为网格列表
-	void Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, std::vector<SingleGrid2D*> nearGrid_Lis, float radius);
+	void Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, std::vector<SingleGrid2D*> nearGrid_List, float radius);
 
 	//根据两点计算集合距离
 	float Distance_point(osg::Vec2 pointA, osg::Vec2 pointB);
@@ -203,8 +203,7 @@ public:
 
 	//根据包裹圆，仅仅通过落点数量，检测边界点
 	void Detect_Shape_By_PackCirlce(GridNet* curGridNet, float radius, int pointMaxNum);
-
-
+	
 public:
 	//用于检测的点列表
 	std::vector<osg::Vec2> m_points;

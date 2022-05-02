@@ -1399,13 +1399,13 @@ void OsgQtTest::slot_DetectPointShape() {
 
 	PaintArea *Project_widget_Circle_And_Edge = new PaintArea();
 	Project_widget_Circle_And_Edge->setAttribute(Qt::WA_DeleteOnClose);
-	Project_widget_Circle_And_Edge->setFixedSize(660, 660);
+	Project_widget_Circle_And_Edge->setFixedSize(600, 600);
 	Project_widget_Circle_And_Edge->setVisible(true);
 	Project_widget_Circle_And_Edge->drawAxis();
 
 	PaintArea *Project_widget_Point = new PaintArea();
 	Project_widget_Point->setAttribute(Qt::WA_DeleteOnClose);
-	Project_widget_Point->setFixedSize(660, 660);
+	Project_widget_Point->setFixedSize(600, 600);
 	Project_widget_Point->setVisible(true);
 	Project_widget_Point->drawAxis();
 
@@ -1448,9 +1448,26 @@ void OsgQtTest::slot_DetectPointShape() {
 		shape_point[i] = QPointF (curP.x(), curP.y());
 	}
 
-	Project_widget->drawLines(alpha->m_edges);
-	Project_widget->drawPoints(shape_point, shape_num, 3, Qt::black);
+	PaintArea *Project_widget_Point_Edge = new PaintArea();
+	Project_widget_Point_Edge->setAttribute(Qt::WA_DeleteOnClose);
+	Project_widget_Point_Edge->setFixedSize(600, 600);
+	Project_widget_Point_Edge->setVisible(true);
+	Project_widget_Point_Edge->drawAxis();
+	Project_widget_Point_Edge->drawLines(alpha->m_edges);
+	Project_widget_Point_Edge->drawPoints(shape_point, shape_num, 3, Qt::black);
+
 	Project_widget_Point->drawPoints(shape_point, shape_num, 2, Qt::red);
+	
+	QDialog * DetectResult_dialog = new QDialog();
+	DetectResult_dialog->setAttribute(Qt::WA_DeleteOnClose);
+	//DetectResult_dialog->setFixedSize(1660, 660);
+	DetectResult_dialog->setVisible(true);
+
+	QHBoxLayout * hboxLayout = new QHBoxLayout;
+	hboxLayout->addWidget(Project_widget_Point, 0, Qt::AlignLeft);
+	hboxLayout->addWidget(Project_widget_Point_Edge, 0, Qt::AlignCenter);
+	hboxLayout->addWidget(Project_widget_Circle_And_Edge, 0, Qt::AlignRight);
+	DetectResult_dialog->setLayout(hboxLayout);
 
 	ofstream outf;
 	double x, y, z = 0.0;
@@ -1482,7 +1499,6 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 	PaintArea *Project_widget_grid_net = new PaintArea();
 	Project_widget_grid_net->setFixedSize(660, 660);
 	Project_widget_grid_net->setVisible(true);
-	//Project_widget_grid_net->drawAxis();
 	
 	_timerClock.start();
 	

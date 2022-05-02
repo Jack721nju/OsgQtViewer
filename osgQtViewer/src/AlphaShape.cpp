@@ -73,22 +73,15 @@ GridNet::GridNet(const PointV3List &Point_List) {
 }
 
 SingleGrid2D* GridNet::getGridByRowAndCol(int RowID, int ColID) {
-	for (int i = 0; i < this->Grid_Num; i++)
-	{
+	for (int i = 0; i < this->Grid_Num; ++i){
 		SingleGrid2D* curGrid = this->Grid_list[i];
-
-		if (curGrid->curGridInfo.m_Row == RowID)
-		{
-			if (curGrid->curGridInfo.m_Col == ColID)
-			{
+		if (curGrid->curGridInfo.m_Row == RowID){
+			if (curGrid->curGridInfo.m_Col == ColID){
 				return curGrid;
-				break;
 			}
 		}
 	}
-
-	return NULL;
-
+	return nullptr;
 }
 
 bool GridNet::isPointInGrid(const osg::Vec3 & curPoint, SingleGrid2D *test_Grid){
@@ -152,7 +145,6 @@ void GridNet::detectGridWithConnection(){
 			curGrid2D->nearByGridAllWithpoint = true;
 		}
 	}
-
 }
 
 //根据网格数量构建格网
@@ -271,10 +263,9 @@ void GridNet::getCenterPoint(){
 //获取网格内离散点的中心点与邻域网格中心点的连接向量
 void GridNet::getVectorOfOutSideGrid(){
 	this->MaxVector_Grid = 0.0;
-	this->MinVector_Grid = 999999999.0;
+	this->MinVector_Grid = 1 << 31;
 
-	for (int i = 0; i < this->Grid_Num; i++)
-	{
+	for (int i = 0; i < this->Grid_Num; ++i){
 		SingleGrid2D* curGrid = this->Grid_list[i];
 
 		int curRowID = curGrid->curGridInfo.m_Row;
@@ -323,7 +314,7 @@ void GridNet::getVectorOfOutSideGrid(){
 
 				SingleGrid2D* nearGrid = this->getGridByRowAndCol(k, j);
 
-				if (nearGrid == NULL)
+				if (nearGrid == nullptr)
 				{
 					continue;
 				}
@@ -510,20 +501,12 @@ void GridNet::DetectSmoothForOutSideGrid(){
 }
 
 
-AlphaShape::AlphaShape(vector<osg::Vec2> point_list){
+AlphaShape::AlphaShape(const vector<osg::Vec2> & point_list){
 	m_radius = 0.0;
-
-	m_points.clear();
-	m_edges.clear();
-	m_circles.clear();
-
-	m_shape_id.clear();
-	m_shape_points.clear();
-
 	m_points.assign(point_list.begin(), point_list.end());
 }
 
-AlphaShape::AlphaShape(){
+AlphaShape::~AlphaShape(){
 	m_radius = 0.0;
 
 	m_points.clear();
@@ -532,8 +515,6 @@ AlphaShape::AlphaShape(){
 
 	m_shape_id.clear();
 	m_shape_points.clear();
-
-	m_points.clear();
 }
 
 float AlphaShape::Distance_point(osg::Vec2 pointA, osg::Vec2 pointB) {

@@ -76,7 +76,7 @@ void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, const QColor& curG
 	float originY = eachGrid->curGridInfo.Min_Y;
 	float width = eachGrid->curGridInfo.Max_X - eachGrid->curGridInfo.Min_X;
 	float height = eachGrid->curGridInfo.Max_Y - eachGrid->curGridInfo.Min_Y;
-	painter.drawRect(originX, originY, width, height);
+	painter.drawRect(originX - 10, originY + 32, width, height);
 }
 
 void PaintArea::drawGrid(SingleGrid2D* eachGrid) {
@@ -153,7 +153,7 @@ void PaintArea::drawCircles(const PointV3List &circle_list, const vector<int> &S
 	QPainter painter(image);
 	painter.setRenderHint(QPainter::Antialiasing, true);//设置反锯齿模式
 
-	for (int i = 0; i < circle_list.size(); i++) {
+	for (int i = 0; i < circle_list.size(); ++i) {
 		QPoint center(circle_list[i].x(), circle_list[i].y());
 		int radius = (int)(circle_list[i].z());
 

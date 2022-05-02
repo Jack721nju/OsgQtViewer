@@ -48,7 +48,7 @@ void PaintArea::drawText(QPointF pos, QString text) {
 	painter.drawText(pos, text);
 }
 
-void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, const QColor& curGridColor) {
+void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, const QColor& curGridColor, int delt_x, int delt_y) {
 	if (!image)
 		return;
 
@@ -76,7 +76,7 @@ void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, const QColor& curG
 	float originY = eachGrid->curGridInfo.Min_Y;
 	float width = eachGrid->curGridInfo.Max_X - eachGrid->curGridInfo.Min_X;
 	float height = eachGrid->curGridInfo.Max_Y - eachGrid->curGridInfo.Min_Y;
-	painter.drawRect(originX - 10, originY + 32, width, height);
+	painter.drawRect(originX + delt_x, originY + delt_y, width, height);
 }
 
 void PaintArea::drawGrid(SingleGrid2D* eachGrid) {

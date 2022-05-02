@@ -1210,6 +1210,7 @@ void OsgQtTest::slot_SetBackGroundColor() {
 void OsgQtTest::slot_Init_Project_Dialog() {	
 	if (ProjectToXY_dialog)	{		
 		ProjectToXY_dialog->close();
+		delete ProjectToXY_dialog;
 		ProjectToXY_dialog = nullptr;
 		return;
 	}
@@ -1493,12 +1494,14 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 		return;
 	}
 	if (nullptr == m_Grid_Y_num || nullptr == m_Grid_X_num) {
-		this->AddToConsoleSlot("Input grid col and row num! \n");
+		this->AddToConsoleSlot("Input correct grid col and row num! \n");
 	}
 
 	PaintArea *Project_widget_grid_net = new PaintArea();
 	Project_widget_grid_net->setFixedSize(660, 660);
+	Project_widget_grid_net->setAttribute(Qt::WA_DeleteOnClose);
 	Project_widget_grid_net->setVisible(true);
+	Project_widget_grid_net->setWindowTitle(m_Grid_Y_num->text() + tr(" X ") + m_Grid_X_num->text());
 	
 	_timerClock.start();
 	
@@ -1511,29 +1514,34 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 
 	gridNet->buildNetByNum(m_Grid_Y_num->text().toInt(), m_Grid_X_num->text().toInt());
 	
-	//计算单纯生成二维格网的耗时
-	float runTime = _timerClock.getTime<Ms>() / 1000.0;
-	QString cost_time = QString::number(runTime);
-	this->AddToConsoleSlot(QString("The cost time of building 2D grid net is :  ") + cost_time + QString("s"));
-
-	//检测网格的连通性
+	//检测网格的连通性,获取网格内点的几何中心
 	gridNet->detectGridWithConnection();
 
 	//获取网格内点的几何中心
-	gridNet->getCenterPoint();
+	//gridNet->getCenterPoint();
 
 	//基于网格点的中心点计算网格与邻域网格的合向量
 	gridNet->getVectorOfOutSideGrid();
 
 	//基于合向量，计算网格是否是平滑网格,并统计网格的平滑度
 	gridNet->DetectSmoothForOutSideGrid();
-	
-	std::vector<QColor> Grid_colorList;//创建颜色数组,逆时针排序
 
-	int girdNum = (int)gridNet->Grid_Num;
+	//计算单纯生成二维格网的耗时
+	float runTime = _timerClock.getTime<Ms>() / 1000.0;
+	QString cost_time = QString::number(runTime);
+	this->AddToConsoleSlot(QString("The cost time of building 2D grid net is :  ") + cost_time + QString("s"));
+	
+	int OutSideGridCenterPointNum = gridNet->GridOutside_Num;
+	QPointF *Grid_CenterPoint = new QPointF[OutSideGridCenterPointNum];
+
+	this->AddToConsoleSlot("The Full 2D grid number is : " + QString::number(gridNet->GridWithPoint_Num));
+	this->AddToConsoleSlot("The OutSide 2D grid number is : " + QString::number(OutSideGridCenterPointNum));
+
+	int delt_x = -10, delt_y = 32;
+	int k = -1;
+	QColor new_color(0, 0, 0, 0);
 
 	for (const auto curGrid : gridNet->Grid_list){
-		QColor new_color(0, 0, 0, 0);
 		if (curGrid->hasPoint) {
 			if (curGrid->nearByGridAllWithpoint == true){
 				//充实网格，灰色
@@ -1546,7 +1554,6 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 					if (curGrid->SmoothDegree == 1)	{
 						new_color.setRgb(250, 100, 0, 155);
 					}
-
 					//粗糙度为2的，红色
 					if (curGrid->SmoothDegree == 2)	{
 						new_color.setRgb(250, 0, 0, 155);
@@ -1555,43 +1562,28 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 					//顺滑网格，绿色
 					new_color.setRgb(0, 125, 0, 155);
 				}
+				Grid_CenterPoint[++k] = QPointF(curGrid->CenterPoint.x() + delt_x, curGrid->CenterPoint.y() + delt_y);
 			}
 		} else {
-			//空网格为透明
+			//空网格为白色
 			new_color.setRgb(0, 0, 0, 0);
 		}
-		Grid_colorList.emplace_back(new_color);
+		Project_widget_grid_net->drawGridWithFillColor(curGrid, new_color, delt_x, delt_y);
 	}
-	
-	int OutSideGridCenterPointNum = gridNet->GridOutside_Num;
-	QPointF *Grid_CenterPoint = new QPointF[OutSideGridCenterPointNum];
-	this->AddToConsoleSlot("The Full 2D grid number is : " + QString::number(gridNet->GridWithPoint_Num));
-	this->AddToConsoleSlot("The OutSide 2D grid number is : " + QString::number(OutSideGridCenterPointNum));
-	
-	int k = -1;
-	int ii = -1;
-	for (const auto &curGrid : gridNet->Grid_list) {
-		Project_widget_grid_net->drawGridWithFillColor(curGrid, Grid_colorList[++ii]);		
-		if (curGrid->hasPoint){
-			if (curGrid->nearByGridAllWithpoint == false)	{
-				Grid_CenterPoint[++k] = QPointF(curGrid->CenterPoint.x(), curGrid->CenterPoint.y());
-			}
-		}
-	}
-
-	//绘制网格内点的几何中心点
-	Project_widget_grid_net->drawPoints(Grid_CenterPoint, OutSideGridCenterPointNum, 5, QColor(255, 255, 255, 255));
 
 	int allPointNum = gridNet->Points_List.size();
 	QPointF *all_point = new QPointF[allPointNum];
-
 	int pointID = -1;
+
 	for (const auto & curP : gridNet->Points_List)	{
-		all_point[++pointID] = QPointF(curP.x(), curP.y());
+		all_point[++pointID] = QPointF(curP.x() + delt_x, curP.y() + delt_y);
 	}
 
 	//绘制所有离散点云,离散点默认颜色为纯黑色
 	Project_widget_grid_net->drawPoints(all_point, allPointNum, 2, QColor(0, 0, 0, 125));
+
+	//绘制边界网格内点的几何中心点
+	Project_widget_grid_net->drawPoints(Grid_CenterPoint, OutSideGridCenterPointNum, 5, QColor(255, 255, 255, 255));
 
 	//计算二维格网的总耗时
 	float runTimeAll = _timerClock.getTime<Ms>() / 1000.0;

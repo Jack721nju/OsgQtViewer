@@ -158,7 +158,7 @@ public:
 	bool isPointInGrid(const osg::Vec3 &curPoint, SingleGrid2D *test_Grid);
 
 	//获取网格的点的平均中心点
-	void getCenterPoint();
+	[[deprecated]] void getCenterPoint();
 
 	//获取外部网格的合向量
 	void getVectorOfOutSideGrid();

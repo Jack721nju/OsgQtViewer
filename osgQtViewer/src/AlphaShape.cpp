@@ -70,6 +70,9 @@ GridNet::GridNet(const PointV3List &Point_List) {
 	Grid_Num = 0;
 	Col_Num = 0;
 	Row_Num = 0;
+
+	GridOutside_Num = 0;
+	GridWithPoint_Num = 0;
 }
 
 SingleGrid2D* GridNet::getGridByRowAndCol(int RowID, int ColID) {
@@ -144,6 +147,9 @@ void GridNet::detectGridWithConnection(){
 		if (countNum == 8) {
 			curGrid2D->nearByGridAllWithpoint = true;
 		}
+		else {
+			++this->GridOutside_Num;
+		}
 	}
 }
 
@@ -157,9 +163,6 @@ void GridNet::buildNetByNum(int RowNum, int ColNum){
 
 	this->Grid_X = (float)(allPointsWidth / Col_Num);
 	this->Grid_Y = (float)(allPointsHeight / Row_Num);
-
-	//MaxPointNum_InOneGrid = 0;
-	//MinPointNum_InOneGrid = 1 << 31;
 
 	GridInfo cur_grid;
 	cur_grid.Size_X = Grid_X;
@@ -180,9 +183,12 @@ void GridNet::buildNetByNum(int RowNum, int ColNum){
 
 			curGrid2D = new SingleGrid2D(cur_grid);
 
+			float CenterX = 0.0, CenterY = 0.0;
 			for (const auto & curP : this->Points_List){
 				if (isPointInGrid(curP, curGrid2D)) {
 					curGrid2D->PointList.emplace_back(curP);
+					CenterX += curP.x();
+					CenterY += curP.y();
 				}
 			}
 
@@ -190,7 +196,9 @@ void GridNet::buildNetByNum(int RowNum, int ColNum){
 			curGrid2D->cur_PointNum = curGrid2D->PointList.size();
 
 			if (curGrid2D->cur_PointNum > 0){
+				++this->GridWithPoint_Num;
 				curGrid2D->hasPoint = true;
+				curGrid2D->CenterPoint.set(CenterX / curGrid2D->cur_PointNum, CenterY / curGrid2D->cur_PointNum);
 			}
 
 			Grid_list.emplace_back(curGrid2D);
@@ -218,43 +226,16 @@ void GridNet::buildNetBySize(float SizeX, float SizeY) {
 
 //获取网格内离散点的中心点
 void GridNet::getCenterPoint(){
-	int haspointGridNum = 0;
-	int GridOutsideNum = 0;
+	int haspointGridNum = 0, GridOutsideNum = 0;
+	for (const auto & curGrid2D : this->Grid_list) {
+		if (curGrid2D->hasPoint){
+			++haspointGridNum;
 
-	for (int i = 0; i < this->Grid_list.size(); i++)
-	{
-		SingleGrid2D *curGrid2D = this->Grid_list[i];
-
-		osg::Vec2 centerP;
-		float CenterX = 0.0;
-		float CenterY = 0.0;
-
-		if (curGrid2D->hasPoint)
-		{
-			haspointGridNum++;
-
-			if (curGrid2D->nearByGridAllWithpoint == false)
-			{
-				GridOutsideNum++;
-			}
-
-			int pointNum = curGrid2D->PointList.size();
-
-			for (int j = 0; j <pointNum; j++)
-			{
-				CenterX += curGrid2D->PointList[j].x();
-				CenterY += curGrid2D->PointList[j].y();
-			}
-
-			CenterX = CenterX / pointNum;
-			CenterY = CenterY / pointNum;
-
-			centerP.set(CenterX, CenterY);
-
-			curGrid2D->CenterPoint = centerP;
+			if (curGrid2D->nearByGridAllWithpoint == false){
+				++GridOutsideNum;
+			}		
 		}
-	}
-
+	}	
 	this->GridWithPoint_Num = haspointGridNum;
 	this->GridOutside_Num = GridOutsideNum;
 }
@@ -265,89 +246,66 @@ void GridNet::getVectorOfOutSideGrid(){
 	this->MaxVector_Grid = 0.0;
 	this->MinVector_Grid = 1 << 31;
 
-	for (int i = 0; i < this->Grid_Num; ++i){
-		SingleGrid2D* curGrid = this->Grid_list[i];
-
-		int curRowID = curGrid->curGridInfo.m_Row;
-		int curColID = curGrid->curGridInfo.m_Col;
-
-		osg::Vec2 curGridCenterPoint = curGrid->CenterPoint;
-
-		curGrid->curVectorGrid.set(0.0, 0.0);
-
+	for (const auto & curGrid : this->Grid_list){
 		//当前网格内无点
-		if (curGrid->hasPoint == false)
-		{
+		if (curGrid->hasPoint == false) {
 			continue;
 		}
 
 		//当前网格的八邻域网格均含有点
-		if (curGrid->nearByGridAllWithpoint == true)
-		{
+		if (curGrid->nearByGridAllWithpoint == true) {
 			continue;
 		}
 
+		int curRowID = curGrid->curGridInfo.m_Row;
+		int curColID = curGrid->curGridInfo.m_Col;
+
+		const osg::Vec2 & curGridCenterPoint = curGrid->CenterPoint;
+
+		curGrid->curVectorGrid.set(0.0, 0.0);
+		SingleGrid2D* nearGrid = nullptr;
+
 		//统计当前网格的上下左右的邻域网格，而不是八网格
-		for (int k = curRowID - 1; k <= curRowID + 1; k++)
-		{
-			for (int j = curColID - 1; j <= curColID + 1; j++)
-			{
-				if ((k == curRowID) && (j == curColID))
-				{
+		for (int k = curRowID - 1; k <= curRowID + 1; ++k){
+			for (int j = curColID - 1; j <= curColID + 1; ++j){
+				if ((k == curRowID) && (j == curColID))	{
 					continue;
 				}
 
-				if (k < 0 || j < 0)
-				{
+				if (k < 0 || j < 0)	{
 					continue;
 				}
 
-				if (k >= (this->Row_Num + 2) || j >= (this->Col_Num + 2))
-				{
+				if (k >= (this->Row_Num + 2) || j >= (this->Col_Num + 2)){
 					continue;
 				}
 
-				if ((k != curRowID) && (j != curColID))
-				{
-					//continue;
-				}
+				nearGrid = this->getGridByRowAndCol(k, j);
 
-				SingleGrid2D* nearGrid = this->getGridByRowAndCol(k, j);
-
-				if (nearGrid == nullptr)
-				{
+				if (nullptr == nearGrid){
 					continue;
 				}
 
-				if (nearGrid->hasPoint == true)
-				{
+				if (nearGrid->hasPoint == true)	{
 					//邻域网格也属于边界网格
-					if (nearGrid->nearByGridAllWithpoint == false)
-					{
-						osg::Vec2 nearGridCenterPoint = nearGrid->CenterPoint;
+					if (nearGrid->nearByGridAllWithpoint == false){
+						const osg::Vec2 &nearGridCenterPoint = nearGrid->CenterPoint;
 						curGrid->curVectorGrid += (nearGridCenterPoint - curGridCenterPoint);
-
-						curGrid->VectorList.push_back(nearGridCenterPoint - curGridCenterPoint);
+						curGrid->VectorList.emplace_back(nearGridCenterPoint - curGridCenterPoint);
 					}
-
 				}
 			}
-
 		}
-
-
+		
 		float curVectorDis = curGrid->curVectorGrid.length();
 
-		if (curVectorDis > this->MaxVector_Grid)
-		{
+		if (curVectorDis > this->MaxVector_Grid){
 			this->MaxVector_Grid = curVectorDis;
 		}
 
-		if (curVectorDis < this->MinVector_Grid)
-		{
+		if (curVectorDis < this->MinVector_Grid){
 			this->MinVector_Grid = curVectorDis;
 		}
-
 	}
 }
 
@@ -361,58 +319,51 @@ static float AngleBetweenVector(osg::Vec2 vector1, osg::Vec2 vector2){
 
 //检测外部边界网格的平滑度，筛选出不平滑的网格，用于单独处理
 void GridNet::DetectSmoothForOutSideGrid(){
-	for (int i = 0; i < this->Grid_Num; i++)
-	{
-		SingleGrid2D* curGrid = this->Grid_list[i];
-
+	for (const auto & curGrid : this->Grid_list) {
 		//当前网格内无点
-		if (curGrid->hasPoint == false)
-		{
+		if (curGrid->hasPoint == false){
 			continue;
 		}
 
 		//当前网格的八邻域网格均含有点
-		if (curGrid->nearByGridAllWithpoint == true)
-		{
+		if (curGrid->nearByGridAllWithpoint == true){
 			continue;
 		}
 
 		//根据邻域网格的数量进行判断
 		int FullgridNum = curGrid->connectGridID_List.size();
 		int needCalculateGridNum = 0;
+
 		vector<SingleGrid2D*> needCalculateGrid_list;
+		SingleGrid2D* nearGrid = nullptr;
+		for (int k = 0; k < FullgridNum; ++k) {
+			nearGrid = this->Grid_list[curGrid->connectGridID_List[k]];
+			if (nullptr == nearGrid) {
+				continue;
+			}
 
-		for (int k = 0; k < FullgridNum; k++)
-		{
-			SingleGrid2D* nearGrid = this->Grid_list[curGrid->connectGridID_List[k]];
-
-			if (nearGrid->hasPoint)
-			{
-				if (nearGrid->nearByGridAllWithpoint == false)
-				{
-					needCalculateGridNum++;
-					needCalculateGrid_list.push_back(nearGrid);
+			if (nearGrid->hasPoint)	{
+				if (nearGrid->nearByGridAllWithpoint == false){
+					++needCalculateGridNum;
+					needCalculateGrid_list.emplace_back(nearGrid);
 				}
 			}
 		}
 
 		//若邻域网格数量小于设定阈值，则认为粗糙度较大
-		if (needCalculateGridNum < 2)
-		{
+		if (needCalculateGridNum < 2) {
 			curGrid->isSmoothGrid = false;
 			curGrid->SmoothDegree = 2;
 			continue;
 		}
 
-		if (needCalculateGridNum == 7)
-		{
+		if (needCalculateGridNum == 7){
 			curGrid->isSmoothGrid = true;
 			curGrid->SmoothDegree = 0;
 			continue;
 		}
 
-		if (needCalculateGridNum == 2)
-		{
+		if (needCalculateGridNum == 2){
 			SingleGrid2D* nearGrid_1 = needCalculateGrid_list[0];
 			SingleGrid2D* nearGrid_2 = needCalculateGrid_list[1];
 
@@ -424,22 +375,19 @@ void GridNet::DetectSmoothForOutSideGrid(){
 			int curCol = curGrid->curGridInfo.m_Col;
 			int curRow = curGrid->curGridInfo.m_Row;
 
-			if ((col1 == curCol) && (col2 == curCol))
-			{
+			if ((col1 == curCol) && (col2 == curCol)){
 				curGrid->isSmoothGrid = true;
 				curGrid->SmoothDegree = 0;
 				continue;
 			}
 
-			if ((row1 == curRow) && (row2 == curRow))
-			{
+			if ((row1 == curRow) && (row2 == curRow)){
 				curGrid->isSmoothGrid = true;
 				curGrid->SmoothDegree = 0;
 				continue;
 			}
 
-			if (((col1 + col2) == (curCol * 2)) && ((row1 + row2) == (curRow * 2)))
-			{
+			if (((col1 + col2) == (curCol * 2)) && ((row1 + row2) == (curRow * 2))){
 				curGrid->isSmoothGrid = true;
 				curGrid->SmoothDegree = 0;
 				continue;
@@ -450,11 +398,9 @@ void GridNet::DetectSmoothForOutSideGrid(){
 			continue;
 		}
 		
-		if ((needCalculateGridNum == 3) || (needCalculateGridNum == 4))
-		{
+		if ((needCalculateGridNum == 3) || (needCalculateGridNum == 4))	{
 			curGrid->isSmoothGrid = false;
 			curGrid->SmoothDegree = 1;
-			//continue;
 		}
 
 		//根据邻域网格的向量夹角和合向量距离进行判断
@@ -462,21 +408,14 @@ void GridNet::DetectSmoothForOutSideGrid(){
 		int baseValue = (this->MaxVector_Grid - this->MinVector_Grid) / 2.5 + this->MinVector_Grid;
 
 		int vectorNum = curGrid->VectorList.size();
-
 		float AngleValue = 45.0;
-
 		bool isBeyondAngle = false;
 
-		for (int j = 0; j < vectorNum; j++)
-		{
+		for (int j = 0; j < vectorNum; ++j)	{
 			osg::Vec2 curVector = curGrid->VectorList[j];
-
-			for (int k = j + 1; k < vectorNum; k++)
-			{
+			for (int k = j + 1; k < vectorNum; ++k)	{
 				osg::Vec2 nextVector = curGrid->VectorList[k];
-
-				if (AngleBetweenVector(curVector, nextVector) > AngleValue)
-				{
+				if (AngleBetweenVector(curVector, nextVector) > AngleValue) {
 					isBeyondAngle = true;
 				}
 			}
@@ -484,16 +423,13 @@ void GridNet::DetectSmoothForOutSideGrid(){
 
 		bool islittleSmooth = false;
 
-		if (cur_VectorDis > baseValue)
-		{
-			if (isBeyondAngle)
-			{
+		if (cur_VectorDis > baseValue){
+			if (isBeyondAngle){
 				islittleSmooth = true;
 			}
 		}
 
-		if (islittleSmooth)
-		{
+		if (islittleSmooth)	{
 			curGrid->isSmoothGrid = false;
 			curGrid->SmoothDegree = 1;
 		}

@@ -1555,14 +1555,14 @@ void OsgQtTest::slot_DetectPointShape() {
 		Project_widget_grid_net->drawPoints(all_point, allPointNum, 2, QColor(0, 0, 0, 125));
 	}
 
-	QHBoxLayout * hboxLayout = new QHBoxLayout;
-	hboxLayout->addWidget(Project_widget_Point, 0);
+	QGridLayout * gridLayout = new QGridLayout;
+	gridLayout->addWidget(Project_widget_Point, 0, 0);
 	if (Project_widget_grid_net) {
-		hboxLayout->addWidget(Project_widget_grid_net, 0);
+		gridLayout->addWidget(Project_widget_grid_net, 0, 1);
 	}
-	hboxLayout->addWidget(Project_widget_Point_Edge, 0);
-	hboxLayout->addWidget(Project_widget_Circle_And_Edge, 0);
-	DetectResult_dialog->setLayout(hboxLayout);
+	gridLayout->addWidget(Project_widget_Point_Edge, 1, 0);
+	gridLayout->addWidget(Project_widget_Circle_And_Edge, 1, 1);
+	DetectResult_dialog->setLayout(gridLayout);
 
 	return;
 

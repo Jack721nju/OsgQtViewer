@@ -26,6 +26,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QGridLayout>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QColorDialog>

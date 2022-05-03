@@ -3,28 +3,23 @@
 using namespace std;
 
 //获取给定点云数据的XY最大最小范围
-point_MAXMIN* getMinMaxXYZ(const PointV3List & all_list) {
+point_MAXMIN* getMinMaxXYZ(const PointV2List & all_list) {
 	point_MAXMIN * Max_area = new point_MAXMIN;
 	vector<float> x_list, y_list, z_list;
 	for (int i = 0; i < all_list.size(); ++i) {
 		x_list.push_back(all_list[i].x());
 		y_list.push_back(all_list[i].y());
-		//z_list.push_back(all_list[i].z());
 	}
 	vector<float>::iterator xmax = max_element(begin(x_list), end(x_list));
 	vector<float>::iterator ymax = max_element(begin(y_list), end(y_list));
-	//vector<float>::iterator zmax = max_element(begin(z_list), end(z_list));
 
 	vector<float>::iterator xmin = min_element(begin(x_list), end(x_list));
 	vector<float>::iterator ymin = min_element(begin(y_list), end(y_list));
-	//vector<float>::iterator zmin = min_element(begin(z_list), end(z_list));
 
 	Max_area->xmax = *xmax;
 	Max_area->ymax = *ymax;
-	//Max_area->zmax = *zmax;
 	Max_area->xmin = *xmin;
 	Max_area->ymin = *ymin;
-	//Max_area->zmin = *zmin;
 
 	return Max_area;
 }
@@ -59,7 +54,7 @@ SingleGrid2D::SingleGrid2D(const GridInfo & curGrid) {
 	curGridInfo = curGrid;
 }
 
-GridNet::GridNet(const PointV3List &Point_List) {
+GridNet::GridNet(const PointV2List &Point_List) {
 	Points_List.assign(Point_List.begin(), Point_List.end());
 	Grid_list.clear();
 	pointMMM = getMinMaxXYZ(Point_List);
@@ -87,7 +82,7 @@ SingleGrid2D* GridNet::getGridByRowAndCol(int RowID, int ColID) {
 	return nullptr;
 }
 
-bool GridNet::isPointInGrid(const osg::Vec3 & curPoint, SingleGrid2D *test_Grid){
+bool GridNet::isPointInGrid(const osg::Vec2 & curPoint, SingleGrid2D *test_Grid){
 	float cur_P_X = curPoint.x();
 	float cur_P_Y = curPoint.y();
 
@@ -440,6 +435,11 @@ void GridNet::DetectSmoothForOutSideGrid(){
 AlphaShape::AlphaShape(const vector<osg::Vec2> & point_list){
 	m_radius = 0.0;
 	m_points.assign(point_list.begin(), point_list.end());
+}
+
+AlphaShape::AlphaShape(GridNet * curGridNet) {
+	m_radius = 0.0;
+	m_gridNet = curGridNet;
 }
 
 AlphaShape::~AlphaShape(){

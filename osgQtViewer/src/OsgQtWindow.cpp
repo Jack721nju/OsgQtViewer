@@ -1267,8 +1267,6 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	float move_y = delt_y - y_max;
 
 	QPointF *point = new QPointF[num];
-
-	point2D_list_AlphaShape.clear();
 	pointlist_bulidGrid2D.clear();
 
 	osg::Vec3Array * pointArry = cur_Pcloud->getVertArry<osg::Vec3Array>();
@@ -1287,10 +1285,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 		osg::Vec2 point2D(Qpoint_x + 60, Qpoint_y + 10);
 
 		point[++id] = each_point;
-		point2D_list_AlphaShape.emplace_back(point2D);
-
-		osg::Vec3 point3D(point2D, curP.z());
-		pointlist_bulidGrid2D.emplace_back(point3D);
+		pointlist_bulidGrid2D.emplace_back(point2D);
 	}
 
 	Project_widget->drawPoints(point, num);
@@ -1298,22 +1293,24 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	
 	QVBoxLayout *v_layout = new QVBoxLayout();
 	v_layout->addWidget(Project_widget, 0);
-
-	QVBoxLayout *VV_layout = new QVBoxLayout();
-
+	
 	QLabel *m_label_radius = new QLabel(ProjectToXY_dialog);
 	m_label_radius->setText("Radius:");
 	m_label_radius->setFixedSize(100, 30);
 
 	m_radius = new QLineEdit(ProjectToXY_dialog);
-	m_label_radius->setFixedSize(100, 30);
+	m_radius->setFixedSize(100, 30);
 
-	QPushButton * detect_shape_edge = new QPushButton("Alpha Shape", ProjectToXY_dialog);
-	detect_shape_edge->setFixedSize(150, 50);
-	connect(detect_shape_edge, SIGNAL(clicked()), this, SLOT(slot_DetectPointShape()));
+	QPushButton * detect_shape_alpah_shape = new QPushButton("Alpha Shape", ProjectToXY_dialog);
+	detect_shape_alpah_shape->setFixedSize(100, 30);
+	connect(detect_shape_alpah_shape, SIGNAL(clicked()), this, SLOT(slot_DetectPointShape()));
+
+	QPushButton * detect_shape_alpah_grid_shape = new QPushButton("Alpha Grid Shape", ProjectToXY_dialog);
+	detect_shape_alpah_grid_shape->setFixedSize(150, 30);
+	connect(detect_shape_alpah_grid_shape, SIGNAL(clicked()), this, SLOT(slot_DetectPointShape()));
 
 	QPushButton * detect_shape_using_GridNet = new QPushButton("Grid Shape", ProjectToXY_dialog);
-	detect_shape_using_GridNet->setFixedSize(150, 50);
+	detect_shape_using_GridNet->setFixedSize(100, 30);
 	connect(detect_shape_using_GridNet, SIGNAL(clicked()), this, SLOT(DetectPointShapeUsingGridNet()));
 
 	QLabel *m_label_num = new QLabel(ProjectToXY_dialog);
@@ -1322,18 +1319,6 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 
 	QLineEdit * m_point_num = new QLineEdit(ProjectToXY_dialog);
 	m_point_num->setFixedSize(100, 30);
-
-	QPushButton * detect_shape_using_Circle = new QPushButton("Circle Shape", ProjectToXY_dialog);
-	detect_shape_using_Circle->setFixedSize(150, 50);
-	connect(detect_shape_using_Circle, SIGNAL(clicked()), this, SLOT(DetectPointShapeUsingCircle()));
-
-	QPushButton * detect_symmetry = new QPushButton("Symmetry", ProjectToXY_dialog);
-	detect_symmetry->setFixedSize(150, 50);
-	connect(detect_symmetry, SIGNAL(clicked()), this, SLOT(DetectPointSymmtery()));
-
-	QPushButton * curvue_fit = new QPushButton("Curve Fit", ProjectToXY_dialog);
-	curvue_fit->setFixedSize(150, 50);
-	connect(curvue_fit, SIGNAL(clicked()), this, SLOT(PointFitCurve()));
 
 	QLabel *m_label_grid_Row = new QLabel(ProjectToXY_dialog);
 	m_label_grid_Row->setText("Row Num:");
@@ -1350,38 +1335,77 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	m_Grid_Y_num->setFixedSize(100, 30);
 
 	QPushButton * build_grid = new QPushButton("Build Grid", ProjectToXY_dialog);
-	build_grid->setFixedSize(150, 50);
+	build_grid->setFixedSize(100, 30);
 	connect(build_grid, SIGNAL(clicked()), this, SLOT(slot_Build2DGridForPoints()));
 
-	VV_layout->addStretch(2);
-	VV_layout->addWidget(m_label_radius, 0);
-	VV_layout->addStretch(0);
-	VV_layout->addWidget(m_radius, 0);
-	VV_layout->addStretch(1);
-	VV_layout->addWidget(detect_shape_edge, 0);
-	VV_layout->addStretch(1);
-	VV_layout->addWidget(detect_shape_using_GridNet, 0);
-	VV_layout->addStretch(1);
-	VV_layout->addWidget(m_label_num, 0);
-	VV_layout->addStretch(1);
-	VV_layout->addWidget(m_point_num, 0);
-	VV_layout->addStretch(1);
-	VV_layout->addWidget(detect_shape_using_Circle, 0);
-	VV_layout->addStretch(2);
-	VV_layout->addWidget(detect_symmetry, 0);
-	VV_layout->addStretch(2);
-	VV_layout->addWidget(curvue_fit, 0);
-	VV_layout->addStretch(2);
-	VV_layout->addWidget(m_label_grid_Row, 0);
-	VV_layout->addStretch(0);
-	VV_layout->addWidget(m_Grid_X_num, 0);
-	VV_layout->addStretch(0);
-	VV_layout->addWidget(m_label_grid_Col, 0);
-	VV_layout->addStretch(0);
-	VV_layout->addWidget(m_Grid_Y_num, 0);
-	VV_layout->addStretch(0);
-	VV_layout->addWidget(build_grid, 0);
-	VV_layout->addStretch(5);
+	QLabel *m_label_alpha_grid_Row = new QLabel(ProjectToXY_dialog);
+	m_label_alpha_grid_Row->setText("Row Num:");
+	m_label_alpha_grid_Row->setFixedSize(100, 30);
+
+	m_alpha_Grid_row_num = new QLineEdit(ProjectToXY_dialog);
+	m_alpha_Grid_row_num->setFixedSize(100, 30);
+
+	QLabel *m_label_alpha_grid_Col = new QLabel(ProjectToXY_dialog);
+	m_label_alpha_grid_Col->setText("Col Num:");
+	m_label_alpha_grid_Col->setFixedSize(100, 30);
+
+	m_alpha_Grid_col_num = new QLineEdit(ProjectToXY_dialog);
+	m_alpha_Grid_col_num->setFixedSize(100, 30);
+	
+	QWidget * alpha_tab_widget = new QWidget();
+	m_Alpah_radio = new QRadioButton("alpha shape");
+	m_Alpah_radio->setChecked(true);
+	m_Alpah_Grid_radio = new QRadioButton("alpha grid");
+	m_Alpah_Grid_radio->setChecked(false);
+
+	QVBoxLayout * alpha_layout = new QVBoxLayout();
+	alpha_layout->addStretch(0);
+	alpha_layout->addWidget(m_label_radius, 0);
+	alpha_layout->addStretch(0);
+	alpha_layout->addWidget(m_radius, 0);
+	alpha_layout->addStretch(0);
+	alpha_layout->addWidget(m_label_alpha_grid_Row, 0);
+	alpha_layout->addStretch(0);
+	alpha_layout->addWidget(m_alpha_Grid_row_num, 0);
+	alpha_layout->addStretch(0);
+	alpha_layout->addWidget(m_label_alpha_grid_Col, 0);
+	alpha_layout->addStretch(0);
+	alpha_layout->addWidget(m_alpha_Grid_col_num, 0);
+	alpha_layout->addStretch(1);
+	alpha_layout->addWidget(m_Alpah_radio, 0);
+	alpha_layout->addWidget(m_Alpah_Grid_radio, 0);
+	alpha_layout->addStretch(1);
+	alpha_layout->addWidget(detect_shape_alpah_shape, 0);
+	alpha_layout->addStretch(1);
+	alpha_layout->addWidget(detect_shape_alpah_grid_shape, 0);
+	alpha_layout->addStretch(8);
+	alpha_tab_widget->setLayout(alpha_layout);
+
+	QWidget * grid_tab_widget = new QWidget();
+	QVBoxLayout * grid_layout = new QVBoxLayout();
+	grid_layout->addStretch(0);
+	grid_layout->addWidget(m_label_grid_Row, 0);
+	grid_layout->addStretch(0);
+	grid_layout->addWidget(m_Grid_X_num, 0);
+	grid_layout->addStretch(0);
+	grid_layout->addWidget(m_label_grid_Col, 0);
+	grid_layout->addStretch(0);
+	grid_layout->addWidget(m_Grid_Y_num, 0);
+	grid_layout->addStretch(0);
+	grid_layout->addWidget(build_grid, 0);
+	grid_layout->addStretch(1);
+	grid_layout->addWidget(detect_shape_using_GridNet, 0);
+	grid_layout->addStretch(8);
+	grid_tab_widget->setLayout(grid_layout);
+	
+
+	QTabWidget * project_Tab_Widget = new QTabWidget();
+	project_Tab_Widget->setFixedSize(300, 600);
+	project_Tab_Widget->addTab(alpha_tab_widget, QString("Alpha Shape"));
+	project_Tab_Widget->addTab(grid_tab_widget, QString("Grid Shape"));
+
+	QVBoxLayout *VV_layout = new QVBoxLayout();
+	VV_layout->addWidget(project_Tab_Widget);
 
 	QHBoxLayout *layout = new QHBoxLayout();
 	layout->addLayout(v_layout);
@@ -1410,22 +1434,51 @@ void OsgQtTest::slot_DetectPointShape() {
 	Project_widget_Point->setVisible(true);
 	Project_widget_Point->drawAxis();
 
-	AlphaShape * alpha = new AlphaShape(point2D_list_AlphaShape);
+	AlphaShape * alpha = nullptr;
+	GridNet* gridNet = nullptr;
+	bool isOnlyAShape = true;
+
+	_timerClock.start();
+
+	if (m_Alpah_Grid_radio->isChecked()) {
+		isOnlyAShape = false;
+
+		gridNet = new GridNet(this->pointlist_bulidGrid2D);
+		if (nullptr == gridNet) {
+			this->AddToConsoleSlot("Build 2D grid net failed! \n");
+			return;
+		}
+		gridNet->buildNetByNum(m_alpha_Grid_row_num->text().toInt(), m_alpha_Grid_col_num->text().toInt());
+	}
+
+	if (isOnlyAShape) {
+		alpha = new AlphaShape(pointlist_bulidGrid2D);
+	}
+	else {
+		alpha = new AlphaShape(gridNet);
+	}
+
+	if (nullptr == alpha) {
+		this->AddToConsoleSlot("Perform alpha detection failed! \n");
+	}
 
 	float radius = 0.0;
 	if (m_radius) {
 		radius = m_radius->text().toFloat();
 	}
 	
-	_timerClock.start();
-
 	//Run progress
 	alpha->Detect_Shape_line(radius);
 
 	//计算Alpha Shapes算法耗费时间
 	float runTime = _timerClock.getTime<Ms>() / 1000.0;
 	QString cost_time = QString::number(runTime);
-	this->AddToConsoleSlot(QString("The cost time of detecting Contour by default is :  ") + cost_time + QString("s"));
+	if (!isOnlyAShape) {
+		this->AddToConsoleSlot(QString("The cost time of detecting Contour by alpha with grid net is :  ") + cost_time + QString("s"));
+	}
+	else{
+		this->AddToConsoleSlot(QString("The cost time of detecting Contour by default alpha shape is :  ") + cost_time + QString("s"));
+	}
 
 	//计算小于滚动圆直径长度的点对比例
 	QString cost_scale = QString::number(alpha->point_pair_scale, 'f', 3);
@@ -1461,7 +1514,6 @@ void OsgQtTest::slot_DetectPointShape() {
 	
 	QDialog * DetectResult_dialog = new QDialog();
 	DetectResult_dialog->setAttribute(Qt::WA_DeleteOnClose);
-	//DetectResult_dialog->setFixedSize(1660, 660);
 	DetectResult_dialog->setVisible(true);
 
 	QHBoxLayout * hboxLayout = new QHBoxLayout;

@@ -92,13 +92,19 @@ private:
 
 	QLineEdit *m_radius;
 
-	vector<osg::Vec2> point2D_list_AlphaShape;
-
-	PointV3List pointlist_bulidGrid2D;
+	PointV2List pointlist_bulidGrid2D;
 
 	QLineEdit *m_Grid_X_num;
 
 	QLineEdit *m_Grid_Y_num;
+
+	QLineEdit *m_alpha_Grid_row_num;
+
+	QLineEdit *m_alpha_Grid_col_num;
+
+	QRadioButton * m_Alpah_radio;
+
+	QRadioButton * m_Alpah_Grid_radio;
 
 private:
 	void AddToConsoleSlot(const QString& show_text);

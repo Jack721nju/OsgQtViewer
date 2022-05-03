@@ -13,7 +13,7 @@
 #include "struct.h"
 
 using namespace std;
-typedef std::vector<osg::Vec3> PointV3List;
+typedef std::vector<osg::Vec2> PointV2List;
 
 //检测边界线的信息
 struct Edge {
@@ -69,7 +69,7 @@ public:
 
 public:
 	//网格内含有的点列表
-	PointV3List PointList;
+	PointV2List PointList;
 
 	//网格内的点数量
 	unsigned int cur_PointNum;
@@ -112,11 +112,11 @@ public:
 class GridNet {
 public:
 	//根据点云生成当前的二维网格
-	GridNet(const PointV3List & Point_List);
+	GridNet(const PointV2List & Point_List);
 
 public:
 	//所有点的列表
-	PointV3List Points_List;
+	PointV2List Points_List;
 
 	//所有二维网格列表
 	std::vector<SingleGrid2D*> Grid_list;
@@ -155,7 +155,7 @@ public:
 	void buildNetByNum(int RowNum, int ColNum);
 
 	//判断当前某点是否处于某一网格中
-	bool isPointInGrid(const osg::Vec3 &curPoint, SingleGrid2D *test_Grid);
+	bool isPointInGrid(const osg::Vec2 &curPoint, SingleGrid2D *test_Grid);
 
 	//获取网格的点的平均中心点
 	[[deprecated]] void getCenterPoint();
@@ -177,6 +177,7 @@ public:
 class AlphaShape {
 public:
 	AlphaShape(const std::vector<osg::Vec2> &point_list);
+	AlphaShape(GridNet * curGridNet);
 	~AlphaShape();
 
 public:
@@ -207,6 +208,9 @@ public:
 public:
 	//用于检测的点列表
 	std::vector<osg::Vec2> m_points;
+
+	//用于检测的格网指针
+	GridNet * m_gridNet{nullptr};
 
 	//轮廓点
 	std::vector<osg::Vec2> m_shape_points;

@@ -11,7 +11,7 @@ public:
 	void drawAxis();
 	void drawPoints(QPointF points[], int point_num, int point_size = 1.0, const QColor& point_color = Qt::blue);
 	void drawCircles(const std::vector<osg::Vec2> &center_list, int radius);
-	void drawCircles(const PointV3List &circle_list, const std::vector<int> & Size_List);
+	void drawCircles(const vector<osg::Vec3> &circle_list, const std::vector<int> & Size_List);
 	void drawLines(const vector<Edge> & line_list);
 	void drawText(QPointF pos, QString text);
 

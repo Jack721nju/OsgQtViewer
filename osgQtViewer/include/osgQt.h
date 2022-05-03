@@ -34,6 +34,9 @@
 #include <QFile>
 #include <QTextStream>
 #include <QColor>
+#include <QTabWidget>
+#include <QRadioButton>
+#include <QButtonGroup>
 
 #include <osgQt/GraphicsWindowQt>
 

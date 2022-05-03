@@ -1210,7 +1210,6 @@ void OsgQtTest::slot_SetBackGroundColor() {
 void OsgQtTest::slot_Init_Project_Dialog() {	
 	if (ProjectToXY_dialog)	{		
 		ProjectToXY_dialog->close();
-		delete ProjectToXY_dialog;
 		ProjectToXY_dialog = nullptr;
 		return;
 	}
@@ -1301,14 +1300,6 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	m_radius = new QLineEdit(ProjectToXY_dialog);
 	m_radius->setFixedSize(100, 30);
 
-	QPushButton * detect_shape_alpah_shape = new QPushButton("Alpha Shape", ProjectToXY_dialog);
-	detect_shape_alpah_shape->setFixedSize(100, 30);
-	connect(detect_shape_alpah_shape, SIGNAL(clicked()), this, SLOT(slot_DetectPointShape()));
-
-	QPushButton * detect_shape_alpah_grid_shape = new QPushButton("Alpha Grid Shape", ProjectToXY_dialog);
-	detect_shape_alpah_grid_shape->setFixedSize(150, 30);
-	connect(detect_shape_alpah_grid_shape, SIGNAL(clicked()), this, SLOT(slot_DetectPointShape()));
-
 	QPushButton * detect_shape_using_GridNet = new QPushButton("Grid Shape", ProjectToXY_dialog);
 	detect_shape_using_GridNet->setFixedSize(100, 30);
 	connect(detect_shape_using_GridNet, SIGNAL(clicked()), this, SLOT(DetectPointShapeUsingGridNet()));
@@ -1337,6 +1328,11 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	QPushButton * build_grid = new QPushButton("Build Grid", ProjectToXY_dialog);
 	build_grid->setFixedSize(100, 30);
 	connect(build_grid, SIGNAL(clicked()), this, SLOT(slot_Build2DGridForPoints()));
+
+
+	QPushButton * detect_shape_alpah_shape = new QPushButton("Detect", ProjectToXY_dialog);
+	detect_shape_alpah_shape->setFixedSize(100, 30);
+	connect(detect_shape_alpah_shape, SIGNAL(clicked()), this, SLOT(slot_DetectPointShape()));
 
 	QLabel *m_label_alpha_grid_Row = new QLabel(ProjectToXY_dialog);
 	m_label_alpha_grid_Row->setText("Row Num:");
@@ -1376,8 +1372,6 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	alpha_layout->addWidget(m_Alpah_Grid_radio, 0);
 	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(detect_shape_alpah_shape, 0);
-	alpha_layout->addStretch(1);
-	alpha_layout->addWidget(detect_shape_alpah_grid_shape, 0);
 	alpha_layout->addStretch(8);
 	alpha_tab_widget->setLayout(alpha_layout);
 
@@ -1448,7 +1442,18 @@ void OsgQtTest::slot_DetectPointShape() {
 			this->AddToConsoleSlot("Build 2D grid net failed! \n");
 			return;
 		}
-		gridNet->buildNetByNum(m_alpha_Grid_row_num->text().toInt(), m_alpha_Grid_col_num->text().toInt());
+		int gridRow = m_alpha_Grid_row_num->text().toInt();
+		int gridCol = m_alpha_Grid_col_num->text().toInt();
+		if (gridRow <= 0 || gridCol <= 0) {
+			this->AddToConsoleSlot("Input correct row and col value! \n");
+		}
+		gridNet->buildNetByNum(gridRow, gridCol);
+		gridNet->detectGridWithConnection();
+	}
+
+	float radius = 0.0;
+	if (m_radius) {
+		radius = m_radius->text().toFloat();
 	}
 
 	if (isOnlyAShape) {
@@ -1461,14 +1466,13 @@ void OsgQtTest::slot_DetectPointShape() {
 	if (nullptr == alpha) {
 		this->AddToConsoleSlot("Perform alpha detection failed! \n");
 	}
-
-	float radius = 0.0;
-	if (m_radius) {
-		radius = m_radius->text().toFloat();
-	}
 	
-	//Run progress
-	alpha->Detect_Shape_line(radius);
+	if (isOnlyAShape) {
+		alpha->Detect_Shape_line(radius);
+	}
+	else {
+		alpha->Detect_Alpha_Shape_by_Grid(radius);
+	}
 
 	//计算Alpha Shapes算法耗费时间
 	float runTime = _timerClock.getTime<Ms>() / 1000.0;
@@ -1515,12 +1519,52 @@ void OsgQtTest::slot_DetectPointShape() {
 	QDialog * DetectResult_dialog = new QDialog();
 	DetectResult_dialog->setAttribute(Qt::WA_DeleteOnClose);
 	DetectResult_dialog->setVisible(true);
+	if (isOnlyAShape) {
+		DetectResult_dialog->setWindowTitle("Alpha Shape result");
+	} else {
+		DetectResult_dialog->setWindowTitle("Alpha Grid result");
+	}
+	
+	PaintArea *Project_widget_grid_net = nullptr;
+	if (!isOnlyAShape) {
+		int delt_x = -10, delt_y = 32;
+		Project_widget_grid_net = new PaintArea();
+		Project_widget_grid_net->setFixedSize(660, 660);
+		Project_widget_grid_net->setAttribute(Qt::WA_DeleteOnClose);
+		Project_widget_grid_net->setVisible(true);
+		Project_widget_grid_net->setWindowTitle(m_alpha_Grid_row_num->text() + tr(" X ") + m_alpha_Grid_col_num->text());
+		for (const auto & curGrid : gridNet->Grid_list) {
+			QColor new_color(0, 0, 0, 0);
+			if (curGrid->hasPoint) {
+				new_color.setRgb(0, 125, 0, 155);
+			}
+			if (curGrid->nearByGridAllWithpoint == true) {
+				//内部网格，灰色
+				new_color.setRgb(150, 150, 150, 125);
+			}
+			Project_widget_grid_net->drawGridWithFillColor(curGrid, new_color, delt_x, delt_y);
+		}
+
+		int allPointNum = gridNet->Points_List.size();
+		QPointF *all_point = new QPointF[allPointNum];
+		int pointID = -1;
+		for (const auto & curP : gridNet->Points_List) {
+			all_point[++pointID] = QPointF(curP.x() + delt_x, curP.y() + delt_y);
+		}
+		//绘制所有离散点云,离散点默认颜色为纯黑色
+		Project_widget_grid_net->drawPoints(all_point, allPointNum, 2, QColor(0, 0, 0, 125));
+	}
 
 	QHBoxLayout * hboxLayout = new QHBoxLayout;
-	hboxLayout->addWidget(Project_widget_Point, 0, Qt::AlignLeft);
-	hboxLayout->addWidget(Project_widget_Point_Edge, 0, Qt::AlignCenter);
-	hboxLayout->addWidget(Project_widget_Circle_And_Edge, 0, Qt::AlignRight);
+	hboxLayout->addWidget(Project_widget_Point, 0);
+	if (Project_widget_grid_net) {
+		hboxLayout->addWidget(Project_widget_grid_net, 0);
+	}
+	hboxLayout->addWidget(Project_widget_Point_Edge, 0);
+	hboxLayout->addWidget(Project_widget_Circle_And_Edge, 0);
 	DetectResult_dialog->setLayout(hboxLayout);
+
+	return;
 
 	ofstream outf;
 	double x, y, z = 0.0;

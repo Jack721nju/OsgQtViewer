@@ -9,6 +9,7 @@
 #include <osg/Array>
 #include <bitset>
 #include <climits>
+#include <set>
 
 #include "struct.h"
 
@@ -25,6 +26,19 @@ struct Edge {
 		this->point_A = pA;
 		this->point_B = pB;
 	}
+
+	bool operator == (const Edge & other) const {
+		return ((((*this).point_A - other.point_A).length() < 0.000001) &&
+			(((*this).point_B - other.point_B).length() < 0.000001));
+	}
+
+	bool operator <(const Edge & other) const{
+		return (((*this).point_A - (*this).point_B).length() < (other.point_A - other.point_B).length());
+	}
+
+	bool operator >(const Edge & other) const {
+		return (((*this).point_A - (*this).point_B).length() > (other.point_A - other.point_B).length());
+	}
 };
 
 //检测圆的信息
@@ -38,6 +52,19 @@ struct Circle {
 	Circle(const osg::Vec2 & center, float radius) {
 		this->m_center = center;
 		this->m_radius = radius;
+	}
+
+	bool operator == (const Circle & other) const {
+		return ((((*this).m_center - other.m_center).length() < 0.000001) &&
+			(((*this).m_radius - other.m_radius) < 0.000001));
+	}
+
+	bool operator <(const Circle & other) const {
+		return ((*this).m_center.length() < other.m_center.length());
+	}
+
+	bool operator >(const Circle & other) const {
+		return ((*this).m_center.length() > other.m_center.length());
 	}
 };
 
@@ -112,7 +139,7 @@ public:
 class GridNet {
 public:
 	//根据点云生成当前的二维网格
-	GridNet(const PointV2List & Point_List);
+	GridNet(const PointV2List & pList);
 
 public:
 	//所有点的列表
@@ -183,6 +210,9 @@ public:
 public:
 	//根据设置的半径，检测点云边界线，默认的常规算法，将判断所有点，效率较慢
 	void Detect_Shape_line(float radius);
+
+	//根据生成的网格对默认算法进行优化，检测邻域域网格内的点，并不判断所有的点
+	void Detect_Alpha_Shape_by_Grid(float radius);
 
 	//根据生成的网格和半径，以及邻域点云检测边界线，传递值为点列表
 	void Detect_Shape_line_by_Grid(std::vector<osg::Vec2> near_point_list, std::vector<osg::Vec2> detect_point_list, float radius);

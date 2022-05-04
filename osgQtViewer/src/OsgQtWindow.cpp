@@ -1353,6 +1353,8 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	m_Alpah_radio->setChecked(true);
 	m_Alpah_Grid_radio = new QRadioButton("alpha grid");
 	m_Alpah_Grid_radio->setChecked(false);
+	m_Alpah_Grid_multi_thread_radio = new QRadioButton("alpha grid multi-thread");
+	m_Alpah_Grid_multi_thread_radio->setChecked(false);
 
 	QVBoxLayout * alpha_layout = new QVBoxLayout();
 	alpha_layout->addStretch(0);
@@ -1369,7 +1371,10 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	alpha_layout->addWidget(m_alpha_Grid_col_num, 0);
 	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(m_Alpah_radio, 0);
+	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(m_Alpah_Grid_radio, 0);
+	alpha_layout->addStretch(1);
+	alpha_layout->addWidget(m_Alpah_Grid_multi_thread_radio, 0);
 	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(detect_shape_alpah_shape, 0);
 	alpha_layout->addStretch(8);
@@ -1434,7 +1439,7 @@ void OsgQtTest::slot_DetectPointShape() {
 
 	_timerClock.start();
 
-	if (m_Alpah_Grid_radio->isChecked()) {
+	if (false == m_Alpah_radio->isChecked()) {
 		isOnlyAShape = false;
 
 		gridNet = new GridNet(this->pointlist_bulidGrid2D);
@@ -1471,14 +1476,25 @@ void OsgQtTest::slot_DetectPointShape() {
 		alpha->Detect_Shape_line(radius);
 	}
 	else {
-		alpha->Detect_Alpha_Shape_by_Grid(radius);
+		if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
+			auto threadCount = std::thread::hardware_concurrency();
+			alpha->Detect_Alpha_Shape_by_Grid_Multi_Thread(radius, threadCount);
+		}
+		else if (m_Alpah_Grid_radio->isChecked()){
+			alpha->Detect_Alpha_Shape_by_Grid(radius);
+		}		
 	}
 
 	//计算Alpha Shapes算法耗费时间
 	float runTime = _timerClock.getTime<Ms>() / 1000.0;
 	QString cost_time = QString::number(runTime);
 	if (!isOnlyAShape) {
-		this->AddToConsoleSlot(QString("The cost time of detecting Contour by alpha with grid net is :  ") + cost_time + QString("s"));
+		if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
+			this->AddToConsoleSlot(QString("The cost time of detecting Contour by alpha with grid and multi-Thread is :  ") + cost_time + QString("s"));
+		}
+		else if (m_Alpah_Grid_radio->isChecked()) {
+			this->AddToConsoleSlot(QString("The cost time of detecting Contour by alpha with grid net is :  ") + cost_time + QString("s"));
+		}
 	}
 	else{
 		this->AddToConsoleSlot(QString("The cost time of detecting Contour by default alpha shape is :  ") + cost_time + QString("s"));
@@ -1632,8 +1648,19 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 
 	this->AddToConsoleSlot("The Full 2D grid number is : " + QString::number(gridNet->GridWithPoint_Num));
 	this->AddToConsoleSlot("The OutSide 2D grid number is : " + QString::number(OutSideGridCenterPointNum));
-
+	
 	int delt_x = -10, delt_y = 32;
+	int allPointNum = gridNet->Points_List.size();
+	QPointF *all_point = new QPointF[allPointNum];
+	int pointID = -1;
+
+	for (const auto & curP : gridNet->Points_List) {
+		all_point[++pointID] = QPointF(curP.x() + delt_x, curP.y() + delt_y);
+	}
+
+	//绘制所有离散点云,离散点默认颜色为纯黑色
+	Project_widget_grid_net->drawPoints(all_point, allPointNum, 1, QColor(0, 0, 0, 125));
+	
 	int k = -1;
 	QColor new_color(0, 0, 0, 0);
 
@@ -1666,17 +1693,6 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 		}
 		Project_widget_grid_net->drawGridWithFillColor(curGrid, new_color, delt_x, delt_y);
 	}
-
-	int allPointNum = gridNet->Points_List.size();
-	QPointF *all_point = new QPointF[allPointNum];
-	int pointID = -1;
-
-	for (const auto & curP : gridNet->Points_List)	{
-		all_point[++pointID] = QPointF(curP.x() + delt_x, curP.y() + delt_y);
-	}
-
-	//绘制所有离散点云,离散点默认颜色为纯黑色
-	Project_widget_grid_net->drawPoints(all_point, allPointNum, 2, QColor(0, 0, 0, 125));
 
 	//绘制边界网格内点的几何中心点
 	Project_widget_grid_net->drawPoints(Grid_CenterPoint, OutSideGridCenterPointNum, 5, QColor(255, 255, 255, 255));

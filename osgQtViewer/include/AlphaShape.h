@@ -10,6 +10,8 @@
 #include <bitset>
 #include <climits>
 #include <set>
+#include <mutex>
+#include <thread>
 
 #include "struct.h"
 
@@ -211,6 +213,9 @@ public:
 	//根据设置的半径，检测点云边界线，默认的常规算法，将判断所有点，效率较慢
 	void Detect_Shape_line(float radius);
 
+	//多线程检测
+	void Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threadNum = 2);
+
 	//根据生成的网格对默认算法进行优化，检测邻域域网格内的点，并不判断所有的点
 	void Detect_Alpha_Shape_by_Grid(float radius);
 
@@ -221,7 +226,7 @@ public:
 	void Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, std::vector<SingleGrid2D*> nearGrid_List, float radius);
 
 	//根据两点计算集合距离
-	float Distance_point(osg::Vec2 pointA, osg::Vec2 pointB);
+	//float Distance_point(osg::Vec2 pointA, osg::Vec2 pointB);
 
 	//根据生成的网格和半径检测边界
 	void Detect_Shape_By_GridNet(GridNet* curGridNet, float radius);
@@ -240,7 +245,7 @@ public:
 	std::vector<osg::Vec2> m_points;
 
 	//用于检测的格网指针
-	GridNet * m_gridNet{nullptr};
+	GridNet * m_gridNet;
 
 	//轮廓点
 	std::vector<osg::Vec2> m_shape_points;
@@ -259,4 +264,6 @@ public:
 	
 	//符合检测半径的点对比例
 	float point_pair_scale;
+
+	int m_point_pair_N;
 };

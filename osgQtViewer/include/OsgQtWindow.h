@@ -106,6 +106,8 @@ private:
 
 	QRadioButton * m_Alpah_Grid_radio;
 
+	QRadioButton * m_Alpah_Grid_multi_thread_radio;
+
 private:
 	void AddToConsoleSlot(const QString& show_text);
 

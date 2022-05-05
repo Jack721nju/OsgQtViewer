@@ -29,17 +29,19 @@ struct Edge {
 		this->point_B = pB;
 	}
 
-	bool operator == (const Edge & other) const {
-		return ((((*this).point_A - other.point_A).length() < 0.000001) &&
-			(((*this).point_B - other.point_B).length() < 0.000001));
-	}
-
 	bool operator <(const Edge & other) const{
-		return (((*this).point_A - (*this).point_B).length() < (other.point_A - other.point_B).length());
-	}
-
-	bool operator >(const Edge & other) const {
-		return (((*this).point_A - (*this).point_B).length() > (other.point_A - other.point_B).length());
+		if ((((*this).point_A - other.point_A).length() < 0.000001) &&
+			(((*this).point_B - other.point_B).length() < 0.000001)) {
+			return false;
+		}
+		else {
+			if (((*this).point_A - other.point_A).length() > 0.000001) {
+				return (*this).point_A.length() < other.point_A.length();
+			}
+			else {
+				return (*this).point_B.length() < other.point_B.length();
+			}
+		}
 	}
 };
 
@@ -56,18 +58,21 @@ struct Circle {
 		this->m_radius = radius;
 	}
 
-	bool operator == (const Circle & other) const {
-		return ((((*this).m_center - other.m_center).length() < 0.000001) &&
-			(((*this).m_radius - other.m_radius) < 0.000001));
-	}
-
 	bool operator <(const Circle & other) const {
-		return ((*this).m_center.length() < other.m_center.length());
+		if ((((*this).m_center - other.m_center).length() < 0.000001) &&
+			(((*this).m_radius - other.m_radius) < 0.000001)) {
+			return false;
+		}
+		else {
+			if (((*this).m_center - other.m_center).length() > 0.000001) {
+				return ((*this).m_center.length() < other.m_center.length());
+			}
+			else{
+				return ((*this).m_radius < other.m_radius);
+			}
+		}		
 	}
 
-	bool operator >(const Circle & other) const {
-		return ((*this).m_center.length() > other.m_center.length());
-	}
 };
 
 //单一网格的信息

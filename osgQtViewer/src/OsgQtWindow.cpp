@@ -1208,12 +1208,6 @@ void OsgQtTest::slot_SetBackGroundColor() {
 }
 
 void OsgQtTest::slot_Init_Project_Dialog() {	
-	if (ProjectToXY_dialog)	{		
-		ProjectToXY_dialog->close();
-		ProjectToXY_dialog = nullptr;
-		return;
-	}
-
 	if (!hasSelectedPcloud()) {
 		this->AddToConsoleSlot(QString("[WARING] No Point Cloud is selected!"));
 		return;

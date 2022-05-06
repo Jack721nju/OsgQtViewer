@@ -224,20 +224,11 @@ public:
 	//根据生成的网格对默认算法进行优化，检测邻域域网格内的点，并不判断所有的点
 	void Detect_Alpha_Shape_by_Grid(float radius);
 
-	//根据生成的网格和半径，以及邻域点云检测边界线，传递值为点列表
-	void Detect_Shape_line_by_Grid(std::vector<osg::Vec2> near_point_list, std::vector<osg::Vec2> detect_point_list, float radius);
-
 	//根据生成的网格和半径，以及邻域点云检测边界线，传递值为网格列表
 	void Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, std::vector<SingleGrid2D*> nearGrid_List, float radius);
 
-	//根据两点计算集合距离
-	//float Distance_point(osg::Vec2 pointA, osg::Vec2 pointB);
-
-	//根据生成的网格和半径检测边界
-	void Detect_Shape_By_GridNet(GridNet* curGridNet, float radius);
-
 	//根据生成的网格和半径检测边界(新)
-	void Detect_Shape_By_GridNet_New(GridNet* curGridNet, float radius);
+	void Detect_Shape_By_GridNet_New(float radius);
 
 	//根据包裹圆，通过落点数量和点的分布角度，检测边界点
 	void Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius, int pointNum);
@@ -250,7 +241,7 @@ public:
 	std::vector<osg::Vec2> m_points;
 
 	//用于检测的格网指针
-	GridNet * m_gridNet;
+	GridNet * m_gridNet{nullptr};
 
 	//轮廓点
 	std::vector<osg::Vec2> m_shape_points;

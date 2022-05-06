@@ -1302,7 +1302,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 
 	QPushButton * detect_shape_using_GridNet = new QPushButton("Grid Shape", ProjectToXY_dialog);
 	detect_shape_using_GridNet->setFixedSize(100, 30);
-	connect(detect_shape_using_GridNet, SIGNAL(clicked()), this, SLOT(DetectPointShapeUsingGridNet()));
+	connect(detect_shape_using_GridNet, SIGNAL(clicked()), this, SLOT(slot_DetectPointShapeUsingGridNet()));
 
 	QLabel *m_label_num = new QLabel(ProjectToXY_dialog);
 	m_label_num->setText("Point Num:");
@@ -1373,7 +1373,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	alpha_layout->addWidget(m_Alpah_radio, 0);
 	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(m_Alpah_Grid_radio, 0);
-	alpha_layout->addStretch(1);
+	alpha_layout->addStretch(2);
 	alpha_layout->addWidget(m_Alpah_Grid_multi_thread_radio, 0);
 	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(detect_shape_alpah_shape, 0);
@@ -1618,19 +1618,18 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 	_timerClock.start();
 	
 	GridNet* gridNet = new GridNet(this->pointlist_bulidGrid2D);
-
+	
 	if (nullptr == gridNet) {
 		this->AddToConsoleSlot("Build 2D grid net failed! \n");
 		return;
 	}
 
+	m_gridNet = gridNet;
+
 	gridNet->buildNetByNum(m_Grid_Y_num->text().toInt(), m_Grid_X_num->text().toInt());
 	
 	//检测网格的连通性,获取网格内点的几何中心
 	gridNet->detectGridWithConnection();
-
-	//获取网格内点的几何中心
-	//gridNet->getCenterPoint();
 
 	//基于网格点的中心点计算网格与邻域网格的合向量
 	gridNet->getVectorOfOutSideGrid();
@@ -1699,6 +1698,82 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 
 	//计算二维格网的总耗时
 	float runTimeAll = _timerClock.getTime<Ms>() / 1000.0;
-	QString cost_timeAll = QString::number(runTimeAll);
+	const QString & cost_timeAll = QString::number(runTimeAll);
 	this->AddToConsoleSlot(QString("The all cost time of building 2D grid net is :  ") + cost_timeAll + QString("s"));
+}
+
+void OsgQtTest::slot_DetectPointShapeUsingGridNet() {
+	if (pointlist_bulidGrid2D.size() < 1){
+		this->AddToConsoleSlot(QString("[WARING] No project point!"));
+		return;
+	}
+
+	if (nullptr == m_gridNet) {
+		this->AddToConsoleSlot(QString("[WARING] No Grid net was build!"));
+		return;
+	}
+
+	_timerClock.start();
+
+	AlphaShape * alpha = new AlphaShape(m_gridNet);
+	float radius = 0.0;
+	if (m_radius) {
+		radius = m_radius->text().toFloat();
+	}
+	
+	alpha->Detect_Shape_By_GridNet_New(radius);
+
+	float runTimeAll = _timerClock.getTime<Ms>() / 1000.0;
+	const QString &cost_timeAll = QString::number(runTimeAll);
+	this->AddToConsoleSlot(QString("The all cost time of detecting Contour by GridNet is :  ") + cost_timeAll + QString("s"));
+
+	PaintArea *Project_widget_Circle_And_Edge = new PaintArea();
+	Project_widget_Circle_And_Edge->setFixedSize(660, 660);
+	Project_widget_Circle_And_Edge->setVisible(true);
+	Project_widget_Circle_And_Edge->drawAxis();
+
+	PaintArea *Project_widget_Point = new PaintArea();
+	Project_widget_Point->setFixedSize(660, 660);
+	Project_widget_Point->setVisible(true);
+	Project_widget_Point->drawAxis();
+
+	vector<osg::Vec3> circle_list;
+	vector<int> Size_List;
+
+	for (const auto & curCricle : alpha->m_circles)	{
+		Size_List.push_back(curCricle.size);
+		circle_list.emplace_back(osg::Vec3(curCricle.m_center, curCricle.m_radius));
+	}
+
+	Project_widget_Circle_And_Edge->drawCircles(circle_list, Size_List);
+	Project_widget_Circle_And_Edge->drawLines(alpha->m_edges);
+
+	int shape_num = alpha->m_shape_points.size();
+	QPointF *shape_point = new QPointF[shape_num];
+	
+	Project_widget->drawLines(alpha->m_edges);
+	Project_widget->drawPoints(shape_point, shape_num, 3, Qt::black);
+	Project_widget_Point->drawPoints(shape_point, shape_num, 2, Qt::red);
+
+	return;
+
+	ofstream outf;
+	double x, y, z = 0.0;
+	outf.open("E:/Data/test/Select/OutlinePoint_UsingGrid.txt", ios::out);
+
+	for (int i = 0; i < shape_num; i++) {
+		x = alpha->m_shape_points[i].x();
+		y = alpha->m_shape_points[i].y();
+		z = 0.0;
+
+		if (!outf.is_open())
+		{
+			return;
+		}
+
+		outf << fixed << setprecision(3) << x << " " << y << " " << z << " ";
+		outf << endl;
+	}
+
+	outf.close();
 }

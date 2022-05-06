@@ -94,6 +94,8 @@ private:
 
 	PointV2List pointlist_bulidGrid2D;
 
+	GridNet* m_gridNet{nullptr};
+
 	QLineEdit *m_Grid_X_num;
 
 	QLineEdit *m_Grid_Y_num;
@@ -166,6 +168,8 @@ public slots:
 	void slot_DetectPointShape();
 
 	void slot_Build2DGridForPoints();
+
+	void slot_DetectPointShapeUsingGridNet();
 
 public:
 	void ReadLasData(const std::string & fileName);

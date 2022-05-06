@@ -165,9 +165,9 @@ private:
 
 	~PCloudManager();
 
-	PCloudManager(const PCloudManager& other) {	};
+	PCloudManager(const PCloudManager& other) = delete;
 
-	PCloudManager & operator=(const PCloudManager& other) {};
+	PCloudManager & operator=(const PCloudManager& other) = delete;
 
 public:
 	static PCloudManager * Instance(osg::ref_ptr<osg::Group> root = nullptr) {

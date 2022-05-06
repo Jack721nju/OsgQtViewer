@@ -697,399 +697,54 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 	}
 }
 
-
-void AlphaShape::Detect_Shape_By_GridNet(GridNet* curGridNet, float radius)
-{
-	m_radius = radius;
-
-	if (curGridNet == NULL)
-	{
-		return;
-	}
-	
-	//用于判断检测圆是否含有点的判断点云
-	vector<osg::Vec2> detect_point_list;
-
-	// 用于检测边界点的邻域点云
-	vector<osg::Vec2> near_point_list;
-	
-	for (int i = 0; i < curGridNet->Grid_Num; i++)
-	{
-		SingleGrid2D* curGrid = curGridNet->Grid_list[i];
-				
-		if (curGrid)
-		{
-			curGrid->hasDetected = true;
-		}
-
-		int curRowID = curGrid->curGridInfo.m_Row;
-		int curColID = curGrid->curGridInfo.m_Col;
-
-		m_points.clear();
-		detect_point_list.clear();
-
-		//当前网格内无点
-		if (curGrid->hasPoint == false)
-		{
-			continue;
-		}
-
-		//当前网格的八邻域网格均含有点
-		if (curGrid->nearByGridAllWithpoint == true)
-		{
-			continue;
-		}
-
-		bool isNearBySmooth = curGrid->isSmoothGrid;
-
-		int pointNum = curGrid->PointList.size();
-
-
-		float acculateX = 0.0;
-		float acculateY = 0.0;
-
-		for (int n = 0; n < pointNum; n++)
-		{
-			float nearPointX = curGrid->PointList[n].x();
-			float nearPointY = curGrid->PointList[n].y();
-
-			osg::Vec2 detectPoint(nearPointX, nearPointY);
-
-			detect_point_list.push_back(detectPoint);
-			near_point_list.push_back(detectPoint);
-
-			m_points.push_back(detectPoint);
-
-			acculateX += nearPointX;
-			acculateY += nearPointY;
-		}
-
-		osg::Vec2 averagePoint(acculateX / pointNum, acculateY / pointNum);
-						
-		float dis_point = (curGrid->curGridInfo.Size_X + curGrid->curGridInfo.Size_Y) / pointNum;
-
-		float changeRadius = 0.0;
-
-		int acculateNumn = 0;
-
-		for (int k = curRowID - 1; k <= curRowID + 1; k++)
-		{
-			for (int j = curColID - 1; j <= curColID + 1; j++)
-			{
-				if ((k == curRowID) && (j == curColID))
-				{
-					continue;
-				}
-
-				if (k < 0 || j < 0)
-				{
-					continue;
-				}
-
-				if (k >= (curGridNet->Row_Num + 2) || j >= (curGridNet->Col_Num + 2))
-				{
-					continue;
-				}
-
-				SingleGrid2D* nearGrid = curGridNet->getGridByRowAndCol(k, j);
-
-				if (nearGrid == NULL)
-				{
-					continue;
-				}
-
-				//说明中心网格与该邻域网格已经检测过边界点了
-				if (nearGrid->hasDetected == true)
-				{
-					//continue;
-				}
-
-				if (nearGrid->nearByGridAllWithpoint == true)
-				{
-					//continue;
-				}
-
-				if (nearGrid->isSmoothGrid == false)
-				{
-					isNearBySmooth = nearGrid->isSmoothGrid;
-				}
-
-				if (nearGrid->hasPoint == true)
-				{
-					acculateX = 0.0;
-					acculateY = 0.0;
-
-					for (int m = 0; m < nearGrid->cur_PointNum; m++)
-					{
-						float nearPointX = nearGrid->PointList[m].x();
-						float nearPointY = nearGrid->PointList[m].y();
-
-						osg::Vec2 nearPoint(nearPointX, nearPointY);
-						detect_point_list.push_back(nearPoint);
-
-						acculateX += nearPointX;
-						acculateY += nearPointY;
-					}
-
-					osg::Vec2 nPoint(acculateX / nearGrid->cur_PointNum, acculateY / nearGrid->cur_PointNum);
-
-					changeRadius += Distance_point(averagePoint, nPoint)*0.33;
-					acculateNumn++;
-
-				}
-
-			}
-		}
-
-		changeRadius = (changeRadius / acculateNumn);
-
-		float girdSize = curGrid->curGridInfo.Size_X;
-
-		if (changeRadius > m_radius)
-		{
-			//m_radius = changeRadius;
-		}
-
-		//该网格邻域内的点云分布不平滑，需要更小的检测半径进行检测
-		if (isNearBySmooth == false)
-		{
-			m_radius = radius* 0.7;
-		}
-		else
-		{
-			m_radius = radius;
-		}
-
-		printf("The distace of curGrid and nearGrid is =========== %f \n", m_radius);
-
-		if (detect_point_list.size() > 0)
-		{
-			this->Detect_Shape_line_by_Grid(detect_point_list, detect_point_list, m_radius);
-		}
-
-	}
-}
-
-
-void AlphaShape::Detect_Shape_By_GridNet_New(GridNet* curGridNet, float radius)
-{
-	if (curGridNet == NULL)
-	{
+void AlphaShape::Detect_Shape_By_GridNet_New(float radius) {
+	if (m_gridNet == nullptr)	{
 		return;
 	}
 
 	vector<SingleGrid2D*> nearGrid_List;
 		
-	for (int i = 0; i < curGridNet->Grid_Num; i++)
-	{
-		SingleGrid2D * CenterGrid = curGridNet->Grid_list[i];
-
+	for (const auto & CenterGrid : m_gridNet->Grid_list) {
 		int curRowID = CenterGrid->curGridInfo.m_Row;
 		int curColID = CenterGrid->curGridInfo.m_Col;
 
 		//当前网格内无点
-		if (CenterGrid->hasPoint == false)
-		{
+		if (CenterGrid->hasPoint == false){
 			continue;
 		}
 
 		//当前网格的八邻域网格均含有点
-		if (CenterGrid->nearByGridAllWithpoint == true)
-		{
-			continue;
+		if (CenterGrid->nearByGridAllWithpoint == true)	{
+			//continue;
 		}
 
 		//清空邻域网格列表
 		nearGrid_List.clear();
 
 		//获取当前网格的八邻域网以及中心网格
-		for (int k = curRowID - 1; k <= curRowID + 1; k++)
-		{
-			for (int j = curColID - 1; j <= curColID + 1; j++)
-			{
-				if ((k == curRowID) && (j == curColID))
-				{
-					//continue;
-				}
-
-				if (k < 0 || j < 0)
-				{
+		for (int k = curRowID - 1; k <= curRowID + 1; ++k){
+			for (int j = curColID - 1; j <= curColID + 1; ++j){
+				if (k < 0 || j < 0)	{
 					continue;
 				}
 
-				if (k >= (curGridNet->Row_Num + 2) || j >= (curGridNet->Col_Num + 2))
-				{
+				if (k >= (m_gridNet->Row_Num + 2) || j >= (m_gridNet->Col_Num + 2)){
 					continue;
 				}
 
-				SingleGrid2D* nearGrid = curGridNet->getGridByRowAndCol(k, j);
+				SingleGrid2D* nearGrid = m_gridNet->getGridByRowAndCol(k, j);
 
-				if (nearGrid == NULL)
-				{
+				if (nearGrid == nullptr || !nearGrid->hasPoint){
 					continue;
 				}
 
-				nearGrid_List.push_back(nearGrid);
-
+				nearGrid_List.emplace_back(nearGrid);
 			}
 		}		
 
 		this->Detect_Shape_line_by_Grid_New(CenterGrid, nearGrid_List, radius);
-
 	}
 }
-
-
-void AlphaShape::Detect_Shape_line_by_Grid(vector<osg::Vec2> near_point_list, vector<osg::Vec2> detect_point_list, float radius){	
-	m_shape_id.clear();
-
-	m_radius = radius;
-
-	for (int i = 0; i < m_points.size(); i++)
-	{
-		for (int k = 0; k < near_point_list.size(); k++)
-		{
-			if (i == k)
-			{
-				continue;
-			}
-
-			float m_distance = Distance_point(m_points[i], near_point_list[k]);
-
-			if (m_distance > 2 * m_radius)
-			{
-				continue;
-			}
-		
-			osg::Vec2 center1, center2;//两外接圆圆心
-
-			osg::Vec2 mid_point = (m_points[i] + near_point_list[k]) / 2;//线段中点
-
-			osg::Vec2 vector_line = m_points[i] - near_point_list[k];//线段的方向向量
-
-			float a = 1.0, b = 1.0;
-			osg::Vec2 normal;
-
-			if (abs(vector_line.x() - 0) < 0.01)
-			{
-				b = 0.0;
-			}
-			else
-			{
-				a = (-b * vector_line.y()) / vector_line.x();
-			}
-
-			normal.set(a, b);//线段的垂直向量
-			normal.normalize();//单位向量化
-
-			float line_length = vector_line.length() / 2.0;
-
-			float length = sqrt(m_radius*m_radius - line_length*line_length);
-			center1 = mid_point + normal*length;
-			center2 = mid_point - normal*length;
-
-			bool hasPointInCircle1 = false, hasPointInCircle2 = false;
-
-			for (int m = 0; m < detect_point_list.size(); m++)
-			{
-				if (m == i || m == k)
-				{
-					continue;
-				}
-
-				if (hasPointInCircle1&&hasPointInCircle2)
-				{
-					break;
-				}
-
-				if (!hasPointInCircle1 && Distance_point(detect_point_list[m], center1) < m_radius)
-				{
-					hasPointInCircle1 = true;
-				}
-
-				if (!hasPointInCircle2 && Distance_point(detect_point_list[m], center2) < m_radius)
-				{
-					hasPointInCircle2 = true;
-				}
-			}
-
-			osg::Vec2 vector_to_center1 = center1 - mid_point;
-			osg::Vec2 vector_to_center2 = center2 - mid_point;
-
-			bool addCircle1 = true;
-			bool addCircle2 = true;
-
-			if (hasPointInCircle1 && hasPointInCircle2)
-			{
-				continue;
-			}
-
-			if (hasPointInCircle1 != true || hasPointInCircle2 != true)
-			{
-				Edge each_edge;
-
-				each_edge.point_A = m_points[i];
-				each_edge.point_B = near_point_list[k];
-				m_edges.push_back(each_edge);
-
-				bool hasPointA = false;
-				bool hasPointB = false;
-
-				for (int j = 0; j < m_shape_id.size(); j++)
-				{
-					if (hasPointA&&hasPointB)
-					{
-						break;
-					}
-
-					if (m_shape_id[j] == i && !hasPointA)
-					{
-						hasPointA = true;
-					}
-
-					if (m_shape_id[j] == k && !hasPointB)
-					{
-						hasPointB = true;
-					}
-				}
-
-				if (!hasPointA)
-				{
-					m_shape_id.push_back(i);
-				}
-
-				if (!hasPointB)
-				{
-					m_shape_id.push_back(k);
-				}
-
-				if (hasPointInCircle1 != true)
-				{
-					Circle each_circle;
-
-					each_circle.m_center = center1;
-					each_circle.m_radius = m_radius;
-					m_circles.push_back(each_circle);
-				}
-
-				if (hasPointInCircle2 != true)
-				{
-					Circle each_circle;
-
-					each_circle.m_center = center2;
-					each_circle.m_radius = m_radius;
-					m_circles.push_back(each_circle);
-				}
-			}
-		}
-	}
-
-	for (int k = 0; k < m_shape_id.size(); k++)
-	{
-		m_shape_points.push_back(near_point_list[m_shape_id[k]]);
-	}
-}
-
 
 void AlphaShape::Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, vector<SingleGrid2D*> nearGrid_List, float radius){
 	m_radius = radius;
@@ -1383,15 +1038,14 @@ static bool checkPointSame(osg::Vec2 pointA, osg::Vec2 pointB) {
 }
 
 
+//用于多线程处理
 static std::mutex all_mutex;
 static std::vector<osg::Vec2> all_shape_points;
-//轮廓线列表
 static std::vector<Edge> all_edges;
-//检测圆列表
 static std::vector<Circle> all_circles;
 static int all_point_pair_N;
 
-//用于多线程处理
+//基于网格筛选的alpha shape处理函数，供多线程调用
 void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & centerGridList, const std::vector<SingleGrid2D*> & allGridList){
 	thread_local int cur_point_pair_N = 0;
 

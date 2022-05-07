@@ -1294,6 +1294,13 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	m_radius = new QLineEdit(ProjectToXY_dialog);
 	m_radius->setFixedSize(100, 30);
 
+	QLabel *m_label_grid_radius = new QLabel(ProjectToXY_dialog);
+	m_label_grid_radius->setText("Radius:");
+	m_label_grid_radius->setFixedSize(100, 30);
+
+	m_grid_radius = new QLineEdit(ProjectToXY_dialog);
+	m_grid_radius->setFixedSize(100, 30);	
+
 	QPushButton * detect_shape_using_GridNet = new QPushButton("Grid Shape", ProjectToXY_dialog);
 	detect_shape_using_GridNet->setFixedSize(100, 30);
 	connect(detect_shape_using_GridNet, SIGNAL(clicked()), this, SLOT(slot_DetectPointShapeUsingGridNet()));
@@ -1376,6 +1383,10 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 
 	QWidget * grid_tab_widget = new QWidget();
 	QVBoxLayout * grid_layout = new QVBoxLayout();
+	grid_layout->addStretch(0);
+	grid_layout->addWidget(m_label_grid_radius, 0);
+	grid_layout->addStretch(0);
+	grid_layout->addWidget(m_grid_radius, 0);
 	grid_layout->addStretch(0);
 	grid_layout->addWidget(m_label_grid_Row, 0);
 	grid_layout->addStretch(0);
@@ -1711,8 +1722,8 @@ void OsgQtTest::slot_DetectPointShapeUsingGridNet() {
 
 	AlphaShape * alpha = new AlphaShape(m_gridNet);
 	float radius = 0.0;
-	if (m_radius) {
-		radius = m_radius->text().toFloat();
+	if (m_grid_radius) {
+		radius = m_grid_radius->text().toFloat();
 	}
 	
 	alpha->Detect_Shape_By_GridNet_New(radius);
@@ -1724,18 +1735,20 @@ void OsgQtTest::slot_DetectPointShapeUsingGridNet() {
 	PaintArea *Project_widget_Circle_And_Edge = new PaintArea();
 	Project_widget_Circle_And_Edge->setFixedSize(660, 660);
 	Project_widget_Circle_And_Edge->setVisible(true);
+	Project_widget_Circle_And_Edge->setAttribute(Qt::WA_DeleteOnClose);
 	Project_widget_Circle_And_Edge->drawAxis();
 
 	PaintArea *Project_widget_Point = new PaintArea();
 	Project_widget_Point->setFixedSize(660, 660);
 	Project_widget_Point->setVisible(true);
+	Project_widget_Point->setAttribute(Qt::WA_DeleteOnClose);
 	Project_widget_Point->drawAxis();
 
 	vector<osg::Vec3> circle_list;
 	vector<int> Size_List;
 
 	for (const auto & curCricle : alpha->m_circles)	{
-		Size_List.push_back(curCricle.size);
+		Size_List.push_back(curCricle.m_size);
 		circle_list.emplace_back(osg::Vec3(curCricle.m_center, curCricle.m_radius));
 	}
 
@@ -1744,9 +1757,11 @@ void OsgQtTest::slot_DetectPointShapeUsingGridNet() {
 
 	int shape_num = alpha->m_shape_points.size();
 	QPointF *shape_point = new QPointF[shape_num];
-	
-	Project_widget->drawLines(alpha->m_edges);
-	Project_widget->drawPoints(shape_point, shape_num, 3, Qt::black);
+	int pointID = -1;
+	for (const auto & curP : alpha->m_shape_points) {
+		shape_point[++pointID] = QPointF(curP.x(), curP.y());
+	}
+
 	Project_widget_Point->drawPoints(shape_point, shape_num, 2, Qt::red);
 
 	return;

@@ -49,13 +49,19 @@ struct Edge {
 struct Circle {
 	osg::Vec2 m_center;
 	float m_radius;
-	int size;
+	int m_size;
 
 	Circle() = default;
 
 	Circle(const osg::Vec2 & center, float radius) {
 		this->m_center = center;
 		this->m_radius = radius;
+	}
+
+	Circle(const osg::Vec2 & center, float radius, int size) {
+		this->m_center = center;
+		this->m_radius = radius;
+		this->m_size = size;
 	}
 
 	bool operator <(const Circle & other) const {
@@ -225,7 +231,7 @@ public:
 	void Detect_Alpha_Shape_by_Grid(float radius);
 
 	//根据生成的网格和半径，以及邻域点云检测边界线，传递值为网格列表
-	void Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, std::vector<SingleGrid2D*> nearGrid_List, float radius);
+	void Detect_Shape_line_by_Grid_New(float radius, const std::vector<SingleGrid2D*> & allGridList);
 
 	//根据生成的网格和半径检测边界(新)
 	void Detect_Shape_By_GridNet_New(float radius);

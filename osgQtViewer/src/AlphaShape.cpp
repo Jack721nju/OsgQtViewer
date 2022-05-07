@@ -2,6 +2,21 @@
 
 using namespace std;
 
+//用于多线程处理
+static std::mutex all_mutex;
+static std::vector<osg::Vec2> all_shape_points;
+static std::vector<Edge> all_edges;
+static std::vector<Circle> all_circles;
+static int all_point_pair_N;
+
+static bool checkPointSame(osg::Vec2 pointA, osg::Vec2 pointB) {
+	if ((pointA - pointB).length() < 0.000001) {
+		return true;
+	}
+	return false;
+}
+
+
 //获取给定点云数据的XY最大最小范围
 point_MAXMIN* getMinMaxXYZ(const PointV2List & all_list) {
 	point_MAXMIN * Max_area = new point_MAXMIN;
@@ -698,354 +713,159 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 }
 
 void AlphaShape::Detect_Shape_By_GridNet_New(float radius) {
-	if (m_gridNet == nullptr)	{
+	if (nullptr == m_gridNet){
 		return;
 	}
 
-	vector<SingleGrid2D*> nearGrid_List;
-		
-	for (const auto & CenterGrid : m_gridNet->Grid_list) {
-		int curRowID = CenterGrid->curGridInfo.m_Row;
-		int curColID = CenterGrid->curGridInfo.m_Col;
-
-		//当前网格内无点
-		if (CenterGrid->hasPoint == false){
-			continue;
-		}
-
-		//当前网格的八邻域网格均含有点
-		if (CenterGrid->nearByGridAllWithpoint == true)	{
-			//continue;
-		}
-
-		//清空邻域网格列表
-		nearGrid_List.clear();
-
-		//获取当前网格的八邻域网以及中心网格
-		for (int k = curRowID - 1; k <= curRowID + 1; ++k){
-			for (int j = curColID - 1; j <= curColID + 1; ++j){
-				if (k < 0 || j < 0)	{
-					continue;
-				}
-
-				if (k >= (m_gridNet->Row_Num + 2) || j >= (m_gridNet->Col_Num + 2)){
-					continue;
-				}
-
-				SingleGrid2D* nearGrid = m_gridNet->getGridByRowAndCol(k, j);
-
-				if (nearGrid == nullptr || !nearGrid->hasPoint){
-					continue;
-				}
-
-				nearGrid_List.emplace_back(nearGrid);
-			}
-		}		
-
-		this->Detect_Shape_line_by_Grid_New(CenterGrid, nearGrid_List, radius);
-	}
+	this->Detect_Shape_line_by_Grid_New(radius, m_gridNet->Grid_list);
 }
 
-void AlphaShape::Detect_Shape_line_by_Grid_New(SingleGrid2D* centerGrid, vector<SingleGrid2D*> nearGrid_List, float radius){
-	m_radius = radius;
+//方法四：基于方法二，不同之处在于滚动圆的检测半径可变
+void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<SingleGrid2D*> & allGridList) {
+	all_edges.clear();
+	all_circles.clear();
+	all_shape_points.clear();
+	all_point_pair_N = 0;	
+	
+	float scaleRate = 0.8;
 
+	int cur_point_pair_N = 0;
+
+	PointV2List cur_shape_points;
+	std::vector<Circle> cur_circles;
+	std::vector<Edge> cur_edges;
+
+	std::vector<osg::Vec2> detectAreaAllPointList;
 	int circleSize = 0;
 
-	vector<osg::Vec2> near_point_list;
-	vector<osg::Vec2> detect_point_list;
-
-	if (centerGrid)
-	{
-		//表示当前中心网格已处于被检测过的状态
-		centerGrid->hasDetected = true;
-	}
-	else
-	{
-		return;
-	}
-
-	//当前网格不平滑，需要缩小检测半径，检测更为细致
-	if (centerGrid->isSmoothGrid == false)
-	{
-		circleSize = centerGrid->SmoothDegree;
-
-		if (circleSize == 1)
-		{
-			m_radius = radius * 0.6;
-		}
-
-		if (circleSize == 2)
-		{
-			m_radius = radius * 0.6 * 0.6;
-		}
-	}
-	else
-	{
-		m_radius = radius;
-		circleSize = 0;
-	}
-
-	printf("The distace of curGrid and nearGrid is =========== %f \n", m_radius);
-	
-	//主点列表清空
-	m_points.clear();
-
-	int pointNum = centerGrid->PointList.size();
-
-	//当前中心窗口内所有的点都作为检测判定主点
-	for (int n = 0; n < pointNum; n++)
-	{
-		float curPointX = centerGrid->PointList[n].x();
-		float curPointY = centerGrid->PointList[n].y();
-
-		osg::Vec2 curPoint(curPointX, curPointY);
-
-		m_points.push_back(curPoint);
-	}
-
-	//中心网格内点数量为0
-	if (m_points.size() < 1)
-	{
-		return;
-	}
-
-	//当前所有的点都作为检测判定副点
-	for (int t = 0; t < nearGrid_List.size(); t++)
-	{
-		SingleGrid2D* curGrid = nearGrid_List[t];
-
-		if (curGrid->hasPoint == true)
-		{
-			for (int m = 0; m < curGrid->cur_PointNum; m++)
-			{
-				float curPointX = curGrid->PointList[m].x();
-				float curPointY = curGrid->PointList[m].y();
-
-				osg::Vec2 detectPoint(curPointX, curPointY);
-				detect_point_list.push_back(detectPoint);
-			}
-		}
-	}
-
-	//逐一遍历所有邻域网格
-	for (int t = 0; t < nearGrid_List.size(); t++)
-	{
-		SingleGrid2D* nearGrid = nearGrid_List[t];
-
-		near_point_list.clear();//邻域网格的副点列表需要清空
-
-		//当前邻域网格点数量为0
-		if (nearGrid->hasPoint == false)
-		{
+	for (const auto & centerGrid : allGridList) {
+		if (centerGrid->hasPoint == false) {
 			continue;
 		}
 
-		//当前邻域网格的八邻域网格均含有点
-		if (nearGrid->nearByGridAllWithpoint == true)
-		{
-			//continue;
+		//若邻域网格内点数量较少且较为离散，可能会出现漏检情况，所以最好别跳过
+		if (centerGrid->nearByGridAllWithpoint) {
+			continue;
 		}
 
 		//当前网格不平滑，需要缩小检测半径，检测更为细致
-		if (nearGrid->isSmoothGrid == false)
-		{
-			//int NearCircleSize = nearGrid->SmoothDegree;
-
-			//if (NearCircleSize == 1)
-			//{
-			//	m_radius = radius * 0.8;
-			//}
-
-			//if (NearCircleSize == 2)
-			//{
-			//	m_radius = radius * 0.8 * 0.8;
-			//}
-		}
-
-		if (nearGrid->hasPoint == true)
-		{
-			for (int m = 0; m < nearGrid->cur_PointNum; m++)
-			{
-				float nearPointX = nearGrid->PointList[m].x();
-				float nearPointY = nearGrid->PointList[m].y();
-
-				osg::Vec2 nearPoint(nearPointX, nearPointY);
-				near_point_list.push_back(nearPoint);
+		if (centerGrid->isSmoothGrid == false)	{
+			circleSize = centerGrid->SmoothDegree;
+		
+			if (circleSize == 1){
+				m_radius = radius * scaleRate;
+			}
+		
+			if (circleSize == 2){
+				m_radius = radius * scaleRate * scaleRate;
 			}
 		}
-		
-		//逐一判断邻域网格与中心网格的离散点的主副点
-		for (int i = 0; i < m_points.size(); i++){
-			for (int k = 0; k < near_point_list.size(); k++)
-			{
-				float m_distance = Distance_point(m_points[i], near_point_list[k]);
+		else {
+			m_radius = radius;
+			circleSize = 0;
+		}
 
-				//两点距离过大
-				if (m_distance > 2 * m_radius)
-				{
+		detectAreaAllPointList.clear();
+		detectAreaAllPointList.insert(detectAreaAllPointList.end(), centerGrid->PointList.begin(), centerGrid->PointList.end());
+		for (const auto nearGirdID : centerGrid->connectGridID_List) {
+			const auto & curNearGrid = allGridList[nearGirdID];
+			if (nullptr == curNearGrid || !curNearGrid->hasPoint) {
+				continue;
+			}
+			detectAreaAllPointList.insert(detectAreaAllPointList.end(), curNearGrid->PointList.begin(), curNearGrid->PointList.end());
+		}
+
+		for (const auto & centerPoint : centerGrid->PointList) {
+			bool isAddToShape = false;
+			for (const auto & outPoint : detectAreaAllPointList) {
+				if (Distance_point(centerPoint, outPoint) > 2 * m_radius) {
 					continue;
 				}
 
-				//距离过小，视同一个点
-				if (m_distance < 0.000001)
-				{
+				if (checkPointSame(centerPoint, outPoint)) {
 					continue;
 				}
 
-				osg::Vec2 center1, center2;//两外接圆圆心
+				++cur_point_pair_N;
 
-				osg::Vec2 mid_point = (m_points[i] + near_point_list[k]) / 2;//线段中点
-
-				osg::Vec2 vector_line = m_points[i] - near_point_list[k];//线段的方向向量
+				const osg::Vec2 &mid_point = (centerPoint + outPoint) / 2;//线段中点
+				const osg::Vec2 &vector_line = centerPoint - outPoint;//线段的方向向量
 
 				float a = 1.0, b = 1.0;
-				osg::Vec2 normal;
 
-				if (abs(vector_line.x() - 0) < 0.01)
-				{
+				if (abs(vector_line.x()) < 0.001) {
 					b = 0.0;
 				}
-				else
-				{
+				else {
 					a = (-b * vector_line.y()) / vector_line.x();
 				}
 
-				normal.set(a, b);//线段的垂直向量
+				//线段的垂直向量
+				osg::Vec2 normal(a, b);
 				normal.normalize();//单位向量化
 
 				float line_length = vector_line.length() / 2.0;
+				float length = sqrt(std::pow(radius, 2) - std::pow(line_length, 2));
 
-				float length = sqrt(m_radius*m_radius - line_length*line_length);
-				center1 = mid_point + normal*length;
-				center2 = mid_point - normal*length;
+				//两外接圆圆心
+				const osg::Vec2 &center1 = mid_point + normal * length;
+				const osg::Vec2 &center2 = mid_point - normal * length;
 
 				bool hasPointInCircle1 = false, hasPointInCircle2 = false;
 
-				//判断是否有检测点落在检测圆内
-				for (int m = 0; m < detect_point_list.size(); m++)
-				{
-					float m_distance1 = Distance_point(m_points[i], detect_point_list[m]);
-					float m_distance2 = Distance_point(near_point_list[k], detect_point_list[m]);
+				for (const auto & checkPoint : detectAreaAllPointList) {
 
-					if (m_distance1 < 0.000001 || m_distance2 < 0.000001)
-					{
+					if (checkPointSame(centerPoint, checkPoint) ||
+						checkPointSame(outPoint, checkPoint)) {
 						continue;
 					}
 
-					if (hasPointInCircle1&&hasPointInCircle2)
-					{
+					if (hasPointInCircle1 && hasPointInCircle2) {
 						break;
 					}
 
-					if (!hasPointInCircle1 && Distance_point(detect_point_list[m], center1) < m_radius)
-					{
+					if (!hasPointInCircle1 && Distance_point(checkPoint, center1) < m_radius) {
 						hasPointInCircle1 = true;
 					}
 
-					if (!hasPointInCircle2 && Distance_point(detect_point_list[m], center2) < m_radius)
-					{
+					if (!hasPointInCircle2 && Distance_point(checkPoint, center2) < m_radius) {
 						hasPointInCircle2 = true;
 					}
 				}
 
-				osg::Vec2 vector_to_center1 = center1 - mid_point;
-				osg::Vec2 vector_to_center2 = center2 - mid_point;
+				if (!hasPointInCircle1 || !hasPointInCircle2) {
+					cur_edges.emplace_back(Edge(centerPoint, outPoint));
 
-				bool addCircle1 = true;
-				bool addCircle2 = true;
-
-				//若内、外侧圆均含有落点，则直接跳过
-				if (hasPointInCircle1 && hasPointInCircle2)	{
-					continue;
-				}
-
-				//若没有落点在圆内，则继续操作
-				if (hasPointInCircle1 != true || hasPointInCircle2 != true)	{
-					bool hasPointA = false;
-					bool hasPointB = false;
-				
-					//判断是否有重复边界点
-					for (int j = 0; j < m_shape_points.size(); j++)
-					{
-						float disA = Distance_point(m_shape_points[j], m_points[i]);
-						float disB = Distance_point(m_shape_points[j], near_point_list[k]);
-
-						if (disA < 0.000001)
-						{
-							hasPointA = true;
-						}
-
-						if (disB < 0.000001)
-						{
-							hasPointB = true;
-						}
+					if (false == hasPointInCircle1) {
+						cur_circles.emplace_back(Circle(center1, m_radius, circleSize));
 					}
 
-					if (hasPointA == false)
-					{
-						m_shape_points.push_back(m_points[i]);
+					if (false == hasPointInCircle2) {
+						cur_circles.emplace_back(Circle(center2, m_radius, circleSize));
 					}
 
-					if (hasPointB == false)
-					{
-						m_shape_points.push_back(near_point_list[k]);
+					if (false == isAddToShape) {
+						cur_shape_points.emplace_back(centerPoint);
+						isAddToShape = true;
 					}
-
-					Edge each_edge;
-
-					each_edge.point_A = m_points[i];
-					each_edge.point_B = near_point_list[k];
-					
-					//录入边界线和检测圆
-					{
-						m_edges.push_back(each_edge);
-
-						if (hasPointInCircle1 != true)
-						{
-							Circle each_circle;
-
-							each_circle.m_center = center1;
-							each_circle.m_radius = m_radius;
-							each_circle.size = circleSize;
-
-							m_circles.push_back(each_circle);
-						}
-
-						if (hasPointInCircle2 != true)
-						{
-							Circle each_circle;
-
-							each_circle.m_center = center2;
-							each_circle.m_radius = m_radius;
-							each_circle.size = circleSize;
-
-							m_circles.push_back(each_circle);
-						}
-					}
-
 				}
 			}
 		}
-
 	}
+	
+	all_edges.insert(all_edges.end(), cur_edges.begin(), cur_edges.end());
+	all_circles.insert(all_circles.end(), cur_circles.begin(), cur_circles.end());
+	m_shape_points.insert(m_shape_points.end(), cur_shape_points.begin(), cur_shape_points.end());
+	all_point_pair_N += cur_point_pair_N;	
+
+	std::set<Edge> edge_set(all_edges.begin(), all_edges.end());
+	m_edges.assign(edge_set.begin(), edge_set.end());
+
+	std::set<Circle> circle_set(all_circles.begin(), all_circles.end());
+	m_circles.assign(circle_set.begin(), circle_set.end());
 }
 
-static bool checkPointSame(osg::Vec2 pointA, osg::Vec2 pointB) {
-	if ((pointA - pointB).length() < 0.000001) {
-		return true;
-	}
-	return false;
-}
-
-
-//用于多线程处理
-static std::mutex all_mutex;
-static std::vector<osg::Vec2> all_shape_points;
-static std::vector<Edge> all_edges;
-static std::vector<Circle> all_circles;
-static int all_point_pair_N;
-
-//基于网格筛选的alpha shape处理函数，供多线程调用
+//方法三的子函数：基于网格筛选的alpha shape处理函数，供多线程调用
 void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & centerGridList, const std::vector<SingleGrid2D*> & allGridList){
 	thread_local int cur_point_pair_N = 0;
 
@@ -1060,9 +880,9 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 			continue;
 		}
 
-		//若邻域网格内点数量较少且较为离散，可能会出现漏检情况
+		//若邻域网格内点数量较少且较为离散，可能会出现漏检情况，所以最好别跳过
 		if (centerGrid->nearByGridAllWithpoint) {
-			//continue;
+			continue;
 		}
 
 		detectAreaAllPointList.clear();
@@ -1153,12 +973,7 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 		}
 	}
 
-	//thread_local std::set<Edge> edge_set(cur_edges.begin(), cur_edges.end());
-	//cur_edges.assign(edge_set.begin(), edge_set.end());
-
-	//thread_local std::set<Circle> circle_set(cur_circles.begin(), cur_circles.end());
-	//cur_circles.assign(circle_set.begin(), circle_set.end());
-
+	//加锁，避免多线程资源冲突
 	{
 		std::lock_guard<std::mutex> lock(all_mutex);
 		all_edges.insert(all_edges.end(), cur_edges.begin(), cur_edges.end());
@@ -1168,7 +983,7 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 	}
 }
 
-
+//方法三：基于方法二，利用多线程进行加速
 void AlphaShape::Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threadNum) {
 	if (nullptr == m_gridNet) {
 		return;
@@ -1215,6 +1030,7 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threa
 	this->point_pair_scale = (float)(all_point_pair_N * 2) / (point_num*(point_num - 1));
 }
 
+//方法二：构造二维格网，仅对3x3窗口网格内的点进行alpha shape检测，从而提升检测效率
 void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 	if (nullptr == m_gridNet) {
 		return;
@@ -1241,7 +1057,7 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 
 		//若邻域网格内点数量较少且较为离散，可能会出现漏检情况
 		if (centerGrid->nearByGridAllWithpoint) {
-			//continue;
+			continue;
 		}
 
 		detectAreaAllPointList.clear();
@@ -1340,7 +1156,7 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 	this->point_pair_scale = (float)(point_pair_N * 2) / (point_num*(point_num - 1));
 }
 
-//常规的Alpha Shapes算法
+//方法一：常规的Alpha Shapes算法
 void AlphaShape::Detect_Shape_line(float radius) {
 	m_radius = radius;
 	int point_pair_N = 0;
@@ -1351,7 +1167,7 @@ void AlphaShape::Detect_Shape_line(float radius) {
 	m_shape_id_set.reserve(point_num);
 	m_shape_points.clear();
 	m_shape_points.reserve(point_num);
-
+	m_edges.clear();
 	m_circles.clear();
 
 	for (int i = 0; i < point_num; ++i){

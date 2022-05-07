@@ -158,17 +158,17 @@ void PaintArea::drawCircles(const vector<osg::Vec3> &circle_list, const vector<i
 		int radius = (int)(circle_list[i].z());
 
 		switch (Size_List[i]) {
-		case 0 :
-			pen.setColor(QColor(0, 255, 0, 100));
-			break;
-		case 2:
-			pen.setColor(QColor(0, 0, 200, 200));
-			break;
-		case 3:
-			pen.setColor(QColor(250, 100, 0));
-			break;
-		default:
-			break;
+			case 0 :
+				pen.setColor(QColor(0, 255, 0, 100));
+				break;
+			case 2:
+				pen.setColor(QColor(0, 0, 200, 200));
+				break;
+			case 3:
+				pen.setColor(QColor(250, 100, 0));
+				break;
+			default:
+				break;
 		}
 
 		painter.setPen(pen);

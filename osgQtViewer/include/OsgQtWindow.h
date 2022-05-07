@@ -92,6 +92,8 @@ private:
 
 	QLineEdit *m_radius;
 
+	QLineEdit *m_grid_radius;
+
 	PointV2List pointlist_bulidGrid2D;
 
 	GridNet* m_gridNet{nullptr};

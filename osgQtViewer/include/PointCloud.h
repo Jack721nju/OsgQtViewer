@@ -179,6 +179,10 @@ public:
 
 	void removePointCloud(PointCloud* pcloud);
 
+	void removeSeletedPointCloud();
+
+	void removeAllPointCloud();
+
 	void removePointCloud(const std::string & pName);
 
 	void setShowPointCloud(const std::string & pName, bool isShow);

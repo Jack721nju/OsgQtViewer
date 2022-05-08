@@ -131,6 +131,8 @@ public slots:
 
 	void slot_SaveData();
 
+	void slot_DeleteData();
+
 	void slot_UpdateProgress(int progressValue);
 
 	void slot_FisishReadProgress();
@@ -172,6 +174,18 @@ public slots:
 	void slot_Build2DGridForPoints();
 
 	void slot_DetectPointShapeUsingGridNet();
+
+	void slot_ShowItemMenuSlot(const QPoint& pos);
+
+	void slot_addItem();
+
+	void slot_saveItem();
+
+	void slot_deleteItem();
+
+	void slot_renameItem();
+
+	void slot_deleteAllItem();
 
 public:
 	void ReadLasData(const std::string & fileName);

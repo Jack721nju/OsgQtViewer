@@ -538,30 +538,43 @@ PointCloud * PCloudManager::addPointCloud(const std::string & pName) {
 	return pcloud;
 }
 
+void PCloudManager::removeSeletedPointCloud() {
+	for (const auto & curP : selected_pcloud_list) {
+		this->removePointCloud(curP);
+	}
+	selected_pcloud_list.clear();
+}
+
+void PCloudManager::removeAllPointCloud() {
+	for (const auto & iter : all_pcloud_map) {
+		this->removePointCloud(iter.second);
+	}
+	selected_pcloud_list.clear();
+	all_pcloud_map.clear();
+}
+
 void PCloudManager::removePointCloud(PointCloud* pcloud) {
 	if (pcloud) {
-		auto iter = all_pcloud_map.begin();
-		while (iter != all_pcloud_map.end()) {
-			if (iter->first == pcloud->getName()) {
-				all_pcloud_map.erase(iter++);
-				break;
-			}
-			iter++;
+		auto iter = all_pcloud_map.find(pcloud->getName());
+		if (iter != all_pcloud_map.end()) {
+			all_pcloud_map.erase(iter++);
 		}
+		pcloud->removeDrawables(0, pcloud->getNumDrawables());
 		m_root->removeChild(pcloud);
+		pcloud = nullptr;
 	}
 }
 
 void PCloudManager::removePointCloud(const std::string & pName) {
 	if (!pName.empty()) {
-		auto iter = all_pcloud_map.begin();
-		while (iter != all_pcloud_map.end()) {
-			if (iter->first == pName) {
-				all_pcloud_map.erase(iter++);
-				break;
-			}
-			iter++;
+		auto iter = all_pcloud_map.find(pName);
+		PointCloud * curP = iter->second;
+		if (iter != all_pcloud_map.end()) {
+			all_pcloud_map.erase(iter++);
 		}
+		curP->removeDrawables(0, curP->getNumDrawables());
+		m_root->removeChild(curP);
+		curP = nullptr;
 	}
 }
 
@@ -658,7 +671,6 @@ void PCloudManager::saveSelectedToFile(const std::string & saveFileName) {
 		header.point_data_record_length = 28;
 		header.number_of_point_records = allPointNum;
 		LASwriter *writer = writerOpener.open(&header);
-		//header.set_bounding_box();
 
 		LASpoint point;
 		point.init(&header, header.point_data_format, header.point_data_record_length, nullptr);

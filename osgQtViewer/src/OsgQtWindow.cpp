@@ -444,6 +444,8 @@ void OsgQtTest::Init_Data_Manager_Widget() {
 	connect(Data_TreeWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(slot_RefreshData_TreeWidget(QTreeWidgetItem*, int)));
 	connect(Data_TreeWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(slot_Update_Data_Info_Widget(QTreeWidgetItem*, int)));
 
+	connect(Data_TreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slot_ShowItemMenuSlot(const QPoint&)));
+
 	Data_TreeWidget->viewport()->installEventFilter(this);
 
 	Dock_Data_Widget = new QDockWidget();
@@ -453,6 +455,124 @@ void OsgQtTest::Init_Data_Manager_Widget() {
 	Dock_Data_Widget->setFeatures(QDockWidget::AllDockWidgetFeatures);
 
 	this->addDockWidget(Qt::LeftDockWidgetArea, Dock_Data_Widget);
+}
+
+void OsgQtTest::slot_ShowItemMenuSlot(const QPoint& pos){
+	if (nullptr == Data_TreeWidget) {
+		return;
+	}
+
+	QTreeWidgetItem* curClickItem = Data_TreeWidget->currentItem();
+	if (nullptr == curClickItem) {
+		return;
+	}
+
+	const QString &curName = curClickItem->text(0);
+
+	if (curName != "DIR") {
+		QAction saveItem(QString::fromLocal8Bit("&Save Item"), Data_TreeWidget);
+		QAction deleteItem(QString::fromLocal8Bit("&Delete Item"), Data_TreeWidget);
+		QAction renameItem(QString::fromLocal8Bit("&Rename Item"), Data_TreeWidget);
+
+		saveItem.setIcon(QIcon(Icon_Path + QString("item_save.png")));
+		deleteItem.setIcon(QIcon(Icon_Path + QString("item_delete.png")));
+		renameItem.setIcon(QIcon(Icon_Path + QString("item_rename.png")));
+
+		connect(&saveItem, SIGNAL(triggered()), this, SLOT(slot_saveItem()));
+		connect(&deleteItem, SIGNAL(triggered()), this, SLOT(slot_deleteItem()));
+		connect(&renameItem, SIGNAL(triggered()), this, SLOT(slot_renameItem()));
+
+		QMenu* menu = new QMenu(Data_TreeWidget);
+		menu->addAction(&saveItem);
+		menu->addAction(&deleteItem);
+		menu->addAction(&renameItem);
+		menu->exec(QCursor::pos());
+	} else  {
+		QAction addItem(QString::fromLocal8Bit("&Add Item"), Data_TreeWidget);
+		QAction deleteAllItem(QString::fromLocal8Bit("&Delete all items"), Data_TreeWidget);
+
+		addItem.setIcon(QIcon(Icon_Path + QString("item_add.png")));
+		deleteAllItem.setIcon(QIcon(Icon_Path + QString("item_delete.png")));
+
+		connect(&addItem, SIGNAL(triggered()), this, SLOT(slot_addItem()));
+		connect(&deleteAllItem, SIGNAL(triggered()), this, SLOT(slot_deleteAllItem()));
+
+		QMenu* DirMenu = new QMenu(Data_TreeWidget);
+		DirMenu->addAction(&addItem);
+		DirMenu->addAction(&deleteAllItem);
+		DirMenu->exec(QCursor::pos());
+	}
+}
+
+void OsgQtTest::slot_addItem() {
+	if (nullptr == Data_TreeWidget) {
+		return;
+	}
+
+	QTreeWidgetItem* curItem = Data_TreeWidget->currentItem();
+	if (nullptr == curItem) {
+		return;
+	}
+
+	this->slot_OpenData();
+}
+
+void OsgQtTest::slot_saveItem() {
+	if (nullptr == Data_TreeWidget) {
+		return;
+	}
+
+	QTreeWidgetItem* curItem = Data_TreeWidget->currentItem();
+	if (nullptr == curItem) {
+		return;
+	}
+
+	this->slot_SaveData();
+}
+
+void OsgQtTest::slot_deleteItem() {
+	if (nullptr == Data_TreeWidget) {
+		return;
+	}
+
+	this->slot_DeleteData();
+
+	for (auto & selectedItem : Data_TreeWidget->selectedItems()) {
+		if (selectedItem->text(0) == "DIR") {
+			continue;
+		}
+		Data_TreeWidget->removeItemWidget(selectedItem, 0);
+		delete selectedItem;
+		selectedItem = nullptr;
+	}
+}
+
+void OsgQtTest::slot_renameItem() {
+	if (nullptr == Data_TreeWidget) {
+		return;
+	}
+}
+
+void OsgQtTest::slot_deleteAllItem() {
+	if (nullptr == Data_TreeWidget) {
+		return;
+	}
+
+	PCloudManager::Instance()->removeAllPointCloud();
+
+	QTreeWidgetItem * topItem = Data_TreeWidget->topLevelItem(0);
+	if (topItem->text(0) != "DIR") {
+		return;
+	}
+
+	while (topItem->childCount() > 0){
+		QTreeWidgetItem * curItem = topItem->child(0);
+		Data_TreeWidget->removeItemWidget(curItem, 0);
+		delete curItem;
+		curItem = nullptr;
+	}
+
+	this->AddToConsoleSlot(QString("[I/O] Remove all files successfully"));	
 }
 
 void OsgQtTest::AddNodeToDataTree(const std::string & nodeName, int type) {
@@ -494,8 +614,6 @@ void OsgQtTest::slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col) {
 			PCloudManager::Instance()->setShowPointCloud(item->text(0).toStdString(), true);
 		}
 	}
-
-
 }
 
 void OsgQtTest::slot_Clear_Data_Info_Widget() {
@@ -784,10 +902,25 @@ bool OsgQtTest::hasSelectedPcloud() {
 	return false;
 }
 
+//删除当前所有选中文件
+void OsgQtTest::slot_DeleteData() {
+	//判断是否已选择目标点云
+	if (false == hasSelectedPcloud()) {
+		this->AddToConsoleSlot("[WARING] Can not delete, no data was selected");
+		return;
+	}
+
+	for (const auto & curPCloud : PCloudManager::Instance()->selected_pcloud_list) {
+		PCloudManager::Instance()->removePointCloud(curPCloud);
+		this->AddToConsoleSlot(QString("[I/O] Remove file <") + QString::fromStdString(curPCloud->getName()) + QString("> successfully"));
+	}	
+}
+
+//保存当前选中文件
 void OsgQtTest::slot_SaveData() {
 	//判断是否已选择目标点云
 	if (false == hasSelectedPcloud()) {
-		this->AddToConsoleSlot("[WARING] Can not save, no data selected");
+		this->AddToConsoleSlot("[WARING] Can not save, no data was selected");
 		return;
 	}
 

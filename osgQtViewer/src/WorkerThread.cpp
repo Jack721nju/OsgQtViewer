@@ -51,17 +51,8 @@ void WorkerThread::runLas() {
 }
 
 void WorkerThread::runTxt() {
-	readPcloud->readPoints(fileName, m_Rate, b_Stop);
+	readPcloud->readTxtData(fileName, m_Rate, b_Stop);
 }
-
-
-
-
-
-
-
-
-
 
 
 int MyQtWorker::m_rate = -1;
@@ -80,10 +71,6 @@ MyQtWorker::~MyQtWorker() {
 	m_thread.exit();
 }
 
-void MyQtWorker::progressCallback() {
-
-}
-
 void MyQtWorker::updateRate() {
 	emit this->progress(m_rate);
 }
@@ -95,7 +82,7 @@ void MyQtWorker::start() {
 void MyQtWorker::doMyJob() {
 	if (m_Pcloud) {
 		bool isCancel = false;
-		m_Pcloud->readPoints(m_fileName, m_rate, isCancel);
+		m_Pcloud->readTxtData(m_fileName, m_rate, isCancel);
 	}
 	emit done();
 }

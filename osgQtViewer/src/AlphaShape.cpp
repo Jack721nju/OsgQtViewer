@@ -727,7 +727,7 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<S
 	all_shape_points.clear();
 	all_point_pair_N = 0;	
 	
-	float scaleRate = 0.8;
+	float scaleRate = 0.8f;
 
 	int cur_point_pair_N = 0;
 

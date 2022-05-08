@@ -26,6 +26,7 @@ enum POINT_FILE_TYPE {
 	LAS = 0,
 	TXT = 1,
 	TXT_COLOR = 2,
+	PCD = 3,
 	UNKNOWN
 };
 
@@ -48,7 +49,10 @@ private:
 	osg::ref_ptr<osg::Geometry> geo_point;//点数据几何体指针
 
 	osg::ref_ptr<osg::Geode> geo_bounding_node;
+
 	osg::ref_ptr<osg::Geometry> geo_bounding_box;//外接矩形框几何体指针
+
+	bool hasBuildBox{false};
 
 	QColor point_color;
 	POINT_FILE_TYPE m_Type;
@@ -58,8 +62,20 @@ private:
 
 private:
 	void clearData() {
+		point_num = 0;
+		point_size = 1.0;
+		point_name = "";
+
 		this->removeDrawables(0, this->getNumDrawables());//剔除节点内所有的几何体
 		geo_point = nullptr;
+
+		if (geo_bounding_node) {
+			geo_bounding_node->removeDrawables(0, this->getNumDrawables());
+			geo_bounding_box = nullptr;
+		}
+
+		this->removeChild(geo_bounding_node);
+		geo_bounding_node = nullptr;
 	}
 
 	void initBoundingBox();
@@ -124,8 +140,7 @@ public:
 	}
 
 	void setPointColor(const QColor & color) {
-		if (geo_point)
-		{
+		if (geo_point) {
 			osg::ref_ptr<osg::Vec4Array> colorList = new osg::Vec4Array;//创建颜色数组,逆时针排序
 			osg::Vec4 new_color(color.red() / 255., color.green() / 255., color.blue() / 255., color.alpha() / 255.);
 			colorList->push_back(new_color);
@@ -152,11 +167,13 @@ public:
 
 	void readLasData(const std::string & openfileName);
 
-	void PointCloud::readLasDataByLibLas(const std::string & openfileName);
+	void readLasDataByLibLas(const std::string & openfileName);
 
 	void readLasData(const std::string & openfileName, int & rate, bool & isCancel);
 
-	void readPoints(const std::string & openfileName, int & rate, bool & isCancel);
+	void readTxtData(const std::string & openfileName, int & rate, bool & isCancel);
+
+	void readPCDData(const std::string & openfileName);
 };
 
 class PCloudManager {

@@ -19,8 +19,7 @@
 #include <atomic>
 #include "PointCloud.h"
 
-class WorkerThread : public QThread
-{
+class WorkerThread : public QThread {
 	Q_OBJECT
 
 public:
@@ -58,15 +57,12 @@ private:
 
 };
 
-class MyQtWorker : public QObject
-{
+class MyQtWorker : public QObject {
 	Q_OBJECT
 
 public:
 	MyQtWorker(osg::ref_ptr<PointCloud> Pcloud, const std::string & fileName);
 	~MyQtWorker();
-
-	static void progressCallback();
 
 	void start();
 

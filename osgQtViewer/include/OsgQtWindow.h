@@ -192,6 +192,8 @@ public:
 
 	void ReadTxtData(const std::string & fileName);
 
+	void ReadPCDData(const std::string & fileName);
+
 	void setMaxReadPointNum(int MaxValue);
 
 public:

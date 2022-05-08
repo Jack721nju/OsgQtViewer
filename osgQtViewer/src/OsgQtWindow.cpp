@@ -911,8 +911,9 @@ void OsgQtTest::slot_DeleteData() {
 	}
 
 	for (const auto & curPCloud : PCloudManager::Instance()->selected_pcloud_list) {
+		const auto fileName = curPCloud->getName();
 		PCloudManager::Instance()->removePointCloud(curPCloud);
-		this->AddToConsoleSlot(QString("[I/O] Remove file <") + QString::fromStdString(curPCloud->getName()) + QString("> successfully"));
+		this->AddToConsoleSlot(QString("[I/O] Remove file <") + QString::fromStdString(fileName) + QString("> successfully"));
 	}	
 }
 
@@ -938,7 +939,7 @@ void OsgQtTest::slot_SaveData() {
 
 //打开文件
 void OsgQtTest::slot_OpenData(){
-	const QString &getFullName = QFileDialog::getOpenFileName(nullptr, tr("Open data name:"), Data_Path, "Screen files(*.txt *.las *.org *.osg *.ive *.earth)");
+	const QString &getFullName = QFileDialog::getOpenFileName(nullptr, tr("Open data name:"), Data_Path, "Screen files(*.txt *.las *.pcd *.org *.osg *.ive *.earth)");
 
 	if (getFullName.isEmpty()) {
 		this->AddToConsoleSlot(QString("[INFO] Cancel opening file ") + getFullName);
@@ -976,6 +977,37 @@ void OsgQtTest::slot_OpenData(){
 	else if (type_name == "txt"){
 		ReadTxtData(fullname);
 	}
+	else if (type_name == "pcd") {
+		ReadPCDData(fullname);
+	}
+}
+
+void OsgQtTest::ReadPCDData(const std::string & fileName) {
+	ifstream ifs;
+	ifs.open(fileName, ios::in | ios::binary);
+
+	if (!ifs.is_open()) {
+		this->AddToConsoleSlot(QString("[WARING] open file <") + QString::fromStdString(fileName) + QString("> failed"));
+		return;
+	}
+
+	PointCloud * scene_Pcloud = PCloudManager::Instance()->addPointCloud(fileName);
+	if (nullptr == scene_Pcloud) {
+		return;
+	}
+
+	scene_Pcloud->setType(POINT_FILE_TYPE::PCD);
+	//scene_Pcloud->setPointNum(pointNum);
+	//if (pointNum < MaxUsingThreadReadNum) 
+	{
+		scene_Pcloud->readPCDData(fileName);
+		AddNodeToDataTree(fileName);
+		SetCamerToObjectCenter(scene_Pcloud->getGeoPoint());
+		float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
+		QString read_time_text = "[Time] Read file <" + QString::fromStdString(fileName) + "> " + "[" +
+			QString::number(scene_Pcloud->getPointNum()) + "] points cost " + QString::number(showTime, 'f', 2) + "s";
+		this->AddToConsoleSlot(read_time_text);
+	}
 }
 
 void OsgQtTest::ReadLasData(const std::string & fileName) {
@@ -989,6 +1021,9 @@ void OsgQtTest::ReadLasData(const std::string & fileName) {
 		size_t pointNum = header.GetPointRecordsCount();
 
 		PointCloud * scene_Pcloud = PCloudManager::Instance()->addPointCloud(fileName);
+		if (nullptr == scene_Pcloud) {
+			return;
+		}
 
 		scene_Pcloud->setType(POINT_FILE_TYPE::LAS);
 		scene_Pcloud->setPointNum(pointNum);
@@ -1023,7 +1058,6 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 		return;
 	}	
 
-	//_timerClock.start();
 	size_t line_count = 0;
 	size_t line_row = 0;
 	size_t single_line_bytes = 0;
@@ -1044,8 +1078,6 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 
 	line_count = (size_t)((text_file.size() << 8) / single_line_bytes);//约为点数量
 	
-	//size_t costTome = _timerClock.getTime<Ms>();	
-
 	if (line_count == 0) {
 		return;
 	}

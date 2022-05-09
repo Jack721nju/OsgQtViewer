@@ -1,5 +1,12 @@
 #include "PointCloud.h"
 
+#include <pcl/io/io.h> 
+#include <pcl/io/pcd_io.h> //PCL的PCD格式文件的输入输出头文件
+#include <pcl/point_types.h> //PCL对各种格式点的支持头文件
+#include <pcl/octree/octree.h> 
+#include <pcl/kdtree/kdtree.h> 
+#include <pcl/kdtree/kdtree_flann.h> 
+
 using namespace std;
 
 PointCloud::PointCloud(osg::ref_ptr<osg::Group> root) {
@@ -11,19 +18,195 @@ PointCloud::PointCloud(osg::ref_ptr<osg::Group> root) {
 }
 
 PointCloud::~PointCloud() {
+	clearData();
+}
+
+void PointCloud::clearData() {
 	point_num = 0;
 	point_size = 1.0;
 	point_name = "";
-	this->removeDrawables(0, this->getNumDrawables());
+
+	if (m_loadCloud) {
+		m_loadCloud->clear();
+		m_loadCloud->~PointCloud();
+	}
+
+	this->removeDrawables(0, this->getNumDrawables());//剔除节点内所有的几何体
 	geo_point = nullptr;
+
+	if (geo_bounding_node) {
+		geo_bounding_node->removeDrawables(0, this->getNumDrawables());
+		geo_bounding_box = nullptr;
+	}
+
+	this->removeChild(geo_bounding_node);
+	geo_bounding_node = nullptr;
+}
+
+void PointCloud::buildOtree(size_t treeDepth) {
+	if (nullptr == m_loadCloud) {
+		return;
+	}
+
+	//最小体素尺寸
+	float size = 1.0;
+	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> curOctree(size);
+	curOctree.setTreeDepth(treeDepth);
+	curOctree.setInputCloud(m_loadCloud);
+	curOctree.addPointsFromInputCloud();
+	
+	size_t maxTreeDepth = curOctree.getTreeDepth();
+	float minGridSize = curOctree.getResolution();
+
+	//获取所有体素的中心点
+	std::vector< pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> > pointGridList;
+	int num = curOctree.getOccupiedVoxelCenters(pointGridList);
+
+	if (nullptr == geo_bounding_node) {
+		geo_bounding_node = new osg::Geode();
+	}
+	
+	for (int i = 0; i < num; ++i) {
+		osg::Vec4 single_color(1.0, 0.0, 0.0, 1.0);
+
+		osg::ref_ptr<osg::Geometry> geo_mesh = new osg::Geometry;//创建一个几何体对象
+		osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
+		osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
+		osg::ref_ptr<osg::DrawElementsUByte> quad = new osg::DrawElementsUByte(GL_LINES);
+		color->push_back(single_color);
+
+		const auto &curCenter = pointGridList[i];
+
+		float  x_min, y_min, z_min;
+		float  x_max, y_max, z_max;
+		x_min = curCenter.x - minGridSize * 0.5;
+		y_min = curCenter.y - minGridSize * 0.5;
+		z_min = curCenter.z - minGridSize * 0.5;
+
+		x_max = curCenter.x + minGridSize * 0.5;
+		y_max = curCenter.y + minGridSize * 0.5;
+		z_max = curCenter.z + minGridSize * 0.5;
+
+		//单一网格的八顶点
+		osg::Vec3 bottom_left_back_point0(x_min, y_min, z_min);
+		osg::Vec3 bottom_right_back_point1(x_max, y_min, z_min);
+		osg::Vec3 bottom_right_front_point2(x_max, y_max, z_min);
+		osg::Vec3 bottom_left_front_point3(x_min, y_max, z_min);
+
+		osg::Vec3 top_left_back_point4(x_min, y_min, z_max);
+		osg::Vec3 top_right_back_point5(x_max, y_min, z_max);
+		osg::Vec3 top_right_front_point6(x_max, y_max, z_max);
+		osg::Vec3 top_left_front_point7(x_min, y_max, z_max);
+
+		vert->push_back(bottom_left_back_point0);
+		vert->push_back(bottom_right_back_point1);
+		vert->push_back(bottom_right_front_point2);
+		vert->push_back(bottom_left_front_point3);
+		vert->push_back(top_left_back_point4);
+		vert->push_back(top_right_back_point5);
+		vert->push_back(top_right_front_point6);
+		vert->push_back(top_left_front_point7);
+
+		{
+			quad->push_back(0);
+			quad->push_back(1);
+
+			quad->push_back(0);
+			quad->push_back(3);
+
+			quad->push_back(0);
+			quad->push_back(4);
+
+			quad->push_back(2);
+			quad->push_back(1);
+
+			quad->push_back(2);
+			quad->push_back(3);
+
+			quad->push_back(2);
+			quad->push_back(6);
+
+			quad->push_back(5);
+			quad->push_back(1);
+
+			quad->push_back(5);
+			quad->push_back(4);
+
+			quad->push_back(5);
+			quad->push_back(6);
+
+			quad->push_back(7);
+			quad->push_back(3);
+
+			quad->push_back(7);
+			quad->push_back(4);
+
+			quad->push_back(7);
+			quad->push_back(6);
+		}
+
+		geo_mesh->setVertexArray(vert.get());
+		geo_mesh->setColorArray(color.get());
+		geo_mesh->setColorBinding(osg::Geometry::BIND_OVERALL);
+		geo_mesh->addPrimitiveSet(quad);
+		geo_bounding_node->addDrawable(geo_mesh.get());
+	}
+}
+
+void PointCloud::readPCDData(const std::string & openfileName) {
+	pcl::PointCloud<pcl::PointXYZ>::Ptr curPointCloud(new pcl::PointCloud<pcl::PointXYZ>);
+	m_loadCloud = curPointCloud;
+	if (-1 == pcl::io::loadPCDFile(openfileName.c_str(), *m_loadCloud)) {
+		return;
+	}
+
+	if (nullptr == m_loadCloud) {
+		return;
+	}
+
+	geo_point = new osg::Geometry;//创建一个几何体对象
+	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
+	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//创建顶点数组,逆时针排序
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
+	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
+	
+	size_t allPointNum = m_loadCloud->points.size();
+	if (allPointNum > 0) {
+		vert->reserve(allPointNum + 1);
+		point->reserve(allPointNum + 1);
+	}
+
+	size_t count = 0;
+	osg::Vec4 single_color(0.0, 0.0, 1.0, 1.0);//默认为蓝色点
+	color->push_back(single_color);
+
+	for (const auto & curP : m_loadCloud->points) {
+		vert->push_back(osg::Vec3(curP.x, curP.y, curP.z));
+		point->push_back(count);
+		++count;
+	}
+
+	//m_loadCloud->clear();
+	//m_loadCloud->~PointCloud();
+	
+	//all points num
+	this->point_num = count;
+	normal->push_back(osg::Vec3(0.0, 0.0, 1.0));
+
+	geo_point->setVertexArray(vert.get());
+	geo_point->setNormalArray(normal.get());
+	geo_point->setNormalBinding(osg::Geometry::BIND_OVERALL);
+	geo_point->setColorArray(color.get());
+	geo_point->setColorBinding(osg::Geometry::BIND_OVERALL);
+	geo_point->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, count));
+
+	this->removeDrawables(0, this->getNumDrawables());//读取文件前先剔除节点内所有的几何体
+	this->addDrawable(geo_point.get());//加入当前新的点云几何绘制体
+
+	this->buildOtree();
 }
 
 void PointCloud::readLasData(const std::string & openfileName) {
-	//fstream ifs;
-	//ifs.open(openfileName.c_str(), ios::in | ios::binary);
-	//if (!ifs)
-	//	return;
-
 	LASreadOpener opener;
 	opener.set_file_name(openfileName.c_str());
 	if (false == opener.active()){
@@ -39,6 +222,12 @@ void PointCloud::readLasData(const std::string & openfileName) {
 	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//创建顶点数组,逆时针排序
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
+
+	if (this->point_num > 0) {
+		vert->reserve(point_num + 1);
+		color->reserve(point_num + 1);
+		point->reserve(point_num + 1);
+	}
 
 	size_t count = 0;
 	std::string errInfo;
@@ -114,6 +303,12 @@ void PointCloud::readLasDataByLibLas(const std::string & openfileName) {
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
 
+	if (this->point_num > 0) {
+		vert->reserve(point_num + 1);
+		color->reserve(point_num + 1);
+		point->reserve(point_num + 1);
+	}
+
 	size_t count = 0;
 	std::string errInfo;
 	try
@@ -151,8 +346,7 @@ void PointCloud::readLasDataByLibLas(const std::string & openfileName) {
 	{
 		errInfo = "get unknown exception";
 	}
-
-
+	
 	this->point_num = count;
 
 	normal->push_back(osg::Vec3(0.0, 0.0, 1.0));
@@ -169,11 +363,6 @@ void PointCloud::readLasDataByLibLas(const std::string & openfileName) {
 }
 
 void PointCloud::readLasData(const std::string & openfileName, int & rate, bool & isCancel) {
-	//std::fstream ifs;
-	//ifs.open(openfileName.c_str(), std::ios::in | std::ios::binary);
-	//if (!ifs)
-	//	return;
-
 	if (isCancel) {
 		return;
 	}
@@ -193,6 +382,12 @@ void PointCloud::readLasData(const std::string & openfileName, int & rate, bool 
 	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//创建顶点数组,逆时针排序
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
+
+	if (this->point_num > 0) {
+		vert->reserve(point_num + 1);
+		color->reserve(point_num + 1);
+		point->reserve(point_num + 1);
+	}
 
 	size_t numInterval = this->getPointNum() / 100;
 	size_t point_count = 0;
@@ -250,7 +445,7 @@ void PointCloud::readLasData(const std::string & openfileName, int & rate, bool 
 	this->addDrawable(geo_point.get());//加入当前新的点云几何绘制体
 }
 
-void PointCloud::readPoints(const std::string & openfileName, int & rate, bool & isCancel) {
+void PointCloud::readTxtData(const std::string & openfileName, int & rate, bool & isCancel) {
 	QFile text_file(QString::fromStdString(openfileName));
 	if (!text_file.open(QFile::ReadOnly | QIODevice::Text)) {
 		return;
@@ -281,8 +476,18 @@ void PointCloud::readPoints(const std::string & openfileName, int & rate, bool &
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
 
-	size_t curInterval = numInterval;
 	bool isOnlyXYZ = (this->getType() == TXT_COLOR ? false : true);
+
+	if (this->point_num > 0) {
+		vert->reserve(point_num + 1);
+		point->reserve(point_num + 1);
+		if (!isOnlyXYZ) {
+			color->reserve(point_num + 1);
+		}
+	}
+
+	size_t curInterval = numInterval;
+
 	if (isOnlyXYZ) {
 		QColor curColor = Qt::blue;
 		point_color = curColor;
@@ -377,15 +582,22 @@ void PointCloud::setShowBoundingBox(bool isShow) {
 }
 
 void PointCloud::initBoundingBox() {
-	if (nullptr == geo_point) {
-		return;
-	}
-	if (geo_bounding_node && geo_bounding_box) {
+	if (hasBuildBox) {
 		return;
 	}
 
-	geo_bounding_node = new osg::Geode;
-	geo_bounding_box = new osg::Geometry;//创建一个几何体对象
+	if (nullptr == geo_point) {
+		return;
+	}
+
+	if (nullptr == geo_bounding_node) {
+		geo_bounding_node = new osg::Geode;
+	}
+
+	if (nullptr == geo_bounding_box) {
+		geo_bounding_box = new osg::Geometry;//创建一个几何体对象
+	}
+
 	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 	osg::ref_ptr<osg::DrawElementsUByte> quad = new osg::DrawElementsUByte(GL_LINES);
@@ -478,6 +690,8 @@ void PointCloud::initBoundingBox() {
 
 	osg::ref_ptr<osg::LineWidth> line_width = new osg::LineWidth(1.0);
 	stateset->setAttribute(line_width);
+
+	hasBuildBox = true;
 }
 
 //获取给点云数据的最大最小范围
@@ -541,6 +755,10 @@ PointCloud * PCloudManager::addPointCloud(const std::string & pName) {
 void PCloudManager::removeSeletedPointCloud() {
 	for (const auto & curP : selected_pcloud_list) {
 		this->removePointCloud(curP);
+		curP->clearData();
+		if (m_root) {
+			m_root->removeChild(curP);
+		}
 	}
 	selected_pcloud_list.clear();
 }
@@ -548,6 +766,10 @@ void PCloudManager::removeSeletedPointCloud() {
 void PCloudManager::removeAllPointCloud() {
 	for (const auto & iter : all_pcloud_map) {
 		this->removePointCloud(iter.second);
+		iter.second->clearData();
+		if (m_root) {
+			m_root->removeChild(iter.second);
+		}
 	}
 	selected_pcloud_list.clear();
 	all_pcloud_map.clear();
@@ -559,8 +781,10 @@ void PCloudManager::removePointCloud(PointCloud* pcloud) {
 		if (iter != all_pcloud_map.end()) {
 			all_pcloud_map.erase(iter++);
 		}
-		pcloud->removeDrawables(0, pcloud->getNumDrawables());
-		m_root->removeChild(pcloud);
+		pcloud->clearData();
+		if (m_root) {
+			m_root->removeChild(pcloud);
+		}
 		pcloud = nullptr;
 	}
 }
@@ -572,8 +796,10 @@ void PCloudManager::removePointCloud(const std::string & pName) {
 		if (iter != all_pcloud_map.end()) {
 			all_pcloud_map.erase(iter++);
 		}
-		curP->removeDrawables(0, curP->getNumDrawables());
-		m_root->removeChild(curP);
+		curP->clearData();
+		if (m_root) {
+			m_root->removeChild(curP);
+		}
 		curP = nullptr;
 	}
 }

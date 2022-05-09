@@ -1,7 +1,11 @@
 #include "PointCloud.h"
+
 #include <pcl/io/io.h> 
 #include <pcl/io/pcd_io.h> //PCL的PCD格式文件的输入输出头文件
 #include <pcl/point_types.h> //PCL对各种格式点的支持头文件
+#include <pcl/octree/octree.h> 
+#include <pcl/kdtree/kdtree.h> 
+#include <pcl/kdtree/kdtree_flann.h> 
 
 using namespace std;
 
@@ -17,13 +21,146 @@ PointCloud::~PointCloud() {
 	clearData();
 }
 
-void PointCloud::readPCDData(const std::string & openfileName) {
-	pcl::PointCloud<pcl::PointXYZ>::Ptr loadCloud(new pcl::PointCloud<pcl::PointXYZ>);
-	if (-1 == pcl::io::loadPCDFile(openfileName.c_str(), *loadCloud)) {
+void PointCloud::clearData() {
+	point_num = 0;
+	point_size = 1.0;
+	point_name = "";
+
+	if (m_loadCloud) {
+		m_loadCloud->clear();
+		m_loadCloud->~PointCloud();
+	}
+
+	this->removeDrawables(0, this->getNumDrawables());//剔除节点内所有的几何体
+	geo_point = nullptr;
+
+	if (geo_bounding_node) {
+		geo_bounding_node->removeDrawables(0, this->getNumDrawables());
+		geo_bounding_box = nullptr;
+	}
+
+	this->removeChild(geo_bounding_node);
+	geo_bounding_node = nullptr;
+}
+
+void PointCloud::buildOtree(size_t treeDepth) {
+	if (nullptr == m_loadCloud) {
 		return;
 	}
 
-	if (nullptr == loadCloud) {
+	//最小体素尺寸
+	float size = 1.0;
+	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> curOctree(size);
+	curOctree.setTreeDepth(treeDepth);
+	curOctree.setInputCloud(m_loadCloud);
+	curOctree.addPointsFromInputCloud();
+	
+	size_t maxTreeDepth = curOctree.getTreeDepth();
+	float minGridSize = curOctree.getResolution();
+
+	//获取所有体素的中心点
+	std::vector< pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> > pointGridList;
+	int num = curOctree.getOccupiedVoxelCenters(pointGridList);
+
+	if (nullptr == geo_bounding_node) {
+		geo_bounding_node = new osg::Geode();
+	}
+	
+	for (int i = 0; i < num; ++i) {
+		osg::Vec4 single_color(1.0, 0.0, 0.0, 1.0);
+
+		osg::ref_ptr<osg::Geometry> geo_mesh = new osg::Geometry;//创建一个几何体对象
+		osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
+		osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
+		osg::ref_ptr<osg::DrawElementsUByte> quad = new osg::DrawElementsUByte(GL_LINES);
+		color->push_back(single_color);
+
+		const auto &curCenter = pointGridList[i];
+
+		float  x_min, y_min, z_min;
+		float  x_max, y_max, z_max;
+		x_min = curCenter.x - minGridSize * 0.5;
+		y_min = curCenter.y - minGridSize * 0.5;
+		z_min = curCenter.z - minGridSize * 0.5;
+
+		x_max = curCenter.x + minGridSize * 0.5;
+		y_max = curCenter.y + minGridSize * 0.5;
+		z_max = curCenter.z + minGridSize * 0.5;
+
+		//单一网格的八顶点
+		osg::Vec3 bottom_left_back_point0(x_min, y_min, z_min);
+		osg::Vec3 bottom_right_back_point1(x_max, y_min, z_min);
+		osg::Vec3 bottom_right_front_point2(x_max, y_max, z_min);
+		osg::Vec3 bottom_left_front_point3(x_min, y_max, z_min);
+
+		osg::Vec3 top_left_back_point4(x_min, y_min, z_max);
+		osg::Vec3 top_right_back_point5(x_max, y_min, z_max);
+		osg::Vec3 top_right_front_point6(x_max, y_max, z_max);
+		osg::Vec3 top_left_front_point7(x_min, y_max, z_max);
+
+		vert->push_back(bottom_left_back_point0);
+		vert->push_back(bottom_right_back_point1);
+		vert->push_back(bottom_right_front_point2);
+		vert->push_back(bottom_left_front_point3);
+		vert->push_back(top_left_back_point4);
+		vert->push_back(top_right_back_point5);
+		vert->push_back(top_right_front_point6);
+		vert->push_back(top_left_front_point7);
+
+		{
+			quad->push_back(0);
+			quad->push_back(1);
+
+			quad->push_back(0);
+			quad->push_back(3);
+
+			quad->push_back(0);
+			quad->push_back(4);
+
+			quad->push_back(2);
+			quad->push_back(1);
+
+			quad->push_back(2);
+			quad->push_back(3);
+
+			quad->push_back(2);
+			quad->push_back(6);
+
+			quad->push_back(5);
+			quad->push_back(1);
+
+			quad->push_back(5);
+			quad->push_back(4);
+
+			quad->push_back(5);
+			quad->push_back(6);
+
+			quad->push_back(7);
+			quad->push_back(3);
+
+			quad->push_back(7);
+			quad->push_back(4);
+
+			quad->push_back(7);
+			quad->push_back(6);
+		}
+
+		geo_mesh->setVertexArray(vert.get());
+		geo_mesh->setColorArray(color.get());
+		geo_mesh->setColorBinding(osg::Geometry::BIND_OVERALL);
+		geo_mesh->addPrimitiveSet(quad);
+		geo_bounding_node->addDrawable(geo_mesh.get());
+	}
+}
+
+void PointCloud::readPCDData(const std::string & openfileName) {
+	pcl::PointCloud<pcl::PointXYZ>::Ptr curPointCloud(new pcl::PointCloud<pcl::PointXYZ>);
+	m_loadCloud = curPointCloud;
+	if (-1 == pcl::io::loadPCDFile(openfileName.c_str(), *m_loadCloud)) {
+		return;
+	}
+
+	if (nullptr == m_loadCloud) {
 		return;
 	}
 
@@ -33,7 +170,7 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
 	
-	size_t allPointNum = loadCloud->points.size();
+	size_t allPointNum = m_loadCloud->points.size();
 	if (allPointNum > 0) {
 		vert->reserve(allPointNum + 1);
 		point->reserve(allPointNum + 1);
@@ -43,14 +180,14 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 	osg::Vec4 single_color(0.0, 0.0, 1.0, 1.0);//默认为蓝色点
 	color->push_back(single_color);
 
-	for (const auto & curP : loadCloud->points) {
+	for (const auto & curP : m_loadCloud->points) {
 		vert->push_back(osg::Vec3(curP.x, curP.y, curP.z));
 		point->push_back(count);
 		++count;
 	}
 
-	loadCloud->clear();
-	loadCloud->~PointCloud();
+	//m_loadCloud->clear();
+	//m_loadCloud->~PointCloud();
 	
 	//all points num
 	this->point_num = count;
@@ -65,6 +202,8 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 
 	this->removeDrawables(0, this->getNumDrawables());//读取文件前先剔除节点内所有的几何体
 	this->addDrawable(geo_point.get());//加入当前新的点云几何绘制体
+
+	this->buildOtree();
 }
 
 void PointCloud::readLasData(const std::string & openfileName) {
@@ -451,8 +590,14 @@ void PointCloud::initBoundingBox() {
 		return;
 	}
 
-	geo_bounding_node = new osg::Geode;
-	geo_bounding_box = new osg::Geometry;//创建一个几何体对象
+	if (nullptr == geo_bounding_node) {
+		geo_bounding_node = new osg::Geode;
+	}
+
+	if (nullptr == geo_bounding_box) {
+		geo_bounding_box = new osg::Geometry;//创建一个几何体对象
+	}
+
 	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 	osg::ref_ptr<osg::DrawElementsUByte> quad = new osg::DrawElementsUByte(GL_LINES);

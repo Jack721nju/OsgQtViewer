@@ -187,6 +187,8 @@ public slots:
 
 	void slot_deleteAllItem();
 
+	void slot_Init_Octree_Widget();
+
 public:
 	void ReadLasData(const std::string & fileName);
 

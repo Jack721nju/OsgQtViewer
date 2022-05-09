@@ -253,7 +253,7 @@ void OsgQtTest::Init_Tool_Bar() {
 	tool_bar->addAction(tool_action8);
 
 	QAction * tool_action9 = new QAction(QIcon(Icon_Path + QString("octree.png")), QString::fromLocal8Bit("&Octree"), tool_bar);
-	tool_action9->connect(tool_action9, SIGNAL(triggered()), this, SLOT(Init_Set_Octree_Widget()));
+	tool_action9->connect(tool_action9, SIGNAL(triggered()), this, SLOT(slot_Init_Octree_Widget()));
 	tool_action9->setToolTip(tr("Set Octree"));
 	tool_bar->addAction(tool_action9);
 
@@ -978,6 +978,44 @@ void OsgQtTest::slot_OpenData(){
 		ReadTxtData(fullname);
 	}
 	else if (type_name == "pcd") {
+		ReadPCDData(fullname);
+	}
+}
+
+void OsgQtTest::slot_Init_Octree_Widget() {
+	const QString &getFullName = QFileDialog::getOpenFileName(nullptr, tr("Open data name:"), Data_Path, "Screen files(*.txt *.las *.pcd *.org *.osg *.ive *.earth)");
+
+	if (getFullName.isEmpty()) {
+		this->AddToConsoleSlot(QString("[INFO] Cancel opening file ") + getFullName);
+		return;
+	}
+
+	const QFileInfo &fileInfo = QFileInfo(getFullName);
+
+	//判断是存在文件
+	if (false == fileInfo.exists()) {
+		this->AddToConsoleSlot(QString("[WARING] The file <") + getFullName + QString("> is not exists"));
+		return;
+	}
+
+	//文件名
+	const QString &curFileName = fileInfo.fileName();
+
+	//文件后缀名
+	const QString &curFileSuffix = fileInfo.suffix();
+
+	//文件绝对路径
+	const QString &curFilePath = fileInfo.absolutePath();
+
+	const string &fullname = getFullName.toStdString();//全局名称，包含完整路径和文件名
+	const string &path_name = curFilePath.toStdString();//完整路径
+
+	const string &type_name = curFileSuffix.toStdString();//文件类型
+	const string &file_name = curFileName.toStdString();//文件名称
+
+	_timerClock.start();//开始计时
+
+	if (type_name == "pcd") {
 		ReadPCDData(fullname);
 	}
 }

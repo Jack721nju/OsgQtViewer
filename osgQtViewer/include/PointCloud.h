@@ -13,6 +13,8 @@
 #include <ostream>
 #include <iomanip>
 
+#include <pcl/io/io.h> 
+
 #include "TimerClock.h"
 
 #include <liblas/liblas.hpp>
@@ -60,23 +62,10 @@ private:
 
 	point_MAXMIN * Max_area{ nullptr };
 
+	pcl::PointCloud<pcl::PointXYZ>::Ptr m_loadCloud;
+
 private:
-	void clearData() {
-		point_num = 0;
-		point_size = 1.0;
-		point_name = "";
-
-		this->removeDrawables(0, this->getNumDrawables());//剔除节点内所有的几何体
-		geo_point = nullptr;
-
-		if (geo_bounding_node) {
-			geo_bounding_node->removeDrawables(0, this->getNumDrawables());
-			geo_bounding_box = nullptr;
-		}
-
-		this->removeChild(geo_bounding_node);
-		geo_bounding_node = nullptr;
-	}
+	void clearData();		
 
 	void initBoundingBox();
 
@@ -174,6 +163,8 @@ public:
 	void readTxtData(const std::string & openfileName, int & rate, bool & isCancel);
 
 	void readPCDData(const std::string & openfileName);
+
+	void buildOtree(size_t treeDepth = 5);
 };
 
 class PCloudManager {

@@ -112,6 +112,12 @@ private:
 
 	QRadioButton * m_Alpah_Grid_multi_thread_radio;
 
+	QDialog * m_octree_bulid_Dialog;
+
+	QLineEdit *m_Octree_depth;
+	
+	QLineEdit *m_Octree_size;
+
 private:
 	void AddToConsoleSlot(const QString& show_text);
 
@@ -188,6 +194,8 @@ public slots:
 	void slot_deleteAllItem();
 
 	void slot_Init_Octree_Widget();
+
+	void slot_build_Octree();
 
 public:
 	void ReadLasData(const std::string & fileName);

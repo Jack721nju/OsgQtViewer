@@ -15,6 +15,7 @@ PointCloud::PointCloud(osg::ref_ptr<osg::Group> root) {
 	geo_bounding_node = nullptr;
 	geo_bounding_box = nullptr;
 	geo_point = nullptr;
+	geo_octree_node = nullptr;
 }
 
 PointCloud::~PointCloud() {
@@ -38,54 +39,60 @@ void PointCloud::clearData() {
 		geo_bounding_node->removeDrawables(0, this->getNumDrawables());
 		geo_bounding_box = nullptr;
 	}
+	
+	if (geo_octree_node) {
+		geo_octree_node->removeDrawables(0, this->getNumDrawables());
+	}
 
-	this->removeChild(geo_bounding_node);
+	this->removeChildren(0, this->getNumChildren());
 	geo_bounding_node = nullptr;
+	geo_octree_node = nullptr;
 }
 
-void PointCloud::buildOtree(size_t treeDepth) {
+void PointCloud::buildOtree(float minSize) {
 	if (nullptr == m_loadCloud) {
 		return;
 	}
 
-	//最小体素尺寸
-	float size = 1.0;
-	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> curOctree(size);
-	curOctree.setTreeDepth(treeDepth);
+	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> curOctree(minSize);
+	//curOctree.setTreeDepth(treeDepth);
 	curOctree.setInputCloud(m_loadCloud);
 	curOctree.addPointsFromInputCloud();
 	
 	size_t maxTreeDepth = curOctree.getTreeDepth();
-	float minGridSize = curOctree.getResolution();
+	float minGridSize = curOctree.getResolution() * 0.5;
 
 	//获取所有体素的中心点
 	std::vector< pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> > pointGridList;
 	int num = curOctree.getOccupiedVoxelCenters(pointGridList);
 
-	if (nullptr == geo_bounding_node) {
-		geo_bounding_node = new osg::Geode();
+	if (geo_octree_node) {
+		geo_octree_node->removeDrawables(0, geo_octree_node->getNumDrawables());
+		this->removeChild(geo_octree_node);
+		geo_octree_node = nullptr;
 	}
-	
-	for (int i = 0; i < num; ++i) {
-		osg::Vec4 single_color(1.0, 0.0, 0.0, 1.0);
 
+	geo_octree_node = new osg::Geode();
+	osg::Vec4 single_color(1.0, 0.0, 0.0, 1.0);
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
+	color->push_back(single_color);
+	float x_min, y_min, z_min, x_max, y_max, z_max;
+		
+	for (const auto & curCenter : pointGridList) {
 		osg::ref_ptr<osg::Geometry> geo_mesh = new osg::Geometry;//创建一个几何体对象
 		osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
-		osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 		osg::ref_ptr<osg::DrawElementsUByte> quad = new osg::DrawElementsUByte(GL_LINES);
-		color->push_back(single_color);
 
-		const auto &curCenter = pointGridList[i];
+		vert->reserve(8);
+		quad->reserve(20);
 
-		float  x_min, y_min, z_min;
-		float  x_max, y_max, z_max;
-		x_min = curCenter.x - minGridSize * 0.5;
-		y_min = curCenter.y - minGridSize * 0.5;
-		z_min = curCenter.z - minGridSize * 0.5;
+		x_min = curCenter.x - minGridSize;
+		y_min = curCenter.y - minGridSize;
+		z_min = curCenter.z - minGridSize;
 
-		x_max = curCenter.x + minGridSize * 0.5;
-		y_max = curCenter.y + minGridSize * 0.5;
-		z_max = curCenter.z + minGridSize * 0.5;
+		x_max = curCenter.x + minGridSize;
+		y_max = curCenter.y + minGridSize;
+		z_max = curCenter.z + minGridSize;
 
 		//单一网格的八顶点
 		osg::Vec3 bottom_left_back_point0(x_min, y_min, z_min);
@@ -149,8 +156,10 @@ void PointCloud::buildOtree(size_t treeDepth) {
 		geo_mesh->setColorArray(color.get());
 		geo_mesh->setColorBinding(osg::Geometry::BIND_OVERALL);
 		geo_mesh->addPrimitiveSet(quad);
-		geo_bounding_node->addDrawable(geo_mesh.get());
+		geo_octree_node->addDrawable(geo_mesh.get());
 	}
+
+	this->addChild(geo_octree_node);
 }
 
 void PointCloud::readPCDData(const std::string & openfileName) {
@@ -202,8 +211,6 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 
 	this->removeDrawables(0, this->getNumDrawables());//读取文件前先剔除节点内所有的几何体
 	this->addDrawable(geo_point.get());//加入当前新的点云几何绘制体
-
-	this->buildOtree();
 }
 
 void PointCloud::readLasData(const std::string & openfileName) {

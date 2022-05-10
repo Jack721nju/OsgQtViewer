@@ -983,41 +983,42 @@ void OsgQtTest::slot_OpenData(){
 }
 
 void OsgQtTest::slot_Init_Octree_Widget() {
-	const QString &getFullName = QFileDialog::getOpenFileName(nullptr, tr("Open data name:"), Data_Path, "Screen files(*.txt *.las *.pcd *.org *.osg *.ive *.earth)");
 
-	if (getFullName.isEmpty()) {
-		this->AddToConsoleSlot(QString("[INFO] Cancel opening file ") + getFullName);
-		return;
-	}
+	m_octree_bulid_Dialog = new QDialog();
+	m_octree_bulid_Dialog->setVisible(true);
+	m_octree_bulid_Dialog->setFixedSize(250, 250);
+	m_octree_bulid_Dialog->setAttribute(Qt::WA_DeleteOnClose);
 
-	const QFileInfo &fileInfo = QFileInfo(getFullName);
+	m_octree_bulid_Dialog->setWindowTitle("Build Octree");
 
-	//判断是存在文件
-	if (false == fileInfo.exists()) {
-		this->AddToConsoleSlot(QString("[WARING] The file <") + getFullName + QString("> is not exists"));
-		return;
-	}
+	QLabel *m_label_depth = new QLabel(m_octree_bulid_Dialog);
+	m_label_depth->setText("Max Depth:");
+	m_Octree_depth = new QLineEdit(m_octree_bulid_Dialog);
+	//m_Octree_depth->setFixedWidth(80);
 
-	//文件名
-	const QString &curFileName = fileInfo.fileName();
+	QLabel *m_label_size = new QLabel(m_octree_bulid_Dialog);
+	m_label_size->setText("Voxel Size:");
+	m_Octree_size = new QLineEdit(m_octree_bulid_Dialog);
+	//m_Octree_size->setFixedWidth(80);
 
-	//文件后缀名
-	const QString &curFileSuffix = fileInfo.suffix();
+	QLabel *m_label_pointNum = new QLabel(m_octree_bulid_Dialog);
+	m_label_pointNum->setText("Min point number:");
+	QLineEdit *m_Octree_pointNum = new QLineEdit(m_octree_bulid_Dialog);
+	//m_Octree_pointNum->setFixedWidth(80);
 
-	//文件绝对路径
-	const QString &curFilePath = fileInfo.absolutePath();
+	QPushButton *m_Create_Octree = new QPushButton("Create", m_octree_bulid_Dialog);
+	connect(m_Create_Octree, SIGNAL(clicked()), this, SLOT(slot_build_Octree()));
+	
+	QGridLayout *layout_all = new QGridLayout();
+	layout_all->addWidget(m_label_depth, 0, 0);
+	layout_all->addWidget(m_Octree_depth, 0, 1);
+	layout_all->addWidget(m_label_size, 1, 0);
+	layout_all->addWidget(m_Octree_size, 1, 1);
+	layout_all->addWidget(m_label_pointNum, 2, 0);
+	layout_all->addWidget(m_Octree_pointNum, 2, 1);
+	layout_all->addWidget(m_Create_Octree, 3, 1);
 
-	const string &fullname = getFullName.toStdString();//全局名称，包含完整路径和文件名
-	const string &path_name = curFilePath.toStdString();//完整路径
-
-	const string &type_name = curFileSuffix.toStdString();//文件类型
-	const string &file_name = curFileName.toStdString();//文件名称
-
-	_timerClock.start();//开始计时
-
-	if (type_name == "pcd") {
-		ReadPCDData(fullname);
-	}
+	m_octree_bulid_Dialog->setLayout(layout_all);
 }
 
 void OsgQtTest::ReadPCDData(const std::string & fileName) {
@@ -1035,17 +1036,13 @@ void OsgQtTest::ReadPCDData(const std::string & fileName) {
 	}
 
 	scene_Pcloud->setType(POINT_FILE_TYPE::PCD);
-	//scene_Pcloud->setPointNum(pointNum);
-	//if (pointNum < MaxUsingThreadReadNum) 
-	{
-		scene_Pcloud->readPCDData(fileName);
-		AddNodeToDataTree(fileName);
-		SetCamerToObjectCenter(scene_Pcloud->getGeoPoint());
-		float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
-		QString read_time_text = "[Time] Read file <" + QString::fromStdString(fileName) + "> " + "[" +
-			QString::number(scene_Pcloud->getPointNum()) + "] points cost " + QString::number(showTime, 'f', 2) + "s";
-		this->AddToConsoleSlot(read_time_text);
-	}
+	scene_Pcloud->readPCDData(fileName);
+	AddNodeToDataTree(fileName);
+	SetCamerToObjectCenter(scene_Pcloud->getGeoPoint());
+	float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
+	QString read_time_text = "[Time] Read file <" + QString::fromStdString(fileName) + "> " + "[" +
+	                         QString::number(scene_Pcloud->getPointNum()) + "] points cost " + QString::number(showTime, 'f', 2) + "s";
+	this->AddToConsoleSlot(read_time_text);	
 }
 
 void OsgQtTest::ReadLasData(const std::string & fileName) {
@@ -1237,6 +1234,35 @@ osg::Node * OsgQtTest::createScalarBar_HUD(osgSim::ColorRange* cr) {
 	colorBar_projection->addChild(modelview);
 
 	return colorBar_projection; //make sure you delete the return sb line
+}
+
+void OsgQtTest::slot_build_Octree() {
+	if (!hasSelectedPcloud()) {
+		this->AddToConsoleSlot(QString("No point cloud is selected now"));
+		return;
+	}
+
+	if (PCloudManager::Instance()->selectedPcloudNum() > 1) {
+		this->AddToConsoleSlot(QString("More than one point cloud is selected now"));
+		return;
+	}
+
+	PointCloud *cur_Pcloud = *(PCloudManager::Instance()->selected_pcloud_list.begin());
+
+	if (cur_Pcloud == nullptr) {
+		return;
+	}
+
+	_timerClock.start();
+	
+	auto max_octree_depth = m_Octree_depth->text().toInt();
+	auto min_octree_size = m_Octree_size->text().toFloat();
+
+	cur_Pcloud->buildOtree(min_octree_size);
+
+	float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
+	QString read_time_text = "[Time] Build octree for <" + QString::fromStdString(cur_Pcloud->getName()) + "> cost " + QString::number(showTime, 'f', 2) + "s";
+	this->AddToConsoleSlot(read_time_text);
 }
 
 void OsgQtTest::slot_setPointColorByHeight() {

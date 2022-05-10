@@ -52,6 +52,8 @@ private:
 
 	osg::ref_ptr<osg::Geode> geo_bounding_node;
 
+	osg::ref_ptr<osg::Geode> geo_octree_node;
+
 	osg::ref_ptr<osg::Geometry> geo_bounding_box;//外接矩形框几何体指针
 
 	bool hasBuildBox{false};
@@ -164,7 +166,7 @@ public:
 
 	void readPCDData(const std::string & openfileName);
 
-	void buildOtree(size_t treeDepth = 5);
+	void buildOtree(float minSize);
 };
 
 class PCloudManager {

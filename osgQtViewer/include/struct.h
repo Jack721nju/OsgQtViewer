@@ -20,8 +20,22 @@ struct Point {
 	//vector<int> p_depth;
 };
 
-//范围的六至边界结构体
+//三维网格顶点坐标结构体
 struct point_MAXMIN {
 	float xmin, ymin, zmin;
 	float xmax, ymax, zmax;
+};
+
+//二维网格顶点坐标结构体
+struct point2D_MAXMIN {
+	float xmin, ymin;
+	float xmax, ymax;
+
+	point2D_MAXMIN() = default;
+	point2D_MAXMIN(const point2D_MAXMIN & other) {
+		this->xmin = other.xmin;
+		this->ymin = other.ymin;
+		this->xmax = other.xmax;
+		this->ymax = other.ymax;
+	}
 };

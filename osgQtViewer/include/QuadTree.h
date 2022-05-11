@@ -9,8 +9,8 @@
 class QuadTreeNode {
 public:
 	QuadTreeNode(
-		int depth,
 		point2D_MAXMIN curSize,
+		int depth = 0,
 		QuadTreeNode * top_left_Node = nullptr,
 		QuadTreeNode * top_right_Node = nullptr,
 		QuadTreeNode * bottom_left_Node = nullptr,
@@ -20,7 +20,7 @@ public:
 
 	~QuadTreeNode() = default;
 
-private:
+public:
 	//节点深度
 	int m_depth;
 

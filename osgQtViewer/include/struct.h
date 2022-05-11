@@ -32,6 +32,13 @@ struct point2D_MAXMIN {
 	float xmax, ymax;
 
 	point2D_MAXMIN() = default;
+	point2D_MAXMIN(float x_min, float y_min, float x_max, float y_max) {
+		xmin = x_min;
+		ymin = y_min;
+		xmax = x_max;
+		ymax = y_max;
+	}
+
 	point2D_MAXMIN(const point2D_MAXMIN & other) {
 		this->xmin = other.xmin;
 		this->ymin = other.ymin;

@@ -30,7 +30,9 @@ public:
 	int m_tree_Index;
 	int m_point_num;
 
-	std::vector<QPoint> point_list;
+	bool m_isSonNode{false};
+
+	std::vector<QPointF> point_list;
 
 	QuadTreeNode * m_top_left;
 	QuadTreeNode * m_top_right;
@@ -38,6 +40,8 @@ public:
 	QuadTreeNode * m_bottom_right;
 
 public:
-	void createQuadTree(QuadTreeNode* rootNode, int treeDepth, const std::vector<QPoint> &point_list, const point2D_MAXMIN &curSize);
+	static void createQuadTree(QuadTreeNode* rootNode, int treeDepth, const std::vector<QPointF> &point_list, const point2D_MAXMIN &curSize);
+	
+	static void getMaxDepQuadNode(QuadTreeNode* curNode, std::vector<QuadTreeNode*> &node_list);
 
 };

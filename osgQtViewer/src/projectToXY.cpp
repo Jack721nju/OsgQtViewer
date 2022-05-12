@@ -48,6 +48,37 @@ void PaintArea::drawText(QPointF pos, QString text) {
 	painter.drawText(pos, text);
 }
 
+void PaintArea::drawGridWithFillColor(float xmin, float ymin, float xmax, float ymax, const QColor& curGridColor, int delt_x, int delt_y) {
+	if (!image)
+		return;
+
+	QPen pen;
+	pen.setWidth(1);
+	pen.setStyle(Qt::SolidLine);
+	pen.setColor(Qt::black);
+
+	QBrush brush;
+	brush.setColor(curGridColor);
+	brush.setStyle(Qt::SolidPattern);
+
+	QPainter painter(image);
+	painter.setRenderHint(QPainter::Antialiasing, true);//设置反锯齿模式
+	painter.setPen(pen);
+	painter.setBrush(brush);//设置画刷形式
+
+	QPoint point_LeftBottom(xmin, ymin);
+	QPoint point_RightBottom(xmax, ymin);
+
+	QPoint point_LeftTop(xmin, ymax);
+	QPoint poitn_RightTop(xmax, ymax);
+
+	float originX = xmin;
+	float originY = ymin;
+	float width = xmax - ymin;
+	float height = ymax - ymin;
+	painter.drawRect(originX + delt_x, originY + delt_y, width, height);
+}
+
 void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, const QColor& curGridColor, int delt_x, int delt_y) {
 	if (!image)
 		return;

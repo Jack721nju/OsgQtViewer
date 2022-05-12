@@ -1887,15 +1887,31 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 	QPointF *all_point = new QPointF[allPointNum];
 	int pointID = -1;
 
+	vector<QPointF> QpointList;
+
 	for (const auto & curP : gridNet->Points_List) {
-		all_point[++pointID] = QPointF(curP.x() + delt_x, curP.y() + delt_y);
+		QPointF curP(curP.x() + delt_x, curP.y() + delt_y);
+		all_point[++pointID] = curP;
+		QpointList.emplace_back(curP);
 	}
+
+	point2D_MAXMIN curSize(gridNet->pointMMM->xmin, gridNet->pointMMM->ymin, gridNet->pointMMM->xmax, gridNet->pointMMM->ymax);
+	QuadTreeNode * rootNode = new QuadTreeNode(curSize);
+	QuadTreeNode::createQuadTree(rootNode, 0, QpointList, curSize);
+	std::vector<QuadTreeNode*> node_list;
+	QuadTreeNode::getMaxDepQuadNode(rootNode, node_list);
+
 
 	//绘制所有离散点云,离散点默认颜色为纯黑色
 	Project_widget_grid_net->drawPoints(all_point, allPointNum, 1, QColor(0, 0, 0, 125));
 	
 	int k = -1;
 	QColor new_color(0, 0, 0, 0);
+
+	for (const auto & curNode : node_list) {
+		new_color.setRgb(200, 0, 0, 0);
+		Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color);
+	}
 
 	for (const auto curGrid : gridNet->Grid_list){
 		if (curGrid->hasPoint) {

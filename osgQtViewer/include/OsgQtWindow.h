@@ -10,6 +10,7 @@
 #include "WorkerThread.h"
 #include "TimerClock.h"
 #include "ProjectToXY.h"
+#include "QuadTree.h"
 
 //¶àÊÓ¾°Æ÷
 class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {

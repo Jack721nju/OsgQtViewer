@@ -17,6 +17,7 @@ public:
 
 	void drawGrid(SingleGrid2D* eachGrid);
 	void drawGridWithFillColor(SingleGrid2D* eachGrid, const QColor& curGridColor, int delt_x = -10, int delt_y = 32);
+	void drawGridWithFillColor(float xmin, float ymin, float xmax, float ymax, const QColor& curGridColor, int delt_x = -10, int delt_y = 32);
 
 	void drawDegreeLines(QString x_axis_name, QString y_axis_name, float base_x, float base_y, float delt_x, float delt_y);
 	

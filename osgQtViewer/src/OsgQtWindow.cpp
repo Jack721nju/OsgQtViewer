@@ -1919,6 +1919,12 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 
 	for (const auto & curNode : all_node_list) {
 		new_color.setRgb(20 + curNode->m_depth * 40, 0, 0, 25);
+		if (curNode->m_point_num < 1) {
+			new_color.setRgb(0, 0, 0, 0);
+		}
+		if (curNode->m_isSonNode) {
+			new_color.setRgb(125, 0, 0, 125);
+		}
 		Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color, 0, 0);
 	}
 

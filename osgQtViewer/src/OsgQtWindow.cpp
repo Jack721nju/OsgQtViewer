@@ -1895,12 +1895,16 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 		QpointList.emplace_back(curP);
 	}
 
-	point2D_MAXMIN curSize(gridNet->pointMMM->xmin, gridNet->pointMMM->ymin, gridNet->pointMMM->xmax, gridNet->pointMMM->ymax);
-	QuadTreeNode * rootNode = new QuadTreeNode(curSize);
-	QuadTreeNode::createQuadTree(rootNode, 0, QpointList, curSize);
+	point2D_MAXMIN curSize = QuadTreeNode::getMinMaxXY(QpointList);
+	QuadTreeNode * rootNode = new QuadTreeNode();
+	float XYSize = (curSize.ymax - curSize.ymin) > (curSize.xmax - curSize.xmin) ? (curSize.ymax - curSize.ymin) : (curSize.xmax - curSize.xmin);
+	QuadTreeNode::createQuadTree(rootNode, 0, QpointList, (curSize.xmin + curSize.xmax) * 0.5, (curSize.ymin + curSize.ymax) * 0.5, curSize.xmax - curSize.xmin, curSize.ymax - curSize.ymin);
 	std::vector<QuadTreeNode*> node_list;
 	QuadTreeNode::getMaxDepQuadNode(rootNode, node_list);
 
+	std::vector<QuadTreeNode*> all_node_list;
+	QuadTreeNode::getAllQuadNode(rootNode, all_node_list);
+	
 
 	//绘制所有离散点云,离散点默认颜色为纯黑色
 	Project_widget_grid_net->drawPoints(all_point, allPointNum, 1, QColor(0, 0, 0, 125));
@@ -1908,9 +1912,14 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 	int k = -1;
 	QColor new_color(0, 0, 0, 0);
 
-	for (const auto & curNode : node_list) {
-		new_color.setRgb(200, 0, 0, 0);
-		Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color);
+	//for (const auto & curNode : node_list) {
+	//	new_color.setRgb(125, 0, 0, 125);
+	//	Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color, 0, 0);
+	//}
+
+	for (const auto & curNode : all_node_list) {
+		new_color.setRgb(20 + curNode->m_depth * 40, 0, 0, 25);
+		Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color, 0, 0);
 	}
 
 	for (const auto curGrid : gridNet->Grid_list){

@@ -66,15 +66,9 @@ void PaintArea::drawGridWithFillColor(float xmin, float ymin, float xmax, float 
 	painter.setPen(pen);
 	painter.setBrush(brush);//…Ë÷√ª≠À¢–Œ Ω
 
-	QPoint point_LeftBottom(xmin, ymin);
-	QPoint point_RightBottom(xmax, ymin);
-
-	QPoint point_LeftTop(xmin, ymax);
-	QPoint poitn_RightTop(xmax, ymax);
-
 	float originX = xmin;
 	float originY = ymin;
-	float width = xmax - ymin;
+	float width = xmax - xmin;
 	float height = ymax - ymin;
 	painter.drawRect(originX + delt_x, originY + delt_y, width, height);
 }

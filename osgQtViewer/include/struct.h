@@ -45,4 +45,12 @@ struct point2D_MAXMIN {
 		this->xmax = other.xmax;
 		this->ymax = other.ymax;
 	}
+
+	point2D_MAXMIN & operator =(const point2D_MAXMIN & other) {
+		this->xmin = other.xmin;
+		this->ymin = other.ymin;
+		this->xmax = other.xmax;
+		this->ymax = other.ymax;
+		return *this;
+	}
 };

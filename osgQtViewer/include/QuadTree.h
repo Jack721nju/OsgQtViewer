@@ -5,18 +5,10 @@
 
 #include "struct.h"
 
-//定义八叉树节点类
+//定义四叉树节点类
 class QuadTreeNode {
 public:
-	QuadTreeNode(
-		point2D_MAXMIN curSize,
-		int depth = 0,
-		QuadTreeNode * top_left_Node = nullptr,
-		QuadTreeNode * top_right_Node = nullptr,
-		QuadTreeNode * bottom_left_Node = nullptr,
-		QuadTreeNode * bottom_right_Node = nullptr
-	) : m_depth(depth), m_XY_Size(curSize),
-		m_top_left(top_left_Node), m_top_right(top_right_Node), m_bottom_left(bottom_left_Node), m_bottom_right(bottom_right_Node), m_point_num(0) {}
+	QuadTreeNode() : m_depth(0), m_point_num(0) {}
 
 	~QuadTreeNode() = default;
 
@@ -27,6 +19,14 @@ public:
 	//节点坐标
 	point2D_MAXMIN m_XY_Size;
 
+	//网格中心坐标
+	float m_CenterX;
+	float m_CenterY;
+
+	//网格尺寸
+	float m_SizeX;
+	float m_SizeY;
+
 	int m_tree_Index;
 	int m_point_num;
 
@@ -34,14 +34,17 @@ public:
 
 	std::vector<QPointF> point_list;
 
-	QuadTreeNode * m_top_left;
-	QuadTreeNode * m_top_right;
-	QuadTreeNode * m_bottom_left;
-	QuadTreeNode * m_bottom_right;
+	QuadTreeNode * m_top_left{ nullptr };
+	QuadTreeNode * m_top_right{ nullptr };
+	QuadTreeNode * m_bottom_left{ nullptr };
+	QuadTreeNode * m_bottom_right{ nullptr };
 
 public:
-	static void createQuadTree(QuadTreeNode* rootNode, int treeDepth, const std::vector<QPointF> &point_list, const point2D_MAXMIN &curSize);
+	static void createQuadTree(QuadTreeNode* &rootNode, int treeDepth, const std::vector<QPointF> &point_list, float m_CenterX, float m_CenterY, float m_SizeX, float m_SizeY);
 	
 	static void getMaxDepQuadNode(QuadTreeNode* curNode, std::vector<QuadTreeNode*> &node_list);
 
+	static void getAllQuadNode(QuadTreeNode* curNode, std::vector<QuadTreeNode*> &node_list);
+
+	static point2D_MAXMIN getMinMaxXY(const std::vector<QPointF> & all_list);
 };

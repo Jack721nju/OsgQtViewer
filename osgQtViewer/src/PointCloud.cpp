@@ -1,13 +1,11 @@
+ï»¿/* CopyrightÂ© 2022 Jack721 */
 #include "PointCloud.h"
 
-#include <pcl/io/io.h> 
-#include <pcl/io/pcd_io.h> //PCLµÄPCD¸ñÊ½ÎÄ¼şµÄÊäÈëÊä³öÍ·ÎÄ¼ş
-#include <pcl/point_types.h> //PCL¶Ô¸÷ÖÖ¸ñÊ½µãµÄÖ§³ÖÍ·ÎÄ¼ş
-#include <pcl/octree/octree.h> 
-#include <pcl/kdtree/kdtree.h> 
-#include <pcl/kdtree/kdtree_flann.h> 
-
-using namespace std;
+#include <pcl/io/pcd_io.h>// PCLçš„PCDæ ¼å¼æ–‡ä»¶çš„è¾“å…¥è¾“å‡ºå¤´æ–‡ä»¶
+#include <pcl/point_types.h>// PCLå¯¹å„ç§æ ¼å¼ç‚¹çš„æ”¯æŒå¤´æ–‡ä»¶
+#include <pcl/octree/octree.h>
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/kdtree/kdtree_flann.h>
 
 PointCloud::PointCloud(osg::ref_ptr<osg::Group> root) {
 	point_num = 0;
@@ -32,14 +30,14 @@ void PointCloud::clearData() {
 		m_loadCloud->~PointCloud();
 	}
 
-	this->removeDrawables(0, this->getNumDrawables());//ÌŞ³ı½ÚµãÄÚËùÓĞµÄ¼¸ºÎÌå
+	this->removeDrawables(0, this->getNumDrawables());//å‰”é™¤èŠ‚ç‚¹å†…æ‰€æœ‰çš„å‡ ä½•ä½“
 	geo_point = nullptr;
 
 	if (geo_bounding_node) {
 		geo_bounding_node->removeDrawables(0, this->getNumDrawables());
 		geo_bounding_box = nullptr;
 	}
-	
+
 	if (geo_octree_node) {
 		geo_octree_node->removeDrawables(0, this->getNumDrawables());
 	}
@@ -55,14 +53,14 @@ void PointCloud::buildOtree(float minSize) {
 	}
 
 	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> curOctree(minSize);
-	//curOctree.setTreeDepth(treeDepth);
+	// curOctree.setTreeDepth(treeDepth);
 	curOctree.setInputCloud(m_loadCloud);
 	curOctree.addPointsFromInputCloud();
-	
+
 	size_t maxTreeDepth = curOctree.getTreeDepth();
 	float minGridSize = curOctree.getResolution() * 0.5;
 
-	//»ñÈ¡ËùÓĞÌåËØµÄÖĞĞÄµã
+	//è·å–æ‰€æœ‰ä½“ç´ çš„ä¸­å¿ƒç‚¹
 	std::vector< pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> > pointGridList;
 	int num = curOctree.getOccupiedVoxelCenters(pointGridList);
 
@@ -74,13 +72,13 @@ void PointCloud::buildOtree(float minSize) {
 
 	geo_octree_node = new osg::Geode();
 	osg::Vec4 single_color(1.0, 0.0, 0.0, 1.0);
-	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//´´½¨ÑÕÉ«Êı×é,ÄæÊ±ÕëÅÅĞò
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//åˆ›å»ºé¢œè‰²æ•°ç»„,é€†æ—¶é’ˆæ’åº
 	color->push_back(single_color);
 	float x_min, y_min, z_min, x_max, y_max, z_max;
-		
+
 	for (const auto & curCenter : pointGridList) {
-		osg::ref_ptr<osg::Geometry> geo_mesh = new osg::Geometry;//´´½¨Ò»¸ö¼¸ºÎÌå¶ÔÏó
-		osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
+		osg::ref_ptr<osg::Geometry> geo_mesh = new osg::Geometry;//åˆ›å»ºä¸€ä¸ªå‡ ä½•ä½“å¯¹è±¡
+		osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
 		osg::ref_ptr<osg::DrawElementsUByte> quad = new osg::DrawElementsUByte(GL_LINES);
 
 		vert->reserve(8);
@@ -94,7 +92,7 @@ void PointCloud::buildOtree(float minSize) {
 		y_max = curCenter.y + minGridSize;
 		z_max = curCenter.z + minGridSize;
 
-		//µ¥Ò»Íø¸ñµÄ°Ë¶¥µã
+		//å•ä¸€ç½‘æ ¼çš„å…«é¡¶ç‚¹
 		osg::Vec3 bottom_left_back_point0(x_min, y_min, z_min);
 		osg::Vec3 bottom_right_back_point1(x_max, y_min, z_min);
 		osg::Vec3 bottom_right_front_point2(x_max, y_max, z_min);
@@ -114,43 +112,41 @@ void PointCloud::buildOtree(float minSize) {
 		vert->push_back(top_right_front_point6);
 		vert->push_back(top_left_front_point7);
 
-		{
-			quad->push_back(0);
-			quad->push_back(1);
+		quad->push_back(0);
+		quad->push_back(1);
 
-			quad->push_back(0);
-			quad->push_back(3);
+		quad->push_back(0);
+		quad->push_back(3);
 
-			quad->push_back(0);
-			quad->push_back(4);
+		quad->push_back(0);
+		quad->push_back(4);
 
-			quad->push_back(2);
-			quad->push_back(1);
+		quad->push_back(2);
+		quad->push_back(1);
 
-			quad->push_back(2);
-			quad->push_back(3);
+		quad->push_back(2);
+		quad->push_back(3);
 
-			quad->push_back(2);
-			quad->push_back(6);
+		quad->push_back(2);
+		quad->push_back(6);
 
-			quad->push_back(5);
-			quad->push_back(1);
+		quad->push_back(5);
+		quad->push_back(1);
 
-			quad->push_back(5);
-			quad->push_back(4);
+		quad->push_back(5);
+		quad->push_back(4);
 
-			quad->push_back(5);
-			quad->push_back(6);
+		quad->push_back(5);
+		quad->push_back(6);
 
-			quad->push_back(7);
-			quad->push_back(3);
+		quad->push_back(7);
+		quad->push_back(3);
 
-			quad->push_back(7);
-			quad->push_back(4);
+		quad->push_back(7);
+		quad->push_back(4);
 
-			quad->push_back(7);
-			quad->push_back(6);
-		}
+		quad->push_back(7);
+		quad->push_back(6);
 
 		geo_mesh->setVertexArray(vert.get());
 		geo_mesh->setColorArray(color.get());
@@ -173,12 +169,12 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 		return;
 	}
 
-	geo_point = new osg::Geometry;//´´½¨Ò»¸ö¼¸ºÎÌå¶ÔÏó
-	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
-	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
-	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//´´½¨ÑÕÉ«Êı×é,ÄæÊ±ÕëÅÅĞò
+	geo_point = new osg::Geometry;//åˆ›å»ºä¸€ä¸ªå‡ ä½•ä½“å¯¹è±¡
+	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
+	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//åˆ›å»ºé¢œè‰²æ•°ç»„,é€†æ—¶é’ˆæ’åº
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
-	
+
 	size_t allPointNum = m_loadCloud->points.size();
 	if (allPointNum > 0) {
 		vert->reserve(allPointNum + 1);
@@ -186,7 +182,7 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 	}
 
 	size_t count = 0;
-	osg::Vec4 single_color(0.0, 0.0, 1.0, 1.0);//Ä¬ÈÏÎªÀ¶É«µã
+	osg::Vec4 single_color(0.0, 0.0, 1.0, 1.0);//é»˜è®¤ä¸ºè“è‰²ç‚¹
 	color->push_back(single_color);
 
 	for (const auto & curP : m_loadCloud->points) {
@@ -195,10 +191,10 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 		++count;
 	}
 
-	//m_loadCloud->clear();
-	//m_loadCloud->~PointCloud();
-	
-	//all points num
+	// m_loadCloud->clear();
+	// m_loadCloud->~PointCloud();
+
+	// all points num
 	this->point_num = count;
 	normal->push_back(osg::Vec3(0.0, 0.0, 1.0));
 
@@ -209,14 +205,14 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 	geo_point->setColorBinding(osg::Geometry::BIND_OVERALL);
 	geo_point->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, count));
 
-	this->removeDrawables(0, this->getNumDrawables());//¶ÁÈ¡ÎÄ¼şÇ°ÏÈÌŞ³ı½ÚµãÄÚËùÓĞµÄ¼¸ºÎÌå
-	this->addDrawable(geo_point.get());//¼ÓÈëµ±Ç°ĞÂµÄµãÔÆ¼¸ºÎ»æÖÆÌå
+	this->removeDrawables(0, this->getNumDrawables());//è¯»å–æ–‡ä»¶å‰å…ˆå‰”é™¤èŠ‚ç‚¹å†…æ‰€æœ‰çš„å‡ ä½•ä½“
+	this->addDrawable(geo_point.get());//åŠ å…¥å½“å‰æ–°çš„ç‚¹äº‘å‡ ä½•ç»˜åˆ¶ä½“
 }
 
 void PointCloud::readLasData(const std::string & openfileName) {
 	LASreadOpener opener;
 	opener.set_file_name(openfileName.c_str());
-	if (false == opener.active()){
+	if (false == opener.active()) {
 		return;
 	}
 	LASreader * reader = opener.open();
@@ -224,10 +220,10 @@ void PointCloud::readLasData(const std::string & openfileName) {
 		return;
 	}
 
-	geo_point = new osg::Geometry;//´´½¨Ò»¸ö¼¸ºÎÌå¶ÔÏó
-	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
-	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
-	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//´´½¨ÑÕÉ«Êı×é,ÄæÊ±ÕëÅÅĞò
+	geo_point = new osg::Geometry;//åˆ›å»ºä¸€ä¸ªå‡ ä½•ä½“å¯¹è±¡
+	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
+	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//åˆ›å»ºé¢œè‰²æ•°ç»„,é€†æ—¶é’ˆæ’åº
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
 
 	if (this->point_num > 0) {
@@ -238,8 +234,7 @@ void PointCloud::readLasData(const std::string & openfileName) {
 
 	size_t count = 0;
 	std::string errInfo;
-	try
-	{
+	try {
 		while (reader->read_point()) {
 			double  x, y, z;
 			double  r, g, b, w;
@@ -262,22 +257,17 @@ void PointCloud::readLasData(const std::string & openfileName) {
 			color->push_back(single_color);
 
 			point->push_back(count);
-			++count;//points num
+			++count;// points num
 		}
 
 		reader->close();
 		delete reader;
 		reader = nullptr;
-	}
-	catch (std::exception & e)
-	{
+	} catch (std::exception & e) {
 		errInfo = e.what();
-	}
-	catch (...)
-	{
+	} catch (...) {
 		errInfo = "get unknown exception";
 	}
-	
 
 	this->point_num = count;
 
@@ -290,13 +280,13 @@ void PointCloud::readLasData(const std::string & openfileName) {
 	geo_point->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
 	geo_point->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, count));
 
-	this->removeDrawables(0, this->getNumDrawables());//¶ÁÈ¡ÎÄ¼şÇ°ÏÈÌŞ³ı½ÚµãÄÚËùÓĞµÄ¼¸ºÎÌå
-	this->addDrawable(geo_point.get());//¼ÓÈëµ±Ç°ĞÂµÄµãÔÆ¼¸ºÎ»æÖÆÌå
+	this->removeDrawables(0, this->getNumDrawables());//è¯»å–æ–‡ä»¶å‰å…ˆå‰”é™¤èŠ‚ç‚¹å†…æ‰€æœ‰çš„å‡ ä½•ä½“
+	this->addDrawable(geo_point.get());//åŠ å…¥å½“å‰æ–°çš„ç‚¹äº‘å‡ ä½•ç»˜åˆ¶ä½“
 }
 
 void PointCloud::readLasDataByLibLas(const std::string & openfileName) {
-	fstream ifs;
-	ifs.open(openfileName.c_str(), ios::in | ios::binary);
+	std::fstream ifs;
+	ifs.open(openfileName.c_str(), std::ios::in | std::ios::binary);
 	if (!ifs)
 		return;
 
@@ -304,10 +294,10 @@ void PointCloud::readLasDataByLibLas(const std::string & openfileName) {
 	liblas::Reader reader = f.CreateWithStream(ifs);
 	liblas::Header const& header = reader.GetHeader();
 
-	geo_point = new osg::Geometry;//´´½¨Ò»¸ö¼¸ºÎÌå¶ÔÏó
-	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
-	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
-	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//´´½¨ÑÕÉ«Êı×é,ÄæÊ±ÕëÅÅĞò
+	geo_point = new osg::Geometry;//åˆ›å»ºä¸€ä¸ªå‡ ä½•ä½“å¯¹è±¡
+	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
+	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//åˆ›å»ºé¢œè‰²æ•°ç»„,é€†æ—¶é’ˆæ’åº
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
 
 	if (this->point_num > 0) {
@@ -318,8 +308,7 @@ void PointCloud::readLasDataByLibLas(const std::string & openfileName) {
 
 	size_t count = 0;
 	std::string errInfo;
-	try
-	{
+    try {
 		while (reader.ReadNextPoint()) {
 			double  x, y, z;
 			double  r, g, b, w;
@@ -342,18 +331,14 @@ void PointCloud::readLasDataByLibLas(const std::string & openfileName) {
 			color->push_back(single_color);
 
 			point->push_back(count);
-			++count;//points num
+			++count;// points num
 		}
-	}
-	catch (std::exception & e)
-	{
+	} catch (std::exception & e) {
 		errInfo = e.what();
-	}
-	catch (...)
-	{
+	} catch (...) {
 		errInfo = "get unknown exception";
 	}
-	
+
 	this->point_num = count;
 
 	normal->push_back(osg::Vec3(0.0, 0.0, 1.0));
@@ -365,8 +350,8 @@ void PointCloud::readLasDataByLibLas(const std::string & openfileName) {
 	geo_point->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
 	geo_point->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, count));
 
-	this->removeDrawables(0, this->getNumDrawables());//¶ÁÈ¡ÎÄ¼şÇ°ÏÈÌŞ³ı½ÚµãÄÚËùÓĞµÄ¼¸ºÎÌå
-	this->addDrawable(geo_point.get());//¼ÓÈëµ±Ç°ĞÂµÄµãÔÆ¼¸ºÎ»æÖÆÌå
+	this->removeDrawables(0, this->getNumDrawables());//è¯»å–æ–‡ä»¶å‰å…ˆå‰”é™¤èŠ‚ç‚¹å†…æ‰€æœ‰çš„å‡ ä½•ä½“
+	this->addDrawable(geo_point.get());//åŠ å…¥å½“å‰æ–°çš„ç‚¹äº‘å‡ ä½•ç»˜åˆ¶ä½“
 }
 
 void PointCloud::readLasData(const std::string & openfileName, int & rate, bool & isCancel) {
@@ -384,10 +369,10 @@ void PointCloud::readLasData(const std::string & openfileName, int & rate, bool 
 		return;
 	}
 
-	geo_point = new osg::Geometry;//´´½¨Ò»¸ö¼¸ºÎÌå¶ÔÏó
-	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
-	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
-	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//´´½¨ÑÕÉ«Êı×é,ÄæÊ±ÕëÅÅĞò
+	geo_point = new osg::Geometry;//åˆ›å»ºä¸€ä¸ªå‡ ä½•ä½“å¯¹è±¡
+	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
+	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//åˆ›å»ºé¢œè‰²æ•°ç»„,é€†æ—¶é’ˆæ’åº
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
 
 	if (this->point_num > 0) {
@@ -400,8 +385,7 @@ void PointCloud::readLasData(const std::string & openfileName, int & rate, bool 
 	size_t point_count = 0;
 	int m_Rate = 1;
 	std::string errInfo;
-	try
-	{
+	try {
 		while (reader->read_point()) {
 			if (isCancel) {
 				break;
@@ -448,8 +432,8 @@ void PointCloud::readLasData(const std::string & openfileName, int & rate, bool 
 	geo_point->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
 	geo_point->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, point_count));
 
-	this->removeDrawables(0, this->getNumDrawables());//¶ÁÈ¡ÎÄ¼şÇ°ÏÈÌŞ³ı½ÚµãÄÚËùÓĞµÄ¼¸ºÎÌå
-	this->addDrawable(geo_point.get());//¼ÓÈëµ±Ç°ĞÂµÄµãÔÆ¼¸ºÎ»æÖÆÌå
+	this->removeDrawables(0, this->getNumDrawables());//è¯»å–æ–‡ä»¶å‰å…ˆå‰”é™¤èŠ‚ç‚¹å†…æ‰€æœ‰çš„å‡ ä½•ä½“
+	this->addDrawable(geo_point.get());//åŠ å…¥å½“å‰æ–°çš„ç‚¹äº‘å‡ ä½•ç»˜åˆ¶ä½“
 }
 
 void PointCloud::readTxtData(const std::string & openfileName, int & rate, bool & isCancel) {
@@ -462,25 +446,25 @@ void PointCloud::readTxtData(const std::string & openfileName, int & rate, bool 
 		return;
 	}
 
-	size_t numInterval = (size_t)(this->getPointNum() / 100);
+	size_t numInterval = static_cast<size_t>(this->getPointNum() / 100);
 	size_t point_count = 0;
 	uchar * fpr = text_file.map(0, text_file.size());
 
-	char *ss = strdup((char*)fpr);
+	char *ss = strdup(reinterpret_cast<char*>(fpr));
 	char delim[] = " ,";
 	char *ppp;
 	char *lineSubstr = nullptr;
 
 	osg::Vec3 single_point(0.0, 0.0, 0.0);
-	osg::Vec4 single_color(0.0, 0.0, 1.0, 1.0);//Ä¬ÈÏÎªÀ¶É«µã
+	osg::Vec4 single_color(0.0, 0.0, 1.0, 1.0);//é»˜è®¤ä¸ºè“è‰²ç‚¹
 
 	char * substr = strtok_s(ss, "\n", &ppp);
-	vector<float> xyz_list;
+	std::vector<float> xyz_list;
 
-	geo_point = new osg::Geometry;//´´½¨Ò»¸ö¼¸ºÎÌå¶ÔÏó
-	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
-	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
-	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//´´½¨ÑÕÉ«Êı×é,ÄæÊ±ÕëÅÅĞò
+	geo_point = new osg::Geometry;//åˆ›å»ºä¸€ä¸ªå‡ ä½•ä½“å¯¹è±¡
+	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
+	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//åˆ›å»ºé¢œè‰²æ•°ç»„,é€†æ—¶é’ˆæ’åº
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
 
 	bool isOnlyXYZ = (this->getType() == TXT_COLOR ? false : true);
@@ -499,7 +483,7 @@ void PointCloud::readTxtData(const std::string & openfileName, int & rate, bool 
 		QColor curColor = Qt::blue;
 		point_color = curColor;
 		color->push_back(single_color);
-		
+
 		while (substr = strtok_s(nullptr, "\n", &ppp)) {
 			if (isCancel) {
 				break;
@@ -523,8 +507,7 @@ void PointCloud::readTxtData(const std::string & openfileName, int & rate, bool 
 				curInterval += numInterval;
 			}
 		}
-	}
-	else {
+	} else {
 		while (substr = strtok_s(nullptr, "\n", &ppp)) {
 			if (isCancel) {
 				break;
@@ -552,8 +535,8 @@ void PointCloud::readTxtData(const std::string & openfileName, int & rate, bool 
 			}
 		}
 	}
-	
-	//free(ss);
+
+	// free(ss);
 
 	if (isCancel) {
 		clearData();
@@ -574,12 +557,12 @@ void PointCloud::readTxtData(const std::string & openfileName, int & rate, bool 
 	geo_point->setColorBinding(isOnlyXYZ ? osg::Geometry::BIND_OVERALL : osg::Geometry::BIND_PER_VERTEX);
 
 	geo_point->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, point_count));
-	this->removeDrawables(0, this->getNumDrawables());//¶ÁÈ¡ÎÄ¼şÇ°ÏÈÌŞ³ı½ÚµãÄÚËùÓĞµÄ¼¸ºÎÌå
-	this->addDrawable(geo_point.get());//¼ÓÈëµ±Ç°ĞÂµÄµãÔÆ¼¸ºÎ»æÖÆÌå
+	this->removeDrawables(0, this->getNumDrawables());//è¯»å–æ–‡ä»¶å‰å…ˆå‰”é™¤èŠ‚ç‚¹å†…æ‰€æœ‰çš„å‡ ä½•ä½“
+	this->addDrawable(geo_point.get());//åŠ å…¥å½“å‰æ–°çš„ç‚¹äº‘å‡ ä½•ç»˜åˆ¶ä½“
 }
 
 void PointCloud::setShowBoundingBox(bool isShow) {
-	//Ê×´Î³õÊ¼»¯Íâ½Ó¿ò
+	//é¦–æ¬¡åˆå§‹åŒ–å¤–æ¥æ¡†
 	initBoundingBox();
 	if (geo_point && geo_point->getNodeMask()) {
 		if (geo_bounding_node) {
@@ -602,11 +585,11 @@ void PointCloud::initBoundingBox() {
 	}
 
 	if (nullptr == geo_bounding_box) {
-		geo_bounding_box = new osg::Geometry;//´´½¨Ò»¸ö¼¸ºÎÌå¶ÔÏó
+		geo_bounding_box = new osg::Geometry;//åˆ›å»ºä¸€ä¸ªå‡ ä½•ä½“å¯¹è±¡
 	}
 
-	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//´´½¨¶¥µãÊı×é,ÄæÊ±ÕëÅÅĞò
-	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//´´½¨ÑÕÉ«Êı×é,ÄæÊ±ÕëÅÅĞò
+	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//åˆ›å»ºé¡¶ç‚¹æ•°ç»„,é€†æ—¶é’ˆæ’åº
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//åˆ›å»ºé¢œè‰²æ•°ç»„,é€†æ—¶é’ˆæ’åº
 	osg::ref_ptr<osg::DrawElementsUByte> quad = new osg::DrawElementsUByte(GL_LINES);
 
 	float box_xmin = geo_point->getBoundingBox().xMin();
@@ -616,7 +599,7 @@ void PointCloud::initBoundingBox() {
 	float box_ymax = geo_point->getBoundingBox().yMax();
 	float box_zmax = geo_point->getBoundingBox().zMax();
 
-	//Íâ½Ó°üÎ§ºĞµÄÊÀ½ç×ø±ê8ÖÁµã
+	// å¤–æ¥åŒ…å›´ç›’çš„ä¸–ç•Œåæ ‡8è‡³ç‚¹
 	osg::Vec3 p0(box_xmin, box_ymin, box_zmin);
 	osg::Vec3 p1(box_xmax, box_ymin, box_zmin);
 	osg::Vec3 p2(box_xmax, box_ymax, box_zmin);
@@ -626,9 +609,9 @@ void PointCloud::initBoundingBox() {
 	osg::Vec3 p6(box_xmax, box_ymax, box_zmax);
 	osg::Vec3 p7(box_xmin, box_ymax, box_zmax);
 
-	osg::Vec4 out_line_color(1.0, 1.0, 0.0, 1.0);//¶¨ÒåÍâ²¿Ïß¿òµÄÑÕÉ«
+	osg::Vec4 out_line_color(1.0, 1.0, 0.0, 1.0);//å®šä¹‰å¤–éƒ¨çº¿æ¡†çš„é¢œè‰²
 
-	//µ¥Ò»Íø¸ñµÄ°Ë¶¥µã
+	//å•ä¸€ç½‘æ ¼çš„å…«é¡¶ç‚¹
 	vert->push_back(p0);
 	vert->push_back(p1);
 	vert->push_back(p2);
@@ -638,47 +621,45 @@ void PointCloud::initBoundingBox() {
 	vert->push_back(p6);
 	vert->push_back(p7);
 
-	for (int k = 0; k < 8; ++k)	{
+	for (int k = 0; k < 8; ++k) {
 		color->push_back(out_line_color);
 	}
 
-	{
-		quad->push_back(0);
-		quad->push_back(1);
+	quad->push_back(0);
+	quad->push_back(1);
 
-		quad->push_back(0);
-		quad->push_back(3);
+	quad->push_back(0);
+	quad->push_back(3);
 
-		quad->push_back(0);
-		quad->push_back(4);
+	quad->push_back(0);
+	quad->push_back(4);
 
-		quad->push_back(2);
-		quad->push_back(1);
+	quad->push_back(2);
+	quad->push_back(1);
 
-		quad->push_back(2);
-		quad->push_back(3);
+	quad->push_back(2);
+	quad->push_back(3);
 
-		quad->push_back(2);
-		quad->push_back(6);
+	quad->push_back(2);
+	quad->push_back(6);
 
-		quad->push_back(5);
-		quad->push_back(1);
+	quad->push_back(5);
+	quad->push_back(1);
 
-		quad->push_back(5);
-		quad->push_back(4);
+	quad->push_back(5);
+	quad->push_back(4);
 
-		quad->push_back(5);
-		quad->push_back(6);
+	quad->push_back(5);
+	quad->push_back(6);
 
-		quad->push_back(7);
-		quad->push_back(3);
+	quad->push_back(7);
+	quad->push_back(3);
 
-		quad->push_back(7);
-		quad->push_back(4);
+	quad->push_back(7);
+	quad->push_back(4);
 
-		quad->push_back(7);
-		quad->push_back(6);
-	}
+	quad->push_back(7);
+	quad->push_back(6);
 
 	geo_bounding_box->setVertexArray(vert.get());
 	geo_bounding_box->setColorArray(color.get());
@@ -688,11 +669,11 @@ void PointCloud::initBoundingBox() {
 	this->addChild(geo_bounding_node.get());
 
 	osg::ref_ptr<osg::StateSet> stateset = geo_bounding_box->getOrCreateStateSet();
-	stateset->setMode(GL_BLEND, osg::StateAttribute::ON);//¿ªÆôAlpha»ìºÏ£¬ÊµÏÖÍ¸Ã÷¶È
-	stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);//ÉèÖÃäÖÈ¾Ä£Ê½		
-	stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);//È¡ÏûÉî¶È²âÊÔ
-	stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);//¹Ø±Õ¹ØÕÕĞ§¹û£¬ÕâÑùÈÎÒâÃæ¾ù¿ÉÊµÏÖ°ëÍ¸Ã÷Ğ§¹û
-	osg::ref_ptr<osg::PolygonMode> polyMode = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);//ÉèÖÃÍø¸ñÄ£Ê½
+	stateset->setMode(GL_BLEND, osg::StateAttribute::ON);// å¼€å¯Alphaæ··åˆï¼Œå®ç°é€æ˜åº¦
+    stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);// è®¾ç½®æ¸²æŸ“æ¨¡å¼
+	stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);// å–æ¶ˆæ·±åº¦æµ‹è¯•
+	stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);// å…³é—­å…³ç…§æ•ˆæœï¼Œè¿™æ ·ä»»æ„é¢å‡å¯å®ç°åŠé€æ˜æ•ˆæœ
+	osg::ref_ptr<osg::PolygonMode> polyMode = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);// è®¾ç½®ç½‘æ ¼æ¨¡å¼
 	stateset->setAttribute(polyMode);
 
 	osg::ref_ptr<osg::LineWidth> line_width = new osg::LineWidth(1.0);
@@ -701,14 +682,14 @@ void PointCloud::initBoundingBox() {
 	hasBuildBox = true;
 }
 
-//»ñÈ¡¸øµãÔÆÊı¾İµÄ×î´ó×îĞ¡·¶Î§
+//è·å–ç»™ç‚¹äº‘æ•°æ®çš„æœ€å¤§æœ€å°èŒƒå›´
 point_MAXMIN* PointCloud::getMinMaxXYZ_POINTS() {
 	if (Max_area) {
 		return Max_area;
 	}
 
 	Max_area = new point_MAXMIN;
-	vector<float> x_list, y_list, z_list;
+	std::vector<float> x_list, y_list, z_list;
 	osg::Vec3Array * pointArry = this->getVertArry<osg::Vec3Array>();
 
 	if (pointArry == nullptr) {
@@ -721,13 +702,13 @@ point_MAXMIN* PointCloud::getMinMaxXYZ_POINTS() {
 		z_list.push_back(curP.z());
 	}
 
-	vector<float>::iterator xmax = max_element(begin(x_list), end(x_list));
-	vector<float>::iterator ymax = max_element(begin(y_list), end(y_list));
-	vector<float>::iterator zmax = max_element(begin(z_list), end(z_list));
+	std::vector<float>::iterator xmax = max_element(begin(x_list), end(x_list));
+	std::vector<float>::iterator ymax = max_element(begin(y_list), end(y_list));
+	std::vector<float>::iterator zmax = max_element(begin(z_list), end(z_list));
 
-	vector<float>::iterator xmin = min_element(begin(x_list), end(x_list));
-	vector<float>::iterator ymin = min_element(begin(y_list), end(y_list));
-	vector<float>::iterator zmin = min_element(begin(z_list), end(z_list));
+	std::vector<float>::iterator xmin = min_element(begin(x_list), end(x_list));
+	std::vector<float>::iterator ymin = min_element(begin(y_list), end(y_list));
+	std::vector<float>::iterator zmin = min_element(begin(z_list), end(z_list));
 
 	Max_area->xmax = *xmax;
 	Max_area->ymax = *ymax;
@@ -852,8 +833,7 @@ bool PCloudManager::setSelectState(const std::string & pName, bool isSelected) {
 		curPCl->setSelected(isSelected);
 		if (isSelected) {
 			selected_pcloud_list.emplace_back(curPCl);
-		}
-		else {
+		} else {
 			selected_pcloud_list.remove(curPCl);
 		}
 		return true;
@@ -887,13 +867,12 @@ void PCloudManager::saveSelectedToFile(const std::string & saveFileName) {
 
 	int pos = saveFileName.find_last_of('.');
 	const std::string &fileFormat = saveFileName.substr(pos + 1);
-	outf.setf(std::ios::fixed, ios::floatfield);
+	outf.setf(std::ios::fixed, std::ios::floatfield);
 	if (fileFormat == "txt") {
 		for (const auto & curVert : *vertAll) {
-			outf << setiosflags(std::ios::left) << setprecision(3) << curVert.x() << " " << curVert.y() << " " << curVert.z() << " " << std::endl;
+			outf << setiosflags(std::ios::left) << std::setprecision(3) << curVert.x() << " " << curVert.y() << " " << curVert.z() << " " << std::endl;
 		}
-	}
-	else if (fileFormat == "las") {
+	} else if (fileFormat == "las") {
 		LASwriteOpener writerOpener;
 		writerOpener.set_file_name(saveFileName.c_str());
 		LASheader header;

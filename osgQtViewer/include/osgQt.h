@@ -1,3 +1,4 @@
+﻿/* Copyright© 2022 Jack721 */
 #pragma once
 
 #include <QTimer>

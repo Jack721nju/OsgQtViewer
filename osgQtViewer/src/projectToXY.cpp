@@ -1,14 +1,15 @@
+ï»¿/* CopyrightÂ© 2022 Jack721 */
 #include "ProjectToXY.h"
 
 PaintArea::PaintArea(QWidget* parent) : QWidget(parent) {
-	//³õÊ¼»¯»æÖÆÇøÓò·¶Î§
+	//åˆå§‹åŒ–ç»˜åˆ¶åŒºåŸŸèŒƒå›´
 	image = new QImage(600, 600, QImage::Format_RGB32);
 	const QColor &backcolor = qRgb(255, 255, 255);
 	image->fill(backcolor);
 }
 
 PaintArea::PaintArea(int widthX, int heightY) {
-	//³õÊ¼»¯»æÖÆÇøÓò·¶Î§
+	//åˆå§‹åŒ–ç»˜åˆ¶åŒºåŸŸèŒƒå›´
 	image = new QImage(widthX, heightY, QImage::Format_RGB32);
 	const QColor & backcolor = qRgb(255, 255, 255);
 	image->fill(backcolor);
@@ -29,7 +30,7 @@ void PaintArea::drawPoints(QPointF points[], int point_num, int point_size, cons
 	pen.setColor(point_color);
 
 	QPainter painter(image);
-	painter.setRenderHint(QPainter::Antialiasing, true);//ÉèÖÃ·´¾â³İÄ£Ê½
+	painter.setRenderHint(QPainter::Antialiasing, true);//è®¾ç½®åé”¯é½¿æ¨¡å¼
 	painter.setPen(pen);
 	painter.drawPoints(points, point_num);
 }
@@ -43,7 +44,7 @@ void PaintArea::drawText(QPointF pos, QString text) {
 	pen.setColor(QColor(0, 0, 0));
 
 	QPainter painter(image);
-	painter.setRenderHint(QPainter::Antialiasing, true);//ÉèÖÃ·´¾â³İÄ£Ê½
+	painter.setRenderHint(QPainter::Antialiasing, true);//è®¾ç½®åé”¯é½¿æ¨¡å¼
 	painter.setPen(pen);
 	painter.drawText(pos, text);
 }
@@ -62,9 +63,9 @@ void PaintArea::drawGridWithFillColor(float xmin, float ymin, float xmax, float 
 	brush.setStyle(Qt::SolidPattern);
 
 	QPainter painter(image);
-	painter.setRenderHint(QPainter::Antialiasing, true);//ÉèÖÃ·´¾â³İÄ£Ê½
+	painter.setRenderHint(QPainter::Antialiasing, true);//è®¾ç½®åé”¯é½¿æ¨¡å¼
 	painter.setPen(pen);
-	painter.setBrush(brush);//ÉèÖÃ»­Ë¢ĞÎÊ½
+	painter.setBrush(brush);//è®¾ç½®ç”»åˆ·å½¢å¼
 
 	float originX = xmin;
 	float originY = ymin;
@@ -87,9 +88,9 @@ void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, const QColor& curG
 	brush.setStyle(Qt::SolidPattern);
 
 	QPainter painter(image);
-	painter.setRenderHint(QPainter::Antialiasing, true);//ÉèÖÃ·´¾â³İÄ£Ê½
+	painter.setRenderHint(QPainter::Antialiasing, true);//è®¾ç½®åé”¯é½¿æ¨¡å¼
 	painter.setPen(pen);
-	painter.setBrush(brush);//ÉèÖÃ»­Ë¢ĞÎÊ½
+	painter.setBrush(brush);//è®¾ç½®ç”»åˆ·å½¢å¼
 
 	QPoint point_LeftBottom(eachGrid->curGridInfo.Min_X, eachGrid->curGridInfo.Min_Y);
 	QPoint point_RightBottom(eachGrid->curGridInfo.Max_X, eachGrid->curGridInfo.Min_Y);
@@ -114,7 +115,7 @@ void PaintArea::drawGrid(SingleGrid2D* eachGrid) {
 	pen.setColor(QColor(0, 0, 0));
 
 	QPainter painter(image);
-	painter.setRenderHint(QPainter::Antialiasing, true);//ÉèÖÃ·´¾â³İÄ£Ê½
+	painter.setRenderHint(QPainter::Antialiasing, true);//è®¾ç½®åé”¯é½¿æ¨¡å¼
 	painter.setPen(pen);
 
 	QPoint point_LeftBottom(eachGrid->curGridInfo.Min_X, eachGrid->curGridInfo.Min_Y);
@@ -129,7 +130,7 @@ void PaintArea::drawGrid(SingleGrid2D* eachGrid) {
 	painter.drawLine(point_LeftTop, point_LeftBottom);
 }
 
-void PaintArea::drawLines(const vector<Edge> &line_list) {
+void PaintArea::drawLines(const std::vector<Edge> &line_list) {
 	if (!image)
 		return;
 
@@ -139,7 +140,7 @@ void PaintArea::drawLines(const vector<Edge> &line_list) {
 	pen.setColor(QColor(255, 0, 0));
 
 	QPainter painter(image);
-	painter.setRenderHint(QPainter::Antialiasing, true);//ÉèÖÃ·´¾â³İÄ£Ê½
+	painter.setRenderHint(QPainter::Antialiasing, true);//è®¾ç½®åé”¯é½¿æ¨¡å¼
 	painter.setPen(pen);
 
 	for (const auto & curLine : line_list) {
@@ -149,7 +150,7 @@ void PaintArea::drawLines(const vector<Edge> &line_list) {
 	}
 }
 
-void PaintArea::drawCircles(const vector<osg::Vec2> &center_list, int radius) {
+void PaintArea::drawCircles(const std::vector<osg::Vec2> &center_list, int radius) {
 	if (!image)
 		return;
 
@@ -159,7 +160,7 @@ void PaintArea::drawCircles(const vector<osg::Vec2> &center_list, int radius) {
 	pen.setColor(QColor(0, 255, 0));
 
 	QPainter painter(image);
-	painter.setRenderHint(QPainter::Antialiasing, true);//ÉèÖÃ·´¾â³İÄ£Ê½
+	painter.setRenderHint(QPainter::Antialiasing, true);//è®¾ç½®åé”¯é½¿æ¨¡å¼
 	painter.setPen(pen);
 
 	for (const auto &curCenter : center_list) {
@@ -167,7 +168,7 @@ void PaintArea::drawCircles(const vector<osg::Vec2> &center_list, int radius) {
 	}
 }
 
-void PaintArea::drawCircles(const vector<osg::Vec3> &circle_list, const vector<int> &Size_List) {
+void PaintArea::drawCircles(const std::vector<osg::Vec3> &circle_list, const std::vector<int> &Size_List) {
 	if (!image)
 		return;
 
@@ -176,11 +177,11 @@ void PaintArea::drawCircles(const vector<osg::Vec3> &circle_list, const vector<i
 	pen.setStyle(Qt::SolidLine);
 
 	QPainter painter(image);
-	painter.setRenderHint(QPainter::Antialiasing, true);//ÉèÖÃ·´¾â³İÄ£Ê½
+	painter.setRenderHint(QPainter::Antialiasing, true);//è®¾ç½®åé”¯é½¿æ¨¡å¼
 
 	for (int i = 0; i < circle_list.size(); ++i) {
 		QPoint center(circle_list[i].x(), circle_list[i].y());
-		int radius = (int)(circle_list[i].z());
+		int radius = static_cast<int>(circle_list[i].z());
 
 		switch (Size_List[i]) {
 			case 0 :
@@ -201,7 +202,7 @@ void PaintArea::drawCircles(const vector<osg::Vec3> &circle_list, const vector<i
 	}
 }
 
-//»æÖÆ×ø±êÖá
+//ç»˜åˆ¶åæ ‡è½´
 void PaintArea::drawAxis() {
 	if (!image)
 		return;
@@ -212,21 +213,21 @@ void PaintArea::drawAxis() {
 	pen.setColor(QColor(0, 0, 0));
 
 	QPainter painter(image);
-	painter.setRenderHint(QPainter::Antialiasing, true);//ÉèÖÃ·´¾â³İÄ£Ê½
+	painter.setRenderHint(QPainter::Antialiasing, true);//è®¾ç½®åé”¯é½¿æ¨¡å¼
 	painter.setPen(pen);
 
 	origin_point_X = 50;
-	origin_point_Y = 530;//×ø±êÏµÔ­µã
+	origin_point_Y = 530;// åæ ‡ç³»åŸç‚¹
 
-	axis_width = 500;//È·¶¨×ø±êÖá³¤¶È
-	axis_height = 500;//¸ß¶È
+	axis_width = 500;// ç¡®å®šåæ ‡è½´é•¿åº¦
+	axis_height = 500;// é«˜åº¦
 
-	//painter.drawRect(5, 5, 520 - 5, 520 - 5);//»æÖÆÇøÓòµÄ¾ØĞÎ·¶Î§£¬±£Áô5×óÓÒµÄ¼äÏ¶
-	painter.drawLine(origin_point_X - 20, origin_point_Y, origin_point_X + axis_width, origin_point_Y);//»æÖÆ×ø±êÖáX
-	painter.drawLine(origin_point_X, origin_point_Y + 20, origin_point_X, origin_point_Y - axis_height);//»æÖÆ×ø±êÖáY
+	// painter.drawRect(5, 5, 520 - 5, 520 - 5); // ç»˜åˆ¶åŒºåŸŸçš„çŸ©å½¢èŒƒå›´ï¼Œä¿ç•™5å·¦å³çš„é—´éš™
+	painter.drawLine(origin_point_X - 20, origin_point_Y, origin_point_X + axis_width, origin_point_Y);// ç»˜åˆ¶åæ ‡è½´X
+	painter.drawLine(origin_point_X, origin_point_Y + 20, origin_point_X, origin_point_Y - axis_height);// ç»˜åˆ¶åæ ‡è½´Y
 }
 
-//»æÖÆ×ø±êÖá¿Ì¶ÈÏß
+// ç»˜åˆ¶åæ ‡è½´åˆ»åº¦çº¿
 void PaintArea::drawDegreeLines(QString x_axis_name, QString y_axis_name, float base_x, float base_y, float delt_x, float delt_y) {
 	if (!image)
 		return;
@@ -240,7 +241,7 @@ void PaintArea::drawDegreeLines(QString x_axis_name, QString y_axis_name, float 
 	painter.drawText(QPoint(280, 560), x_axis_name);
 	painter.drawText(QPoint(10, 280), y_axis_name);
 
-	//»æÖÆ¿Ì¶ÈÏß
+	//ç»˜åˆ¶åˆ»åº¦çº¿
 	QPen penDegree;
 	penDegree.setColor(Qt::black);
 	penDegree.setWidth(2);
@@ -248,13 +249,13 @@ void PaintArea::drawDegreeLines(QString x_axis_name, QString y_axis_name, float 
 
 	int divde_num = 10;
 
-	for (int i = 0; i < divde_num; ++i)	{
+	for (int i = 0; i < divde_num; ++i) {
 		painter.drawLine((i + 1)*axis_width / divde_num, origin_point_Y, (i + 1)*axis_width / divde_num, origin_point_Y + 3);
-		painter.drawText((i + 1)*axis_width / divde_num - 7, origin_point_Y + 18, QString::number((int)(base_x + (i + 1) * (abs(delt_x)) / divde_num)));
+		painter.drawText((i + 1)*axis_width / divde_num - 7, origin_point_Y + 18, QString::number(static_cast<int>(base_x + (i + 1) * (abs(delt_x)) / divde_num)));
 	}
 
-	for (int i = 0; i < divde_num; ++i ) {
+	for (int i = 0; i < divde_num; ++i) {
 		painter.drawLine(origin_point_X, axis_height - (i + 1)*axis_height / divde_num, origin_point_X - 3, axis_height - (i + 1)*axis_height / divde_num);
-		painter.drawText(origin_point_X - 30, axis_height - (i + 1)*axis_height / divde_num + 10, QString::number((int)(base_y + (i + 1) * (abs(delt_y)) / divde_num)));
+		painter.drawText(origin_point_X - 30, axis_height - (i + 1)*axis_height / divde_num + 10, QString::number(static_cast<int>(base_y + (i + 1) * (abs(delt_y)) / divde_num)));
 	}
 }

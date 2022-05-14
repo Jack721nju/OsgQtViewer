@@ -1,3 +1,5 @@
+ï»¿/* CopyrightÂ© 2022 Jack721 */
+
 #include "OsgQtWindow.h"
 #include "JsonMgr.h"
 
@@ -11,12 +13,10 @@ static float eye_distance_rate = 5;
 
 #define MaxUsingThreadReadNum 5000000
 
-using namespace std;
-
-OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMainWindow() {	
+OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel):QMainWindow() {
 	setThreadingModel(threadingModel);
-	setKeyEventSetsDone(0);//½ûÓÃEscape¹Ø±ÕÊÓÍ¼
-	setAcceptDrops(true);//¿ªÆôÍÏ×§¹¦ÄÜ
+	setKeyEventSetsDone(0);// ç¦ç”¨Escapeå…³é—­è§†å›¾
+	setAcceptDrops(true);// å¼€å¯æ‹–æ‹½åŠŸèƒ½
 
 	MainWidget = new OsgContainer(this);
 	QHBoxLayout * hgrid = new QHBoxLayout;
@@ -25,8 +25,8 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMai
 	grid->addLayout(hgrid, 0, 0);
 	QWidget* centerWidget = new QWidget;
 	centerWidget->setLayout(grid);
-	
-	//ÉèÖÃÖĞÑëÖ÷´°¿Ú
+
+	// è®¾ç½®ä¸­å¤®ä¸»çª—å£
 	this->setCentralWidget(centerWidget);
 
 	mainView_root = MainWidget->getRoot();
@@ -35,39 +35,37 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel) :QMai
 		opt.optimize(mainView_root.get());
 	}
 
-	//³õÊ¼»¯Ö÷²Ëµ¥À¸
+	// åˆå§‹åŒ–ä¸»èœå•æ 
 	Init_Mian_Menu();
 
-	//³õÊ¼»¯¹¤¾ßÀ¸
+	// åˆå§‹åŒ–å·¥å…·æ 
 	Init_Tool_Bar();
 
-	//³õÊ¼»¯ÊÓ½ÇÇĞ»»¹¤¾ßÀ¸
+	// åˆå§‹åŒ–è§†è§’åˆ‡æ¢å·¥å…·æ 
 	Init_View_Bar();
 
-	//³õÊ¼»¯ÃüÁîÊä³ö¿ò
+	// åˆå§‹åŒ–å‘½ä»¤è¾“å‡ºæ¡†
 	Init_Console_Frame();
 
-	//³õÊ¼»¯Êı¾İ¹ÜÀí´°¿Ú
+	// åˆå§‹åŒ–æ•°æ®ç®¡ç†çª—å£
 	Init_Data_Manager_Widget();
 
-	//³õÊ¼»¯Êı¾İĞÅÏ¢´°¿Ú
+	// åˆå§‹åŒ–æ•°æ®ä¿¡æ¯çª—å£
 	Init_Dock_Data_Info_Widget();
 
-	//ÉèÖÃ¶ÁÈ¡Êı¾İ½ø¶ÈÌõ¼ÆÊ±Æ÷
+	// è®¾ç½®è¯»å–æ•°æ®è¿›åº¦æ¡è®¡æ—¶å™¨
 	read_timer.setSingleShot(false);
-	
-	//1ms
+
+	// 1ms
 	read_timer.setInterval(100);
 
-	//³õÊ¼»¯µãÔÆÊı¾İ¹ÜÀíÆ÷£¬µ¥ÀıÄ£Ê½
+	// åˆå§‹åŒ–ç‚¹äº‘æ•°æ®ç®¡ç†å™¨ï¼Œå•ä¾‹æ¨¡å¼
 	PCloudManager::Instance(mainView_root);
 }
 
-OsgQtTest::~OsgQtTest() {
+OsgQtTest::~OsgQtTest() { }
 
-};
-
-//¹¹½¨Í¼ĞÎ´°¿Ú£¬ÉèÖÃ´°¿ÚäÖÈ¾Ïà¹Ø²ÎÊı
+//æ„å»ºå›¾å½¢çª—å£ï¼Œè®¾ç½®çª—å£æ¸²æŸ“ç›¸å…³å‚æ•°
 osgQt::GraphicsWindowQt* OsgQtTest::createGraphicsWindow(int x, int y, int w, int h, const std::string& name, bool windowDecoration) {
 	osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
@@ -88,13 +86,9 @@ osgQt::GraphicsWindowQt* OsgQtTest::createGraphicsWindow(int x, int y, int w, in
 	return new osgQt::GraphicsWindowQt(traits.get());
 }
 
-//Ìí¼Ó¿ÉÊÓ´°¿Ú
+//æ·»åŠ å¯è§†çª—å£
 QWidget* OsgQtTest::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::ref_ptr<osg::Group> scene) {
 	osgViewer::Viewer* view = new osgViewer::Viewer;
-
-	//osgViewer::ViewerBase::ThreadingModel fitModel = osgViewer::ViewerBase::suggestBestThreadingModel();
-
-	//fitModel = osgViewer::ViewerBase::ThreadingModel::AutomaticSelection;
 
 	setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 
@@ -108,11 +102,6 @@ QWidget* OsgQtTest::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::ref_ptr<osg:
 	gw->setSyncToVBlank(false);
 	gw->setTouchEventsEnabled(true);
 
-	//pick = CPick::Instance();
-	//pick->m_Viewer = this;
-
-	//view->addEventHandler(pick);
-
 	const osg::GraphicsContext::Traits* traits = gw->getTraits();
 
 	camera->setClearColor(osg::Vec4(0.9, 0.9, 0.9, 1.0));
@@ -122,7 +111,7 @@ QWidget* OsgQtTest::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::ref_ptr<osg:
 	camera->setDrawBuffer(GL_BACK);
 	camera->setReadBuffer(GL_BACK);
 
-	//camera->setProjectionMatrixAsPerspective(30.0f, static_cast<float>(traits->width) / static_cast<float>(traits->height), 1.0f, 10000.0f);
+	// camera->setProjectionMatrixAsPerspective(30.0f, static_cast<float>(traits->width) / static_cast<float>(traits->height), 1.0f, 10000.0f);
 
 	view->addSlave(camera);
 	view->addEventHandler(new osgViewer::StatsHandler);
@@ -131,9 +120,8 @@ QWidget* OsgQtTest::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::ref_ptr<osg:
 	return gw->getGLWidget();
 }
 
-//µ÷ÕûÏà»ú²ÎÊı£¬Ê¹µÃÎïÌåÔÚÖ÷´°¿Ú¾ÓÖĞÏÔÊ¾
-void OsgQtTest::SetCamerToObjectCenter(osg::ref_ptr<osg::Node> cur_node)
-{
+//è°ƒæ•´ç›¸æœºå‚æ•°ï¼Œä½¿å¾—ç‰©ä½“åœ¨ä¸»çª—å£å±…ä¸­æ˜¾ç¤º
+void OsgQtTest::SetCamerToObjectCenter(osg::ref_ptr<osg::Node> cur_node) {
 	if (nullptr == cur_node) {
 		this->AddToConsoleSlot(QString("[WARING] No Object is selected!"));
 		return;
@@ -141,17 +129,17 @@ void OsgQtTest::SetCamerToObjectCenter(osg::ref_ptr<osg::Node> cur_node)
 
 	auto boundSphere = cur_node->getBound();
 
-	osg::Vec3 view_center = boundSphere.center();//Ïà»ú¶¢×ÅµÄÄ¿±êµã£¬²»Ò»¶¨ÊÇÎïÌåÖĞĞÄ£¬ÊÓÇé¿ö¶ø¶¨
+	osg::Vec3 view_center = boundSphere.center();//ç›¸æœºç›¯ç€çš„ç›®æ ‡ç‚¹ï¼Œä¸ä¸€å®šæ˜¯ç‰©ä½“ä¸­å¿ƒï¼Œè§†æƒ…å†µè€Œå®š
 	float object_radius = boundSphere.radius();
 	float view_Distance = object_radius * eye_distance_rate;
 
-	//·½ÏòÏòÉÏ
+	//æ–¹å‘å‘ä¸Š
 	osg::Vec3 view_up = osg::Z_AXIS;
 
-	osg::Vec3 view_Direction(0.0, -5.0, 1.0);//´ÓÎïÌåÖĞĞÄ¿´ÏòÏà»úÖĞĞÄµÄÏòÁ¿£¬Ä¬ÈÏÎª¸©ÊÓÍ¼
+	osg::Vec3 view_Direction(0.0, -5.0, 1.0);//ä»ç‰©ä½“ä¸­å¿ƒçœ‹å‘ç›¸æœºä¸­å¿ƒçš„å‘é‡ï¼Œé»˜è®¤ä¸ºä¿¯è§†å›¾
 	view_Direction.normalize();
 
-	osg::Vec3 camer_eye = view_center + view_Direction * view_Distance;//Ïà»úµÄÑÛ¾µÎ»ÖÃ
+	osg::Vec3 camer_eye = view_center + view_Direction * view_Distance;//ç›¸æœºçš„çœ¼é•œä½ç½®
 
 	if (MainWidget) {
 		MainWidget->getCameraManipulator()->setHomePosition(camer_eye, view_center, view_up);
@@ -183,7 +171,7 @@ void OsgQtTest::Init_Mian_Menu() {
 	QAction * edit_action2 = new QAction(QString::fromLocal8Bit("&Rotate"), menu_Edit);
 	edit_action2->connect(edit_action2, SIGNAL(triggered()), this, SLOT(RotateDataSlot()));
 	menu_Edit->addAction(edit_action2);
-	
+
 	QMenu * menu_Tool = menu_bar->addMenu("Tool");
 	QAction * tool_action1 = new QAction(QString::fromLocal8Bit("&Octree"), menu_Tool);
 	tool_action1->connect(tool_action1, SIGNAL(triggered()), this, SLOT(MoveDataSlot()));
@@ -378,8 +366,7 @@ void OsgQtTest::Init_View_Bar() {
 	view_bar->addAction(view_action7);
 }
 
-void OsgQtTest::Init_Console_Frame()
-{
+void OsgQtTest::Init_Console_Frame() {
 	Console_Frame = new QFrame(this);
 	Console_Frame->setMaximumHeight(200);
 
@@ -403,15 +390,15 @@ void OsgQtTest::Init_Console_Frame()
 bool OsgQtTest::eventFilter(QObject * obj, QEvent * event) {
 	if (obj == Data_TreeWidget->viewport()) {
 		if (event->type() == QEvent::MouseButtonPress) {
-			QMouseEvent * mouseEvent = (QMouseEvent*)event;
+			QMouseEvent * mouseEvent = reinterpret_cast<QMouseEvent*>(event);
 			if (mouseEvent->buttons() & Qt::LeftButton) {
 				QModelIndex index = Data_TreeWidget->indexAt(mouseEvent->pos());
 				if (!index.isValid()) {
-					//È¡Ïû½çÃæËùÓĞÑ¡ÖĞ×´Ì¬
+					//å–æ¶ˆç•Œé¢æ‰€æœ‰é€‰ä¸­çŠ¶æ€
 					Data_TreeWidget->setCurrentIndex(QModelIndex());
-					//Çå¿ÕËùÓĞµãÔÆµÄÑ¡ÖĞ×´Ì¬
+					//æ¸…ç©ºæ‰€æœ‰ç‚¹äº‘çš„é€‰ä¸­çŠ¶æ€
 					PCloudManager::Instance()->clearSelectedState();
-					//Çå¿ÕÊı¾İĞÅÏ¢ÏÔÊ¾´°¿Ú
+					//æ¸…ç©ºæ•°æ®ä¿¡æ¯æ˜¾ç¤ºçª—å£
 					slot_Clear_Data_Info_Widget();
 				}
 			}
@@ -431,9 +418,9 @@ void OsgQtTest::Init_Data_Manager_Widget() {
 	TopItem->setIcon(0, QIcon(Icon_Path + QString("layer.png")));
 
 	Data_TreeWidget->addTopLevelItem(TopItem);
-	Data_TreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);//ctrl + ¶àÑ¡
-	Data_TreeWidget->setSelectionMode(QAbstractItemView::ContiguousSelection);//shift + ¶àÑ¡
-	Data_TreeWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);//½ûÖ¹±à¼­
+	Data_TreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);// ctrl + å¤šé€‰
+	Data_TreeWidget->setSelectionMode(QAbstractItemView::ContiguousSelection);// shift + å¤šé€‰
+	Data_TreeWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);// ç¦æ­¢ç¼–è¾‘
 
 	Data_TreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	Data_TreeWidget->setRootIsDecorated(true);
@@ -457,7 +444,7 @@ void OsgQtTest::Init_Data_Manager_Widget() {
 	this->addDockWidget(Qt::LeftDockWidgetArea, Dock_Data_Widget);
 }
 
-void OsgQtTest::slot_ShowItemMenuSlot(const QPoint& pos){
+void OsgQtTest::slot_ShowItemMenuSlot(const QPoint& pos) {
 	if (nullptr == Data_TreeWidget) {
 		return;
 	}
@@ -565,14 +552,14 @@ void OsgQtTest::slot_deleteAllItem() {
 		return;
 	}
 
-	while (topItem->childCount() > 0){
+	while (topItem->childCount() > 0) {
 		QTreeWidgetItem * curItem = topItem->child(0);
 		Data_TreeWidget->removeItemWidget(curItem, 0);
 		delete curItem;
 		curItem = nullptr;
 	}
 
-	this->AddToConsoleSlot(QString("[I/O] Remove all files successfully"));	
+	this->AddToConsoleSlot(QString("[I/O] Remove all files successfully"));
 }
 
 void OsgQtTest::AddNodeToDataTree(const std::string & nodeName, int type) {
@@ -580,10 +567,9 @@ void OsgQtTest::AddNodeToDataTree(const std::string & nodeName, int type) {
 	witem->setText(0, nodeName.c_str());
 	witem->setCheckState(0, Qt::Checked);
 	QString Icon_file;
-	if (type == 1)	{
+	if (type == 1) {
 		Icon_file = Icon_Path + QString("cloud.png");
-	}
-	else if (type == 2)	{
+	} else if (type == 2) {
 		Icon_file = Icon_Path + QString("model.png");
 	}
 
@@ -598,7 +584,7 @@ void OsgQtTest::AddNodeToDataTree(const std::string & nodeName, int type) {
 	slot_RefreshData_TreeWidget(witem, 0);
 }
 
-void OsgQtTest::slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col) {	
+void OsgQtTest::slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col) {
 	PCloudManager::Instance()->clearSelectedState();
 
 	for (const auto & selectedItem : Data_TreeWidget->selectedItems()) {
@@ -609,8 +595,7 @@ void OsgQtTest::slot_RefreshData_TreeWidget(QTreeWidgetItem* item, int col) {
 	if (item) {
 		if (item->checkState(0) == Qt::Unchecked) {
 			PCloudManager::Instance()->setShowPointCloud(item->text(0).toStdString(), false);
-		}
-		else if (item->checkState(0) == Qt::Checked) {
+		} else if (item->checkState(0) == Qt::Checked) {
 			PCloudManager::Instance()->setShowPointCloud(item->text(0).toStdString(), true);
 		}
 	}
@@ -767,7 +752,7 @@ void OsgQtTest::Init_Point_Info_Widget(const std::string & itemName) {
 	point_color_button->setIconSize(QSize(25, 25));
 	point_color_button->setText(QString("Set Color"));
 	point_color_button->setMinimumHeight(20);
-	DataInfo_TableWidget->setCellWidget(13, 1, point_color_button);	
+	DataInfo_TableWidget->setCellWidget(13, 1, point_color_button);
 }
 
 void OsgQtTest::slot_setPointCloudColor() {
@@ -777,10 +762,10 @@ void OsgQtTest::slot_setPointCloudColor() {
 	}
 
 	QColorDialog *palette = new QColorDialog(DataInfo_TableWidget);
-	//ÉèÖÃµ±Ç°ÑÕÉ«£¬²¢»ñÈ¡ĞÂÉèÖÃÑÕÉ«
+	//è®¾ç½®å½“å‰é¢œè‰²ï¼Œå¹¶è·å–æ–°è®¾ç½®é¢œè‰²
 	const QColor &new_color = palette->getColor();
 
-	//ĞÂÉèÖÃÑÕÉ«Îª·Ç¿Õ
+	//æ–°è®¾ç½®é¢œè‰²ä¸ºéç©º
 	if (new_color.isValid()) {
 		PCloudManager::Instance()->setSelectPointColor(new_color);
 	}
@@ -804,7 +789,7 @@ void OsgQtTest::slot_Update_Data_Info_Widget(QTreeWidgetItem* item, int col) {
 		return;
 	}
 
-	if (DataInfo_TableWidget){
+	if (DataInfo_TableWidget) {
 		slot_Clear_Data_Info_Widget();
 		if (item == Data_TreeWidget->topLevelItem(0)) {
 			return;
@@ -837,7 +822,7 @@ void OsgQtTest::slot_Update_Data_Info_Widget(QTreeWidgetItem* item, int col) {
 	DataInfo_TableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
 	DataInfo_TableWidget->setStyleSheet("selection-background-color:pink");
 	DataInfo_TableWidget->setShowGrid(false);
-	DataInfo_TableWidget->horizontalHeader()->setStretchLastSection(true);//×îÓÒ²àÁĞÓë´°¿Ú¿í¶È¶ÔÆë
+	DataInfo_TableWidget->horizontalHeader()->setStretchLastSection(true);//æœ€å³ä¾§åˆ—ä¸çª—å£å®½åº¦å¯¹é½
 
 	QTableWidgetItem * t_item1 = new QTableWidgetItem;
 	t_item1->setText(tr("Property"));
@@ -882,13 +867,12 @@ void OsgQtTest::slot_Update_Data_Info_Widget(QTreeWidgetItem* item, int col) {
 	DataInfo_TableWidget->setItem(2, 0, t_item5);
 	DataInfo_TableWidget->setItem(3, 0, t_item6);
 	DataInfo_TableWidget->setItem(6, 0, t_item7);
-	DataInfo_TableWidget->setItem(9, 0, t_item8);	
+    DataInfo_TableWidget->setItem(9, 0, t_item8);
 
 	Init_Point_Info_Widget(item->text(0).toStdString());
-
 }
 
-void OsgQtTest::AddToConsoleSlot(const QString & show_text){
+void OsgQtTest::AddToConsoleSlot(const QString & show_text) {
 	QString cur_systemTime = "[" + QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") + "] ";
 	if (Console_edit) {
 		Console_edit->append(cur_systemTime + show_text);
@@ -902,9 +886,9 @@ bool OsgQtTest::hasSelectedPcloud() {
 	return false;
 }
 
-//É¾³ıµ±Ç°ËùÓĞÑ¡ÖĞÎÄ¼ş
+//åˆ é™¤å½“å‰æ‰€æœ‰é€‰ä¸­æ–‡ä»¶
 void OsgQtTest::slot_DeleteData() {
-	//ÅĞ¶ÏÊÇ·ñÒÑÑ¡ÔñÄ¿±êµãÔÆ
+	//åˆ¤æ–­æ˜¯å¦å·²é€‰æ‹©ç›®æ ‡ç‚¹äº‘
 	if (false == hasSelectedPcloud()) {
 		this->AddToConsoleSlot("[WARING] Can not delete, no data was selected");
 		return;
@@ -914,12 +898,12 @@ void OsgQtTest::slot_DeleteData() {
 		const auto fileName = curPCloud->getName();
 		PCloudManager::Instance()->removePointCloud(curPCloud);
 		this->AddToConsoleSlot(QString("[I/O] Remove file <") + QString::fromStdString(fileName) + QString("> successfully"));
-	}	
+    }
 }
 
-//±£´æµ±Ç°Ñ¡ÖĞÎÄ¼ş
+//ä¿å­˜å½“å‰é€‰ä¸­æ–‡ä»¶
 void OsgQtTest::slot_SaveData() {
-	//ÅĞ¶ÏÊÇ·ñÒÑÑ¡ÔñÄ¿±êµãÔÆ
+	//åˆ¤æ–­æ˜¯å¦å·²é€‰æ‹©ç›®æ ‡ç‚¹äº‘
 	if (false == hasSelectedPcloud()) {
 		this->AddToConsoleSlot("[WARING] Can not save, no data was selected");
 		return;
@@ -930,15 +914,15 @@ void OsgQtTest::slot_SaveData() {
 		this->AddToConsoleSlot(QString("[I/O] Cancel save file"));
 		return;
 	}
-	
-	_timerClock.start();//¿ªÊ¼¼ÆÊ±
+
+	_timerClock.start();//å¼€å§‹è®¡æ—¶
 	PCloudManager::Instance()->saveSelectedToFile(saveFileName.toStdString());
 	float saveTime = _timerClock.getTime<Ms>() * 0.001;
 	this->AddToConsoleSlot(QString("[I/O] Save file <") + saveFileName + QString("> successfully cost ") + QString::number(saveTime, 'f', 2) + "s");
 }
 
-//´ò¿ªÎÄ¼ş
-void OsgQtTest::slot_OpenData(){
+//æ‰“å¼€æ–‡ä»¶
+void OsgQtTest::slot_OpenData() {
 	const QString &getFullName = QFileDialog::getOpenFileName(nullptr, tr("Open data name:"), Data_Path, "Screen files(*.txt *.las *.pcd *.org *.osg *.ive *.earth)");
 
 	if (getFullName.isEmpty()) {
@@ -948,36 +932,34 @@ void OsgQtTest::slot_OpenData(){
 
 	const QFileInfo &fileInfo = QFileInfo(getFullName);
 
-	//ÅĞ¶ÏÊÇ´æÔÚÎÄ¼ş
-	if (false == fileInfo.exists())	{
+	//åˆ¤æ–­æ˜¯å­˜åœ¨æ–‡ä»¶
+	if (false == fileInfo.exists()) {
 		this->AddToConsoleSlot(QString("[WARING] The file <") + getFullName + QString("> is not exists"));
 		return;
 	}
 
-	//ÎÄ¼şÃû
+	//æ–‡ä»¶å
 	const QString &curFileName = fileInfo.fileName();
 
-	//ÎÄ¼şºó×ºÃû
+	//æ–‡ä»¶åç¼€å
 	const QString &curFileSuffix = fileInfo.suffix();
 
-	//ÎÄ¼ş¾ø¶ÔÂ·¾¶
+	//æ–‡ä»¶ç»å¯¹è·¯å¾„
 	const QString &curFilePath = fileInfo.absolutePath();
 
-	const string &fullname = getFullName.toStdString();//È«¾ÖÃû³Æ£¬°üº¬ÍêÕûÂ·¾¶ºÍÎÄ¼şÃû
-	const string &path_name = curFilePath.toStdString();//ÍêÕûÂ·¾¶
+	const std::string &fullname = getFullName.toStdString();//å…¨å±€åç§°ï¼ŒåŒ…å«å®Œæ•´è·¯å¾„å’Œæ–‡ä»¶å
+	const std::string &path_name = curFilePath.toStdString();//å®Œæ•´è·¯å¾„
 
-	const string &type_name = curFileSuffix.toStdString();//ÎÄ¼şÀàĞÍ
-	const string &file_name = curFileName.toStdString();//ÎÄ¼şÃû³Æ
+	const std::string &type_name = curFileSuffix.toStdString();//æ–‡ä»¶ç±»å‹
+	const std::string &file_name = curFileName.toStdString();//æ–‡ä»¶åç§°
 
-	_timerClock.start();//¿ªÊ¼¼ÆÊ±
-	
-	if (type_name == "las")	{
+	_timerClock.start();//å¼€å§‹è®¡æ—¶
+
+	if (type_name == "las") {
 		ReadLasData(fullname);
-	} 
-	else if (type_name == "txt"){
+	} else if (type_name == "txt") {
 		ReadTxtData(fullname);
-	}
-	else if (type_name == "pcd") {
+	} else if (type_name == "pcd") {
 		ReadPCDData(fullname);
 	}
 }
@@ -994,21 +976,18 @@ void OsgQtTest::slot_Init_Octree_Widget() {
 	QLabel *m_label_depth = new QLabel(m_octree_bulid_Dialog);
 	m_label_depth->setText("Max Depth:");
 	m_Octree_depth = new QLineEdit(m_octree_bulid_Dialog);
-	//m_Octree_depth->setFixedWidth(80);
 
 	QLabel *m_label_size = new QLabel(m_octree_bulid_Dialog);
 	m_label_size->setText("Voxel Size:");
 	m_Octree_size = new QLineEdit(m_octree_bulid_Dialog);
-	//m_Octree_size->setFixedWidth(80);
 
 	QLabel *m_label_pointNum = new QLabel(m_octree_bulid_Dialog);
 	m_label_pointNum->setText("Min point number:");
 	QLineEdit *m_Octree_pointNum = new QLineEdit(m_octree_bulid_Dialog);
-	//m_Octree_pointNum->setFixedWidth(80);
 
 	QPushButton *m_Create_Octree = new QPushButton("Create", m_octree_bulid_Dialog);
 	connect(m_Create_Octree, SIGNAL(clicked()), this, SLOT(slot_build_Octree()));
-	
+
 	QGridLayout *layout_all = new QGridLayout();
 	layout_all->addWidget(m_label_depth, 0, 0);
 	layout_all->addWidget(m_Octree_depth, 0, 1);
@@ -1022,8 +1001,8 @@ void OsgQtTest::slot_Init_Octree_Widget() {
 }
 
 void OsgQtTest::ReadPCDData(const std::string & fileName) {
-	ifstream ifs;
-	ifs.open(fileName, ios::in | ios::binary);
+	std::ifstream ifs;
+	ifs.open(fileName, std::ios::in | std::ios::binary);
 
 	if (!ifs.is_open()) {
 		this->AddToConsoleSlot(QString("[WARING] open file <") + QString::fromStdString(fileName) + QString("> failed"));
@@ -1039,17 +1018,17 @@ void OsgQtTest::ReadPCDData(const std::string & fileName) {
 	scene_Pcloud->readPCDData(fileName);
 	AddNodeToDataTree(fileName);
 	SetCamerToObjectCenter(scene_Pcloud->getGeoPoint());
-	float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
+	float showTime = static_cast<float>(_timerClock.getTime<Ms>() * 0.001);
 	QString read_time_text = "[Time] Read file <" + QString::fromStdString(fileName) + "> " + "[" +
 	                         QString::number(scene_Pcloud->getPointNum()) + "] points cost " + QString::number(showTime, 'f', 2) + "s";
-	this->AddToConsoleSlot(read_time_text);	
+    this->AddToConsoleSlot(read_time_text);
 }
 
 void OsgQtTest::ReadLasData(const std::string & fileName) {
-	ifstream ifs;
-	ifs.open(fileName, ios::in | ios::binary);
+	std::ifstream ifs;
+	ifs.open(fileName, std::ios::in | std::ios::binary);
 
-	if (ifs){
+	if (ifs) {
 		liblas::ReaderFactory ff;
 		const liblas::Reader & reader = ff.CreateWithStream(ifs);
 		const liblas::Header & header = reader.GetHeader();
@@ -1062,17 +1041,16 @@ void OsgQtTest::ReadLasData(const std::string & fileName) {
 
 		scene_Pcloud->setType(POINT_FILE_TYPE::LAS);
 		scene_Pcloud->setPointNum(pointNum);
-	
+
 		if (pointNum < MaxUsingThreadReadNum) {
 			scene_Pcloud->readLasData(fileName);
 			AddNodeToDataTree(fileName);
 			SetCamerToObjectCenter(scene_Pcloud->getGeoPoint());
-			float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
+			float showTime = static_cast<float>(_timerClock.getTime<Ms>() * 0.001);
 			QString read_time_text = "[Time] Read file <" + QString::fromStdString(fileName) + "> " + "[" +
 				QString::number(scene_Pcloud->getPointNum()) + "] points cost " + QString::number(showTime, 'f', 2) + "s";
 			this->AddToConsoleSlot(read_time_text);
-		}
-		else {
+		} else {
 			Init_ReadProgressDlg(fileName);
 			this->setMaxReadPointNum(scene_Pcloud->getPointNum());
 			WorkerThread * readData_thread = new WorkerThread(scene_Pcloud, progressMinValue, progressMaxValue, this);
@@ -1091,7 +1069,7 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 	QFile text_file(QString::fromStdString(fileName));
 	if (!text_file.open(QFile::ReadOnly | QIODevice::Text)) {
 		return;
-	}	
+	}
 
 	size_t line_count = 0;
 	size_t line_row = 0;
@@ -1102,24 +1080,24 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 	QTextStream stream(&text_file);
 
 	while (!stream.atEnd()) {
-		const QString & curLine = stream.readLine();		
-		const QStringList & row_parts = curLine.split(regep, QString::SkipEmptyParts);
-		line_row = row_parts.size();//ÎÄ¼şµÄÁĞÊı£¬Ò»°ã±íÊ¾µãÔÆÊÇ·ñº¬ÓĞÑÕÉ«»òÕß·¨ÏòÁ¿µÈ²ÎÊı	
+        const QString & curLine = stream.readLine();
+        const QStringList & row_parts = curLine.split(regep, QString::SkipEmptyParts);
+     	line_row = row_parts.size();//æ–‡ä»¶çš„åˆ—æ•°ï¼Œä¸€èˆ¬è¡¨ç¤ºç‚¹äº‘æ˜¯å¦å«æœ‰é¢œè‰²æˆ–è€…æ³•å‘é‡ç­‰å‚æ•°
 		single_line_bytes += curLine.size();
 		if (++countNum >= 256) {
 			break;
 		}
 	}
 
-	line_count = (size_t)((text_file.size() << 8) / single_line_bytes);//Ô¼ÎªµãÊıÁ¿
-	
+	line_count = static_cast<size_t>((text_file.size() << 8) / single_line_bytes);//çº¦ä¸ºç‚¹æ•°é‡
+
 	if (line_count == 0) {
 		return;
 	}
 
 	Init_ReadProgressDlg(fileName);
 	this->setMaxReadPointNum(line_count);
-	
+
 	if (line_row < 3) {
 		return;
 	}
@@ -1132,7 +1110,7 @@ void OsgQtTest::ReadTxtData(const std::string & fileName) {
 	PointCloud * scene_Pcloud = PCloudManager::Instance()->addPointCloud(fileName);
 	scene_Pcloud->setType(isOnlyXYZ ? POINT_FILE_TYPE::TXT : POINT_FILE_TYPE::TXT_COLOR);
 	scene_Pcloud->setPointNum(line_count);
-	
+
 	WorkerThread *readData_thread = new WorkerThread(scene_Pcloud, progressMinValue, progressMaxValue, this);
 	connect(&read_timer, SIGNAL(timeout()), readData_thread, SLOT(updateRate()));
 	connect(readData_thread, SIGNAL(started()), &read_timer, SLOT(start()));
@@ -1159,7 +1137,7 @@ void OsgQtTest::Init_ReadProgressDlg(const std::string & fileName) {
 	readDataProgressDlg->setValue(progressMinValue);
 }
 
-void OsgQtTest::setMaxReadPointNum(int MaxValue){
+void OsgQtTest::setMaxReadPointNum(int MaxValue) {
 	if (readDataProgressDlg) {
 		readDataProgressDlg->setLabelText(QString("Points: ") + QString::number(MaxValue));
 	}
@@ -1173,7 +1151,7 @@ void OsgQtTest::slot_UpdateProgress(int progressValue) {
 		if (readDataProgressDlg->wasCanceled() || getWrongValue) {
 			slot_CancelReadProgress();
 		}
-		
+
 		if (progressValue >= readDataProgressDlg->maximum()) {
 			slot_FisishReadProgress();
 		}
@@ -1195,7 +1173,7 @@ void OsgQtTest::slot_FisishReadProgress() {
 		PointCloud * curPcloud = PCloudManager::Instance()->getPointCloud(readDataProgressDlg->objectName().toStdString());
 		SetCamerToObjectCenter(curPcloud->getGeoPoint());
 		AddNodeToDataTree(readDataProgressDlg->objectName().toStdString());
-		float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
+		float showTime = static_cast<float>(_timerClock.getTime<Ms>() * 0.001);
 		QString read_time_text = "[I/O] Load file <" + readDataProgressDlg->objectName() + "> "
 								+ "[" + QString::number(curPcloud->getPointNum()) + "] points cost "
 								+ QString::number(showTime, 'f', 2) + "s";
@@ -1233,7 +1211,7 @@ osg::Node * OsgQtTest::createScalarBar_HUD(osgSim::ColorRange* cr) {
 	colorBar_projection->setMatrix(osg::Matrix::ortho2D(0, 1280, 0, 1024)); // or whatever the OSG window res is
 	colorBar_projection->addChild(modelview);
 
-	return colorBar_projection; //make sure you delete the return sb line
+	return colorBar_projection; // make sure you delete the return sb line
 }
 
 void OsgQtTest::slot_build_Octree() {
@@ -1254,13 +1232,13 @@ void OsgQtTest::slot_build_Octree() {
 	}
 
 	_timerClock.start();
-	
+
 	auto max_octree_depth = m_Octree_depth->text().toInt();
 	auto min_octree_size = m_Octree_size->text().toFloat();
 
 	cur_Pcloud->buildOtree(min_octree_size);
 
-	float showTime = (float)(_timerClock.getTime<Ms>() * 0.001);
+	float showTime = (_timerClock.getTime<Ms>() * 0.001);
 	QString read_time_text = "[Time] Build octree for <" + QString::fromStdString(cur_Pcloud->getName()) + "> cost " + QString::number(showTime, 'f', 2) + "s";
 	this->AddToConsoleSlot(read_time_text);
 }
@@ -1270,7 +1248,7 @@ void OsgQtTest::slot_setPointColorByHeight() {
 		this->AddToConsoleSlot(QString("No point cloud is selected now"));
 		return;
 	}
-	
+
 	if (PCloudManager::Instance()->selectedPcloudNum() > 1) {
 		this->AddToConsoleSlot(QString("More than one point cloud is selected now"));
 		return;
@@ -1291,7 +1269,7 @@ void OsgQtTest::slot_setPointColorByHeight() {
 			cur_Pcloud->setPointColor(cur_Pcloud->getPointColor());
 			return;
 		}
-	}	
+	}
 
 	float height_Max = cur_Pcloud->getBoundingBox().zMax();
 	float height_Min = cur_Pcloud->getBoundingBox().zMin();
@@ -1309,8 +1287,8 @@ void OsgQtTest::slot_setPointColorByHeight() {
 		cs.push_back(osg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));   // B
 		cs.push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));   // R
 
-		osgSim::ColorRange * colorRange = new osgSim::ColorRange(0.0f, 1.0f, cs);	
-		osg::ref_ptr<osg::Vec4Array> colorList = new osg::Vec4Array;//´´½¨ÑÕÉ«Êı×é,ÄæÊ±ÕëÅÅĞò
+		osgSim::ColorRange * colorRange = new osgSim::ColorRange(0.0f, 1.0f, cs);
+		osg::ref_ptr<osg::Vec4Array> colorList = new osg::Vec4Array;//åˆ›å»ºé¢œè‰²æ•°ç»„,é€†æ—¶é’ˆæ’åº
 
 		osg::Vec3Array * pointList = cur_Pcloud->getVertArry<osg::Vec3Array>();
 		for (const auto & curP : *pointList) {
@@ -1320,7 +1298,7 @@ void OsgQtTest::slot_setPointColorByHeight() {
 
 		cur_Pcloud->setPointColorArry(colorList);
 		this->mainView_root->addChild(createScalarBar_HUD(colorRange));
-	}	
+	}
 }
 
 void OsgQtTest::SetCameraDirection(int direct_type) {
@@ -1343,36 +1321,36 @@ void OsgQtTest::SetCameraDirection(int direct_type) {
 	float object_radius = boundSphere.radius();
 	float view_Distance = object_radius * eye_distance_rate;
 
-	osg::Vec3d view_center = boundSphere.center();//Ïà»ú¶¢×ÅµÄÄ¿±êµã£¬²»Ò»¶¨ÊÇÎïÌåÖĞĞÄ£¬ÊÓÇé¿ö¶ø¶¨
-	osg::Vec3d view_Direction(0.0, -2.0, 1.0);//´ÓÎïÌåÖĞĞÄ¿´ÏòÏà»úÖĞĞÄµÄÏòÁ¿
+	osg::Vec3d view_center = boundSphere.center();//ç›¸æœºç›¯ç€çš„ç›®æ ‡ç‚¹ï¼Œä¸ä¸€å®šæ˜¯ç‰©ä½“ä¸­å¿ƒï¼Œè§†æƒ…å†µè€Œå®š
+	osg::Vec3d view_Direction(0.0, -2.0, 1.0);//ä»ç‰©ä½“ä¸­å¿ƒçœ‹å‘ç›¸æœºä¸­å¿ƒçš„å‘é‡
 
 	switch (direct_type) {
 		case 1:
-			view_Direction.set(0.0, 0.0, 1.0);//¶¥ÊÓÍ¼
+			view_Direction.set(0.0, 0.0, 1.0);//é¡¶è§†å›¾
 			break;
 		case 2:
-			view_Direction.set(0.0, 0.0, -1.0);//µ×ÊÓÍ¼
+			view_Direction.set(0.0, 0.0, -1.0);//åº•è§†å›¾
 			break;
 		case 3:
-			view_Direction.set(-1.0, 0.0, 0.0);//×óÊÓÍ¼
+			view_Direction.set(-1.0, 0.0, 0.0);//å·¦è§†å›¾
 			break;
 		case 4:
-			view_Direction.set(1.0, 0.0, 0.0);//ÓÒÊÓÍ¼
+			view_Direction.set(1.0, 0.0, 0.0);//å³è§†å›¾
 			break;
 		case 5:
-			view_Direction.set(0.0, -1.0, 0.0);//Ç°ÊÓÍ¼
+			view_Direction.set(0.0, -1.0, 0.0);//å‰è§†å›¾
 			break;
 		case 6:
-			view_Direction.set(0.0, 1.0, 0.0);//ºóÊÓÍ¼
+			view_Direction.set(0.0, 1.0, 0.0);//åè§†å›¾
 			break;
 		default:
-			view_Direction.set(0.0, -2.0, 1.0);//¸©ÊÓÍ¼
+			view_Direction.set(0.0, -2.0, 1.0);//ä¿¯è§†å›¾
 			break;
 	}
 
-	//·½ÏòÏòÉÏ
+	//æ–¹å‘å‘ä¸Š
 	osg::Vec3d view_up = osg::Z_AXIS;
-	osg::Vec3d camer_eye = view_center + view_Direction * view_Distance;//Ïà»úµÄÑÛ¾µÎ»ÖÃ
+	osg::Vec3d camer_eye = view_center + view_Direction * view_Distance;//ç›¸æœºçš„çœ¼é•œä½ç½®
 
 	if (MainWidget) {
 		MainWidget->getCameraManipulator()->setHomePosition(camer_eye, view_center, view_up);
@@ -1404,7 +1382,7 @@ void OsgQtTest::slot_SetBackDirection() {
 	SetCameraDirection(6);
 }
 
-void OsgQtTest::slot_ZoomToScreen(){
+void OsgQtTest::slot_ZoomToScreen() {
 	if (!hasSelectedPcloud()) {
 		this->AddToConsoleSlot(QString("[WARING] Please selected point cloud!"));
 		return;
@@ -1436,7 +1414,7 @@ void OsgQtTest::slot_SetBackGroundColor() {
 	MainWidget->getCamera()->setClearColor(osg::Vec4(color.red() / 255., color.green() / 255., color.blue() / 255., color.alpha() / 255.));
 }
 
-void OsgQtTest::slot_Init_Project_Dialog() {	
+void OsgQtTest::slot_Init_Project_Dialog() {
 	if (!hasSelectedPcloud()) {
 		this->AddToConsoleSlot(QString("[WARING] No Point Cloud is selected!"));
 		return;
@@ -1457,15 +1435,15 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	ProjectToXY_dialog->setWindowTitle(QString::fromStdString(cur_Pcloud->getName()));
 	ProjectToXY_dialog->setWindowModality(Qt::WindowModal);
 	ProjectToXY_dialog->setAttribute(Qt::WA_DeleteOnClose);
-	//±³¾°´°¿Ú·¶Î§
+	//èƒŒæ™¯çª—å£èŒƒå›´
 	ProjectToXY_dialog->setFixedSize(1200, 660);
 
-	//ÔÚ±³¾°´°¿ÚÉÏĞÂ½¨»æÍ¼Çø
+	//åœ¨èƒŒæ™¯çª—å£ä¸Šæ–°å»ºç»˜å›¾åŒº
 	Project_widget = new PaintArea(ProjectToXY_dialog);
-	//»æÍ¼ÇøÓò·¶Î§
+	//ç»˜å›¾åŒºåŸŸèŒƒå›´
 	Project_widget->setFixedSize(600, 600);
 	Project_widget->setVisible(true);
-	Project_widget->drawAxis();	
+    Project_widget->drawAxis();
 
 	size_t num = cur_Pcloud->getPointNum();
 
@@ -1512,10 +1490,10 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 
 	Project_widget->drawPoints(point, num);
 	Project_widget->drawDegreeLines(QString("X"), QString("Y"), x_min, y_min, delt_x, delt_y);
-	
+
 	QVBoxLayout *v_layout = new QVBoxLayout();
 	v_layout->addWidget(Project_widget, 0);
-	
+
 	QLabel *m_label_radius = new QLabel(ProjectToXY_dialog);
 	m_label_radius->setText("Radius:");
 	m_label_radius->setFixedSize(100, 30);
@@ -1528,7 +1506,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	m_label_grid_radius->setFixedSize(100, 30);
 
 	m_grid_radius = new QLineEdit(ProjectToXY_dialog);
-	m_grid_radius->setFixedSize(100, 30);	
+    m_grid_radius->setFixedSize(100, 30);
 
 	QPushButton * detect_shape_using_GridNet = new QPushButton("Grid Shape", ProjectToXY_dialog);
 	detect_shape_using_GridNet->setFixedSize(100, 30);
@@ -1577,7 +1555,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 
 	m_alpha_Grid_col_num = new QLineEdit(ProjectToXY_dialog);
 	m_alpha_Grid_col_num->setFixedSize(100, 30);
-	
+
 	QWidget * alpha_tab_widget = new QWidget();
 	m_Alpah_radio = new QRadioButton("alpha shape");
 	m_Alpah_radio->setChecked(true);
@@ -1633,38 +1611,38 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 
 	QWidget * quad_tab_widget = new QWidget();
 	QVBoxLayout * quad_layout = new QVBoxLayout();
-	{
-		QPushButton * build_quad_tree = new QPushButton("Build", ProjectToXY_dialog);
-		build_quad_tree->setFixedSize(100, 30);
-		connect(build_quad_tree, SIGNAL(clicked()), this, SLOT(slot_BuildQuadGridForPoints()));
 
-		QLabel *m_label_Quad_Tree_maxDepth = new QLabel(ProjectToXY_dialog);
-		m_label_Quad_Tree_maxDepth->setText("Max Depth:");
-		m_label_Quad_Tree_maxDepth->setFixedSize(100, 30);
+	QPushButton * build_quad_tree = new QPushButton("Build", ProjectToXY_dialog);
+	build_quad_tree->setFixedSize(100, 30);
+	connect(build_quad_tree, SIGNAL(clicked()), this, SLOT(slot_BuildQuadGridForPoints()));
 
-		m_Quad_Tree_maxDepth = new QLineEdit(ProjectToXY_dialog);
-		m_Quad_Tree_maxDepth->setFixedSize(100, 30);
+	QLabel *m_label_Quad_Tree_maxDepth = new QLabel(ProjectToXY_dialog);
+	m_label_Quad_Tree_maxDepth->setText("Max Depth:");
+	m_label_Quad_Tree_maxDepth->setFixedSize(100, 30);
 
-		QLabel *m_label_Quad_minPointNum = new QLabel(ProjectToXY_dialog);
-		m_label_Quad_minPointNum->setText("Point Num:");
-		m_label_Quad_minPointNum->setFixedSize(100, 30);
+	m_Quad_Tree_maxDepth = new QLineEdit(ProjectToXY_dialog);
+	m_Quad_Tree_maxDepth->setFixedSize(100, 30);
 
-		m_Quad_minPointNum = new QLineEdit(ProjectToXY_dialog);
-		m_Quad_minPointNum->setFixedSize(100, 30);
+	QLabel *m_label_Quad_minPointNum = new QLabel(ProjectToXY_dialog);
+	m_label_Quad_minPointNum->setText("Point Num:");
+	m_label_Quad_minPointNum->setFixedSize(100, 30);
 
-		quad_layout->addStretch(0);
-		quad_layout->addWidget(m_label_Quad_Tree_maxDepth, 0);
-		quad_layout->addStretch(0);
-		quad_layout->addWidget(m_Quad_Tree_maxDepth, 0);
-		quad_layout->addStretch(0);
-		quad_layout->addWidget(m_label_Quad_minPointNum, 0);
-		quad_layout->addStretch(0);
-		quad_layout->addWidget(m_Quad_minPointNum, 0);
-		quad_layout->addStretch(1);
-		quad_layout->addWidget(build_quad_tree, 0);
-		quad_layout->addStretch(8);
-		quad_tab_widget->setLayout(quad_layout);
-	}
+	m_Quad_minPointNum = new QLineEdit(ProjectToXY_dialog);
+	m_Quad_minPointNum->setFixedSize(100, 30);
+
+	quad_layout->addStretch(0);
+	quad_layout->addWidget(m_label_Quad_Tree_maxDepth, 0);
+	quad_layout->addStretch(0);
+	quad_layout->addWidget(m_Quad_Tree_maxDepth, 0);
+	quad_layout->addStretch(0);
+	quad_layout->addWidget(m_label_Quad_minPointNum, 0);
+	quad_layout->addStretch(0);
+	quad_layout->addWidget(m_Quad_minPointNum, 0);
+	quad_layout->addStretch(1);
+	quad_layout->addWidget(build_quad_tree, 0);
+	quad_layout->addStretch(8);
+	quad_tab_widget->setLayout(quad_layout);
+
 
 	QTabWidget * project_Tab_Widget = new QTabWidget();
 	project_Tab_Widget->setFixedSize(360, 600);
@@ -1732,48 +1710,43 @@ void OsgQtTest::slot_DetectPointShape() {
 
 	if (isOnlyAShape) {
 		alpha = new AlphaShape(pointlist_bulidGrid2D);
-	}
-	else {
+	} else {
 		alpha = new AlphaShape(gridNet);
 	}
 
 	if (nullptr == alpha) {
 		this->AddToConsoleSlot("Perform alpha detection failed! \n");
 	}
-	
+
 	if (isOnlyAShape) {
 		alpha->Detect_Shape_line(radius);
-	}
-	else {
+	} else {
 		if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
 			auto threadCount = std::thread::hardware_concurrency();
 			alpha->Detect_Alpha_Shape_by_Grid_Multi_Thread(radius, threadCount);
-		}
-		else if (m_Alpah_Grid_radio->isChecked()){
+		} else if (m_Alpah_Grid_radio->isChecked()) {
 			alpha->Detect_Alpha_Shape_by_Grid(radius);
-		}		
+		}
 	}
 
-	//¼ÆËãAlpha ShapesËã·¨ºÄ·ÑÊ±¼ä
+	// è®¡ç®—Alpha Shapesç®—æ³•è€—è´¹æ—¶é—´
 	float runTime = _timerClock.getTime<Ms>() / 1000.0;
 	QString cost_time = QString::number(runTime);
 	if (!isOnlyAShape) {
 		if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
 			this->AddToConsoleSlot(QString("The cost time of detecting Contour by alpha with grid and multi-Thread is :  ") + cost_time + QString("s"));
-		}
-		else if (m_Alpah_Grid_radio->isChecked()) {
+		} else if (m_Alpah_Grid_radio->isChecked()) {
 			this->AddToConsoleSlot(QString("The cost time of detecting Contour by alpha with grid net is :  ") + cost_time + QString("s"));
 		}
-	}
-	else{
+	} else {
 		this->AddToConsoleSlot(QString("The cost time of detecting Contour by default alpha shape is :  ") + cost_time + QString("s"));
 	}
 
-	//¼ÆËãĞ¡ÓÚ¹ö¶¯Ô²Ö±¾¶³¤¶ÈµÄµã¶Ô±ÈÀı
+	//è®¡ç®—å°äºæ»šåŠ¨åœ†ç›´å¾„é•¿åº¦çš„ç‚¹å¯¹æ¯”ä¾‹
 	QString cost_scale = QString::number(alpha->point_pair_scale, 'f', 3);
 	this->AddToConsoleSlot(QString("The scale of detecting Contour by default is :  ") + cost_scale);
 
-	vector<osg::Vec2> center_list;
+	std::vector<osg::Vec2> center_list;
 
 	for (int i = 0; i < alpha->m_circles.size(); ++i) {
 		osg::Vec2 center_P = alpha->m_circles[i].m_center;
@@ -1782,13 +1755,13 @@ void OsgQtTest::slot_DetectPointShape() {
 
 	Project_widget_Circle_And_Edge->drawCircles(center_list, radius);
 	Project_widget_Circle_And_Edge->drawLines(alpha->m_edges);
-	
+
 	int shape_num = alpha->m_shape_points.size();
 	QPointF *shape_point = new QPointF[shape_num];
 
-	for (int i = 0; i < shape_num; ++i)	{
+	for (int i = 0; i < shape_num; ++i) {
 		const auto & curP = alpha->m_shape_points[i];
-		shape_point[i] = QPointF (curP.x(), curP.y());
+		shape_point[i] = QPointF(curP.x(), curP.y());
 	}
 
 	PaintArea *Project_widget_Point_Edge = new PaintArea();
@@ -1800,7 +1773,7 @@ void OsgQtTest::slot_DetectPointShape() {
 	Project_widget_Point_Edge->drawPoints(shape_point, shape_num, 3, Qt::black);
 
 	Project_widget_Point->drawPoints(shape_point, shape_num, 2, Qt::red);
-	
+
 	QDialog * DetectResult_dialog = new QDialog();
 	DetectResult_dialog->setAttribute(Qt::WA_DeleteOnClose);
 	DetectResult_dialog->setVisible(true);
@@ -1809,7 +1782,7 @@ void OsgQtTest::slot_DetectPointShape() {
 	} else {
 		DetectResult_dialog->setWindowTitle("Alpha Grid result");
 	}
-	
+
 	PaintArea *Project_widget_grid_net = nullptr;
 	if (!isOnlyAShape) {
 		int delt_x = -10, delt_y = 32;
@@ -1824,7 +1797,7 @@ void OsgQtTest::slot_DetectPointShape() {
 				new_color.setRgb(0, 125, 0, 155);
 			}
 			if (curGrid->nearByGridAllWithpoint == true) {
-				//ÄÚ²¿Íø¸ñ£¬»ÒÉ«
+				//å†…éƒ¨ç½‘æ ¼ï¼Œç°è‰²
 				new_color.setRgb(150, 150, 150, 125);
 			}
 			Project_widget_grid_net->drawGridWithFillColor(curGrid, new_color, delt_x, delt_y);
@@ -1836,7 +1809,7 @@ void OsgQtTest::slot_DetectPointShape() {
 		for (const auto & curP : gridNet->Points_List) {
 			all_point[++pointID] = QPointF(curP.x() + delt_x, curP.y() + delt_y);
 		}
-		//»æÖÆËùÓĞÀëÉ¢µãÔÆ,ÀëÉ¢µãÄ¬ÈÏÑÕÉ«Îª´¿ºÚÉ«
+		//ç»˜åˆ¶æ‰€æœ‰ç¦»æ•£ç‚¹äº‘,ç¦»æ•£ç‚¹é»˜è®¤é¢œè‰²ä¸ºçº¯é»‘è‰²
 		Project_widget_grid_net->drawPoints(all_point, allPointNum, 2, QColor(0, 0, 0, 125));
 	}
 
@@ -1851,20 +1824,20 @@ void OsgQtTest::slot_DetectPointShape() {
 
 	return;
 
-	ofstream outf;
+	std::ofstream outf;
 	double x, y, z = 0.0;
-	outf.open("E:/Data/test/Select/OutlinePoint_UsingAlpha.txt", ios::out);
+	outf.open("E:/Data/test/Select/OutlinePoint_UsingAlpha.txt", std::ios::out);
 
 	if (!outf.is_open()) {
 		return;
 	}
 
-	for (int i = 0; i < shape_num; ++i)	{
+	for (int i = 0; i < shape_num; ++i) {
 		x = alpha->m_shape_points[i].x();
 		y = alpha->m_shape_points[i].y();
 		z = 0.0;
 
-		outf << std::fixed << setprecision(3) << x << " " << y << " " << z << " " << std::endl;
+		outf << std::fixed << std::setprecision(3) << x << " " << y << " " << z << " " << std::endl;
 	}
 
 	outf.close();
@@ -1893,7 +1866,7 @@ void OsgQtTest::slot_BuildQuadGridForPoints() {
 	QPointF *all_point = new QPointF[allPointNum];
 	int pointID = -1;
 
-	vector<QPointF> QpointList;
+	std::vector<QPointF> QpointList;
 
 	for (const auto & curP : pointlist_bulidGrid2D) {
 		QPointF curP(curP.x() + delt_x, curP.y() + delt_y);
@@ -1916,22 +1889,17 @@ void OsgQtTest::slot_BuildQuadGridForPoints() {
 
 	point2D_MAXMIN curSize = QuadTreeNode::getMinMaxXY(QpointList);
 	QuadTreeNode::createQuadTree(rootNode, 0, QpointList, (curSize.xmin + curSize.xmax) * 0.5, (curSize.ymin + curSize.ymax) * 0.5, curSize.xmax - curSize.xmin, curSize.ymax - curSize.ymin);
-	
+
 	std::vector<QuadTreeNode*> node_list;
 	QuadTreeNode::getMaxDepQuadNode(rootNode, node_list);
 
 	std::vector<QuadTreeNode*> all_node_list;
 	QuadTreeNode::getAllQuadNode(rootNode, all_node_list);
-	
-	//»æÖÆËùÓĞÀëÉ¢µãÔÆ,ÀëÉ¢µãÄ¬ÈÏÑÕÉ«Îª´¿ºÚÉ«
+
+	//ç»˜åˆ¶æ‰€æœ‰ç¦»æ•£ç‚¹äº‘,ç¦»æ•£ç‚¹é»˜è®¤é¢œè‰²ä¸ºçº¯é»‘è‰²
 	Project_widget_grid_net->drawPoints(all_point, allPointNum, 1, QColor(0, 0, 0, 125));
 
 	QColor new_color(0, 0, 0, 0);
-
-	//for (const auto & curNode : node_list) {
-	//	new_color.setRgb(125, 0, 0, 125);
-	//	Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color, 0, 0);
-	//}
 
 	for (const auto & curNode : all_node_list) {
 		new_color.setRgb(20 + curNode->m_depth * 40, 0, 0, 25);
@@ -1943,15 +1911,15 @@ void OsgQtTest::slot_BuildQuadGridForPoints() {
 		}
 		Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color, 0, 0);
 	}
-	
-	//¼ÆËãËÄ²æÊ÷¸ñÍøµÄ×ÜºÄÊ±
+
+	//è®¡ç®—å››å‰æ ‘æ ¼ç½‘çš„æ€»è€—æ—¶
 	float runTimeAll = _timerClock.getTime<Ms>() / 1000.0;
 	const QString & cost_timeAll = QString::number(runTimeAll);
 	this->AddToConsoleSlot(QString("The all cost time of building 2D grid net is :  ") + cost_timeAll + QString("s"));
 }
 
 void OsgQtTest::slot_Build2DGridForPoints() {
-	if (this->pointlist_bulidGrid2D.size() < 1){
+	if (this->pointlist_bulidGrid2D.size() < 1) {
 		return;
 	}
 	if (nullptr == m_Grid_Y_num || nullptr == m_Grid_X_num) {
@@ -1963,11 +1931,11 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 	Project_widget_grid_net->setAttribute(Qt::WA_DeleteOnClose);
 	Project_widget_grid_net->setVisible(true);
 	Project_widget_grid_net->setWindowTitle(m_Grid_Y_num->text() + tr(" X ") + m_Grid_X_num->text());
-	
+
 	_timerClock.start();
-	
+
 	GridNet* gridNet = new GridNet(this->pointlist_bulidGrid2D);
-	
+
 	if (nullptr == gridNet) {
 		this->AddToConsoleSlot("Build 2D grid net failed! \n");
 		return;
@@ -1976,33 +1944,33 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 	m_gridNet = gridNet;
 
 	gridNet->buildNetByNum(m_Grid_Y_num->text().toInt(), m_Grid_X_num->text().toInt());
-	
-	//¼ì²âÍø¸ñµÄÁ¬Í¨ĞÔ,»ñÈ¡Íø¸ñÄÚµãµÄ¼¸ºÎÖĞĞÄ
+
+	//æ£€æµ‹ç½‘æ ¼çš„è¿é€šæ€§,è·å–ç½‘æ ¼å†…ç‚¹çš„å‡ ä½•ä¸­å¿ƒ
 	gridNet->detectGridWithConnection();
 
-	//»ùÓÚÍø¸ñµãµÄÖĞĞÄµã¼ÆËãÍø¸ñÓëÁÚÓòÍø¸ñµÄºÏÏòÁ¿
+	//åŸºäºç½‘æ ¼ç‚¹çš„ä¸­å¿ƒç‚¹è®¡ç®—ç½‘æ ¼ä¸é‚»åŸŸç½‘æ ¼çš„åˆå‘é‡
 	gridNet->getVectorOfOutSideGrid();
 
-	//»ùÓÚºÏÏòÁ¿£¬¼ÆËãÍø¸ñÊÇ·ñÊÇÆ½»¬Íø¸ñ,²¢Í³¼ÆÍø¸ñµÄÆ½»¬¶È
+	//åŸºäºåˆå‘é‡ï¼Œè®¡ç®—ç½‘æ ¼æ˜¯å¦æ˜¯å¹³æ»‘ç½‘æ ¼,å¹¶ç»Ÿè®¡ç½‘æ ¼çš„å¹³æ»‘åº¦
 	gridNet->DetectSmoothForOutSideGrid();
 
-	//¼ÆËãµ¥´¿Éú³É¶şÎ¬¸ñÍøµÄºÄÊ±
+	//è®¡ç®—å•çº¯ç”ŸæˆäºŒç»´æ ¼ç½‘çš„è€—æ—¶
 	float runTime = _timerClock.getTime<Ms>() / 1000.0;
 	QString cost_time = QString::number(runTime);
 	this->AddToConsoleSlot(QString("The cost time of building 2D grid net is :  ") + cost_time + QString("s"));
-	
+
 	int OutSideGridCenterPointNum = gridNet->GridOutside_Num;
 	QPointF *Grid_CenterPoint = new QPointF[OutSideGridCenterPointNum];
 
 	this->AddToConsoleSlot("The Full 2D grid number is : " + QString::number(gridNet->GridWithPoint_Num));
 	this->AddToConsoleSlot("The OutSide 2D grid number is : " + QString::number(OutSideGridCenterPointNum));
-	
+
 	int delt_x = -10, delt_y = 32;
 	int allPointNum = gridNet->Points_List.size();
 	QPointF *all_point = new QPointF[allPointNum];
 	int pointID = -1;
 
-	vector<QPointF> QpointList;
+	std::vector<QPointF> QpointList;
 
 	for (const auto & curP : gridNet->Points_List) {
 		QPointF curP(curP.x() + delt_x, curP.y() + delt_y);
@@ -2019,18 +1987,13 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 
 	std::vector<QuadTreeNode*> all_node_list;
 	QuadTreeNode::getAllQuadNode(rootNode, all_node_list);
-	
 
-	//»æÖÆËùÓĞÀëÉ¢µãÔÆ,ÀëÉ¢µãÄ¬ÈÏÑÕÉ«Îª´¿ºÚÉ«
+
+	//ç»˜åˆ¶æ‰€æœ‰ç¦»æ•£ç‚¹äº‘,ç¦»æ•£ç‚¹é»˜è®¤é¢œè‰²ä¸ºçº¯é»‘è‰²
 	Project_widget_grid_net->drawPoints(all_point, allPointNum, 1, QColor(0, 0, 0, 125));
-	
+
 	int k = -1;
 	QColor new_color(0, 0, 0, 0);
-
-	//for (const auto & curNode : node_list) {
-	//	new_color.setRgb(125, 0, 0, 125);
-	//	Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color, 0, 0);
-	//}
 
 	for (const auto & curNode : all_node_list) {
 		new_color.setRgb(20 + curNode->m_depth * 40, 0, 0, 25);
@@ -2043,47 +2006,46 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 		Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color, 0, 0);
 	}
 
-	for (const auto curGrid : gridNet->Grid_list){
+	for (const auto curGrid : gridNet->Grid_list) {
 		if (curGrid->hasPoint) {
-			if (curGrid->nearByGridAllWithpoint == true){
-				//³äÊµÍø¸ñ£¬»ÒÉ«
+			if (curGrid->nearByGridAllWithpoint == true) {
+				// å……å®ç½‘æ ¼ï¼Œç°è‰²
 				new_color.setRgb(150, 150, 150, 125);
-			}
-			else{
-				//µ±Ç°Íø¸ñ²»Æ½»¬
-				if (curGrid->isSmoothGrid == false){
-					//´Ö²Ú¶ÈÎª1µÄ£¬³ÈÉ«
-					if (curGrid->SmoothDegree == 1)	{
+			} else {
+				// å½“å‰ç½‘æ ¼ä¸å¹³æ»‘
+				if (curGrid->isSmoothGrid == false) {
+					// ç²—ç³™åº¦ä¸º1çš„ï¼Œæ©™è‰²
+					if (curGrid->SmoothDegree == 1) {
 						new_color.setRgb(250, 100, 0, 155);
 					}
-					//´Ö²Ú¶ÈÎª2µÄ£¬ºìÉ«
-					if (curGrid->SmoothDegree == 2)	{
+					// ç²—ç³™åº¦ä¸º2çš„ï¼Œçº¢è‰²
+					if (curGrid->SmoothDegree == 2) {
 						new_color.setRgb(250, 0, 0, 155);
 					}
 				} else {
-					//Ë³»¬Íø¸ñ£¬ÂÌÉ«
+					// é¡ºæ»‘ç½‘æ ¼ï¼Œç»¿è‰²
 					new_color.setRgb(0, 125, 0, 155);
 				}
 				Grid_CenterPoint[++k] = QPointF(curGrid->CenterPoint.x() + delt_x, curGrid->CenterPoint.y() + delt_y);
 			}
 		} else {
-			//¿ÕÍø¸ñÎª°×É«
+			//ç©ºç½‘æ ¼ä¸ºç™½è‰²
 			new_color.setRgb(0, 0, 0, 0);
 		}
 		Project_widget_grid_net->drawGridWithFillColor(curGrid, new_color, delt_x, delt_y);
 	}
 
-	//»æÖÆ±ß½çÍø¸ñÄÚµãµÄ¼¸ºÎÖĞĞÄµã
+	//ç»˜åˆ¶è¾¹ç•Œç½‘æ ¼å†…ç‚¹çš„å‡ ä½•ä¸­å¿ƒç‚¹
 	Project_widget_grid_net->drawPoints(Grid_CenterPoint, OutSideGridCenterPointNum, 5, QColor(255, 255, 255, 255));
 
-	//¼ÆËã¶şÎ¬¸ñÍøµÄ×ÜºÄÊ±
+	//è®¡ç®—äºŒç»´æ ¼ç½‘çš„æ€»è€—æ—¶
 	float runTimeAll = _timerClock.getTime<Ms>() / 1000.0;
 	const QString & cost_timeAll = QString::number(runTimeAll);
 	this->AddToConsoleSlot(QString("The all cost time of building 2D grid net is :  ") + cost_timeAll + QString("s"));
 }
 
 void OsgQtTest::slot_DetectPointShapeUsingGridNet() {
-	if (pointlist_bulidGrid2D.size() < 1){
+	if (pointlist_bulidGrid2D.size() < 1) {
 		this->AddToConsoleSlot(QString("[WARING] No project point!"));
 		return;
 	}
@@ -2100,7 +2062,6 @@ void OsgQtTest::slot_DetectPointShapeUsingGridNet() {
 	if (m_grid_radius) {
 		radius = m_grid_radius->text().toFloat();
 	}
-	
 	alpha->Detect_Shape_By_GridNet_New(radius);
 
 	float runTimeAll = _timerClock.getTime<Ms>() / 1000.0;
@@ -2119,10 +2080,10 @@ void OsgQtTest::slot_DetectPointShapeUsingGridNet() {
 	Project_widget_Point->setAttribute(Qt::WA_DeleteOnClose);
 	Project_widget_Point->drawAxis();
 
-	vector<osg::Vec3> circle_list;
-	vector<int> Size_List;
+	std::vector<osg::Vec3> circle_list;
+	std::vector<int> Size_List;
 
-	for (const auto & curCricle : alpha->m_circles)	{
+	for (const auto & curCricle : alpha->m_circles) {
 		Size_List.push_back(curCricle.m_size);
 		circle_list.emplace_back(osg::Vec3(curCricle.m_center, curCricle.m_radius));
 	}
@@ -2141,21 +2102,20 @@ void OsgQtTest::slot_DetectPointShapeUsingGridNet() {
 
 	return;
 
-	ofstream outf;
+	std::ofstream outf;
 	double x, y, z = 0.0;
-	outf.open("E:/Data/test/Select/OutlinePoint_UsingGrid.txt", ios::out);
+	outf.open("E:/Data/test/Select/OutlinePoint_UsingGrid.txt", std::ios::out);
 
 	for (int i = 0; i < shape_num; i++) {
 		x = alpha->m_shape_points[i].x();
 		y = alpha->m_shape_points[i].y();
 		z = 0.0;
 
-		if (!outf.is_open())
-		{
-			return;
+		if (!outf.is_open()) {
+            return;
 		}
 
-		outf << fixed << setprecision(3) << x << " " << y << " " << z << " ";
+		outf << fixed << std::setprecision(3) << x << " " << y << " " << z << " ";
 		outf << endl;
 	}
 

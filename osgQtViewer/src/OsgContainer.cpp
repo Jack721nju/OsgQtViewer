@@ -1,3 +1,4 @@
+﻿/* Copyright© 2022 Jack721 */
 #include "OsgContainer.h"
 #include <QInputEvent>
 #include <osg/MatrixTransform>
@@ -16,9 +17,7 @@ OsgContainer::OsgContainer(QWidget *parent)
 	setFocusPolicy(Qt::StrongFocus);
 }
 
-OsgContainer::~OsgContainer() {
-
-}
+OsgContainer::~OsgContainer() { }
 
 bool OsgContainer::event(QEvent *event) {
 	switch (event->type()) {
@@ -36,17 +35,14 @@ bool OsgContainer::event(QEvent *event) {
 				if (event->type() == QEvent::TouchBegin) {
 					phase = osgGA::GUIEventAdapter::TOUCH_BEGAN;
 					osgEvent = window->getEventQueue()->touchBegan(id, osgGA::GUIEventAdapter::TOUCH_BEGAN, touchPoint.pos().x(), touchPoint.pos().y());
-				}
-				else if (event->type() == QEvent::TouchEnd) {
+				} else if (event->type() == QEvent::TouchEnd) {
 					phase = osgGA::GUIEventAdapter::TOUCH_ENDED;
 					osgEvent = window->getEventQueue()->touchEnded(id, osgGA::GUIEventAdapter::TOUCH_ENDED, touchPoint.pos().x(), touchPoint.pos().y(), tapCount);
-				}
-				else if (event->type() == QEvent::TouchUpdate) {
+				} else if (event->type() == QEvent::TouchUpdate) {
 					phase = osgGA::GUIEventAdapter::TOUCH_MOVED;
 					osgEvent = window->getEventQueue()->touchMoved(id, osgGA::GUIEventAdapter::TOUCH_MOVED, touchPoint.pos().x(), touchPoint.pos().y());
 				}
-			}
-			else {
+			} else {
 				osgEvent->addTouchPoint(id, osgGA::GUIEventAdapter::TOUCH_ENDED, touchPoint.pos().x(), touchPoint.pos().y());
 				osgEvent->addTouchPoint(id, phase, touchPoint.pos().x(), touchPoint.pos().y());
 			}
@@ -118,20 +114,20 @@ void OsgContainer::mousePressEvent(QMouseEvent *event) {
 void OsgContainer::mouseReleaseEvent(QMouseEvent *event) {
 	int button = 0;
 	switch (event->button()) {
-		case Qt::LeftButton: 
-			button = 1; 
+		case Qt::LeftButton:
+			button = 1;
 			break;
 		case Qt::MidButton:
-			button = 2; 
+			button = 2;
 			break;
 		case Qt::RightButton:
 			button = 3;
 			break;
 		case Qt::NoButton:
-			button = 0; 
+			button = 0;
 			break;
-		default: 
-			button = 0; 
+		default:
+			button = 0;
 			break;
 	}
 	setKeyboardModifiers(event);
@@ -235,15 +231,15 @@ osg::ref_ptr<osg::Camera> OsgContainer::createCamera(int x, int y, int w, int h)
 	camera->setGraphicsContext(window);
 	camera->setViewport(new osg::Viewport(0, 0, traits->width, traits->height));
 	camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	camera->setProjectionMatrixAsPerspective(30.0f, double(traits->width) / double(traits->height), 1.0f, 10000.0f);
-	
+	camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width) / static_cast<double>(traits->height), 1.0f, 10000.0f);
+
 	Json::Value colorValue = JsonMgr::getReadValue();
 
 	float colorR = colorValue["backcolor"]["Red"].asInt() / 255.0;
 	float colorG = colorValue["backcolor"]["Green"].asInt() / 255.0;
 	float colorB = colorValue["backcolor"]["Blue"].asInt() / 255.0;
 	float colorA = colorValue["backcolor"]["Alpha"].asInt() / 255.0;
-	
+
 	camera->setClearColor(osg::Vec4(colorR, colorG, colorB, colorA));
 	return camera.release();
 }

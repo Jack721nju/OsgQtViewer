@@ -1,35 +1,32 @@
+ï»¿/* CopyrightÂ© 2022 Jack721 */
 #pragma once
 #include <iostream>
 #include <chrono>
 
-using namespace std;
-
-typedef chrono::minutes       Min;
-typedef chrono::seconds       Sec;
-typedef chrono::milliseconds  Ms;
-typedef chrono::microseconds  Us;
+typedef std::chrono::minutes       Min;
+typedef std::chrono::seconds       Sec;
+typedef std::chrono::milliseconds  Ms;
+typedef std::chrono::microseconds  Us;
 
 class TimerClock {
-public:
-	TimerClock() {
+ public:
+	TimerClock() {}
+
+	~TimerClock() {}
+
+	// å¼€å§‹oré‡æ–°è®¡æ—¶
+	void start() {
+		_start = std::chrono::steady_clock::now();
 	}
 
-	~TimerClock(){
-	}
-
-	//¿ªÊ¼/ÖØĞÂ¼ÆÊ±
-	void start(){
-		_start = chrono::steady_clock::now();
-	}
-
-	//»ñÈ¡Ê±¼ä£¬¸ù¾İÄ£°åÉèÖÃÊ±¼äµ¥Î»
+	// è·å–æ—¶é—´ï¼Œæ ¹æ®æ¨¡æ¿è®¾ç½®æ—¶é—´å•ä½
 	template <typename clockUnit = Sec>
-	auto getTime(){
-		_end = chrono::steady_clock::now();
-		return chrono::duration_cast<clockUnit>(_end - _start).count();
+	auto getTime() {
+		_end = std::chrono::steady_clock::now();
+		return std::chrono::duration_cast<clockUnit>(_end - _start).count();
 	}
 
-private:
-	chrono::time_point<chrono::steady_clock> _start;
-	chrono::time_point<chrono::steady_clock> _end;
+ private:
+	std::chrono::time_point<std::chrono::steady_clock> _start;
+	std::chrono::time_point<std::chrono::steady_clock> _end;
 };

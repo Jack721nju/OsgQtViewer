@@ -1,14 +1,15 @@
+ï»¿/* CopyrightÂ© 2022 Jack721 */
 #pragma once
 #include <vector>
 
-//µ¥Ò»µãµÄ½á¹¹Ìå¶¨Òå
+//å•ä¸€ç‚¹çš„ç»“æ„ä½“å®šä¹‰
 struct Point {
-	//×ø±ê
+	//åæ ‡
 	float p_x;
 	float p_y;
 	float p_z;
 
-	//ÑÕÉ«
+	//é¢œè‰²
 	float C_r;
 	float C_g;
 	float C_b;
@@ -17,16 +18,15 @@ struct Point {
 	std::vector<int> octreeIndex;
 	int voxel_index[3];
 	int color_type;
-	//vector<int> p_depth;
 };
 
-//ÈıÎ¬Íø¸ñ¶¥µã×ø±ê½á¹¹Ìå
+//ä¸‰ç»´ç½‘æ ¼é¡¶ç‚¹åæ ‡ç»“æ„ä½“
 struct point_MAXMIN {
 	float xmin, ymin, zmin;
 	float xmax, ymax, zmax;
 };
 
-//¶şÎ¬Íø¸ñ¶¥µã×ø±ê½á¹¹Ìå
+//äºŒç»´ç½‘æ ¼é¡¶ç‚¹åæ ‡ç»“æ„ä½“
 struct point2D_MAXMIN {
 	float xmin, ymin;
 	float xmax, ymax;

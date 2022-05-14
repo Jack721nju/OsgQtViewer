@@ -1,3 +1,4 @@
+﻿/* Copyright© 2022 Jack721 */
 #include "OsgQtWindow.h"
 #include "JsonMgr.h"
 
@@ -12,7 +13,7 @@ int main(int argc, char* argv[]) {
 	a.processEvents();
 
 	Sleep(300);
-	
+
 	int startX = curValue["WindowSize"]["startX"].asInt();
 	int startY = curValue["WindowSize"]["startY"].asInt();
 	int width = curValue["WindowSize"]["width"].asInt();
@@ -24,4 +25,4 @@ int main(int argc, char* argv[]) {
 
 	splash.finish(viewWidget);
 	return a.exec();
-} 
+}

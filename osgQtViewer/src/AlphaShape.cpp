@@ -1,8 +1,7 @@
+ï»¿/* CopyrightÂ© 2022 Jack721 */
 #include "AlphaShape.h"
 
-using namespace std;
-
-//ÓÃÓÚ¶àÏß³Ì´¦Àí
+// ç”¨äºå¤šçº¿ç¨‹å¤„ç†
 static std::mutex all_mutex;
 static std::vector<osg::Vec2> all_shape_points;
 static std::vector<Edge> all_edges;
@@ -17,19 +16,19 @@ static bool checkPointSame(osg::Vec2 pointA, osg::Vec2 pointB) {
 }
 
 
-//»ñÈ¡¸ø¶¨µãÔÆÊı¾İµÄXY×î´ó×îĞ¡·¶Î§
+// è·å–ç»™å®šç‚¹äº‘æ•°æ®çš„XYæœ€å¤§æœ€å°èŒƒå›´
 point_MAXMIN* getMinMaxXYZ(const PointV2List & all_list) {
 	point_MAXMIN * Max_area = new point_MAXMIN;
-	vector<float> x_list, y_list, z_list;
+	std::vector<float> x_list, y_list, z_list;
 	for (int i = 0; i < all_list.size(); ++i) {
 		x_list.push_back(all_list[i].x());
 		y_list.push_back(all_list[i].y());
 	}
-	vector<float>::iterator xmax = max_element(begin(x_list), end(x_list));
-	vector<float>::iterator ymax = max_element(begin(y_list), end(y_list));
+	std::vector<float>::iterator xmax = max_element(begin(x_list), end(x_list));
+	std::vector<float>::iterator ymax = max_element(begin(y_list), end(y_list));
 
-	vector<float>::iterator xmin = min_element(begin(x_list), end(x_list));
-	vector<float>::iterator ymin = min_element(begin(y_list), end(y_list));
+	std::vector<float>::iterator xmin = min_element(begin(x_list), end(x_list));
+	std::vector<float>::iterator ymin = min_element(begin(y_list), end(y_list));
 
 	Max_area->xmax = *xmax;
 	Max_area->ymax = *ymax;
@@ -40,12 +39,15 @@ point_MAXMIN* getMinMaxXYZ(const PointV2List & all_list) {
 }
 
 
-SingleGrid2D::SingleGrid2D(float Grid_X, float Grid_Y){
+SingleGrid2D::SingleGrid2D(float Grid_X, float Grid_Y) {
 	cur_PointNum = 0;
+
 	hasPoint = false;
+
 	heightDifference = 0;
 
 	nearByGridAllWithpoint = false;
+
 	hasDetected = false;
 
 	isSmoothGrid = true;
@@ -56,10 +58,13 @@ SingleGrid2D::SingleGrid2D(float Grid_X, float Grid_Y){
 
 SingleGrid2D::SingleGrid2D(const GridInfo & curGrid) {
 	cur_PointNum = 0;
+
 	hasPoint = false;
+
 	heightDifference = 0;
 
 	nearByGridAllWithpoint = false;
+
 	hasDetected = false;
 
 	isSmoothGrid = true;
@@ -86,10 +91,10 @@ GridNet::GridNet(const PointV2List &pList) {
 }
 
 SingleGrid2D* GridNet::getGridByRowAndCol(int RowID, int ColID) {
-	for (int i = 0; i < this->Grid_Num; ++i){
+	for (int i = 0; i < this->Grid_Num; ++i) {
 		SingleGrid2D* curGrid = this->Grid_list[i];
-		if (curGrid->curGridInfo.m_Row == RowID){
-			if (curGrid->curGridInfo.m_Col == ColID){
+		if (curGrid->curGridInfo.m_Row == RowID) {
+			if (curGrid->curGridInfo.m_Col == ColID) {
 				return curGrid;
 			}
 		}
@@ -97,7 +102,7 @@ SingleGrid2D* GridNet::getGridByRowAndCol(int RowID, int ColID) {
 	return nullptr;
 }
 
-bool GridNet::isPointInGrid(const osg::Vec2 & curPoint, SingleGrid2D *test_Grid){
+bool GridNet::isPointInGrid(const osg::Vec2 & curPoint, SingleGrid2D *test_Grid) {
 	float cur_P_X = curPoint.x();
 	float cur_P_Y = curPoint.y();
 
@@ -109,17 +114,16 @@ bool GridNet::isPointInGrid(const osg::Vec2 & curPoint, SingleGrid2D *test_Grid)
 	if ((cur_P_X > grid_min_x)
 		&& (cur_P_X < grid_max_x)
 		&& (cur_P_Y > grid_min_y)
-		&& (cur_P_Y < grid_max_y))	{
+		&& (cur_P_Y < grid_max_y)) {
 		return true;
-	}
-	else {
+	} else {
 		return false;
 	}
 }
 
-//¼ì²âÃ¿¸ö¶şÎ¬Íø¸ñµÄ°ËÁÚÓòÁ¬Í¨µÄÍø¸ñ£¬²¢ÖğÒ»ÅĞ¶ÏÍø¸ñÄÚÊÇ·ñÓĞµã
-void GridNet::detectGridWithConnection(){
-	for (const auto & curGrid2D : this->Grid_list)	{
+// æ£€æµ‹æ¯ä¸ªäºŒç»´ç½‘æ ¼çš„å…«é‚»åŸŸè¿é€šçš„ç½‘æ ¼ï¼Œå¹¶é€ä¸€åˆ¤æ–­ç½‘æ ¼å†…æ˜¯å¦æœ‰ç‚¹
+void GridNet::detectGridWithConnection() {
+	for (const auto & curGrid2D : this->Grid_list) {
 		if (curGrid2D->hasPoint == false) {
 			continue;
 		}
@@ -136,7 +140,7 @@ void GridNet::detectGridWithConnection(){
 		int topLeftGridID = topGridID - 1;
 		int topRightGridID = topGridID + 1;
 
-		vector<int> idList{ buttomLeftGridID , buttomGridID, buttomRightGridID, curLeftGridID, curRightGridID, topLeftGridID, topGridID, topRightGridID };
+		std::vector<int> idList{ buttomLeftGridID , buttomGridID, buttomRightGridID, curLeftGridID, curRightGridID, topLeftGridID, topGridID, topRightGridID };
 		int countNum = 0;
 		SingleGrid2D *nearGrid2D = nullptr;
 		for (const auto curID : idList) {
@@ -156,23 +160,22 @@ void GridNet::detectGridWithConnection(){
 
 		if (countNum == 8) {
 			curGrid2D->nearByGridAllWithpoint = true;
-		}
-		else {
+		} else {
 			++this->GridOutside_Num;
 		}
 	}
 }
 
-//¸ù¾İÍø¸ñÊıÁ¿¹¹½¨¸ñÍø
-void GridNet::buildNetByNum(int RowNum, int ColNum){
+// æ ¹æ®ç½‘æ ¼æ•°é‡æ„å»ºæ ¼ç½‘
+void GridNet::buildNetByNum(int RowNum, int ColNum) {
 	this->Row_Num = (unsigned int)(RowNum);
 	this->Col_Num = (unsigned int)(ColNum);
 
 	float allPointsHeight = pointMMM->ymax - pointMMM->ymin;
 	float allPointsWidth = pointMMM->xmax - pointMMM->xmin;
 
-	this->Grid_X = (float)(allPointsWidth / Col_Num);
-	this->Grid_Y = (float)(allPointsHeight / Row_Num);
+	this->Grid_X = static_cast<float>(allPointsWidth / Col_Num);
+	this->Grid_Y = static_cast<float>(allPointsHeight / Row_Num);
 
 	GridInfo cur_grid;
 	cur_grid.Size_X = Grid_X;
@@ -180,16 +183,16 @@ void GridNet::buildNetByNum(int RowNum, int ColNum){
 
 	SingleGrid2D *curGrid2D = nullptr;
 	int gridNum = -1;
-	//ÏòÍâ²¿À©ÕÅÒ»²ã¿ÕµÄÍø¸ñ£¬±ãÓÚºóĞøµÄÁÚÓòËÑË÷
-	for (int i = 0; i < (Row_Num + 2); ++i)	{
-		for (int j = 0; j < (Col_Num + 2); ++j)	{
+	// å‘å¤–éƒ¨æ‰©å¼ ä¸€å±‚ç©ºçš„ç½‘æ ¼ï¼Œä¾¿äºåç»­çš„é‚»åŸŸæœç´¢
+	for (int i = 0; i < (Row_Num + 2); ++i) {
+		for (int j = 0; j < (Col_Num + 2); ++j) {
 			cur_grid.Min_X = pointMMM->xmin + Grid_X*(i - 1);
 			cur_grid.Max_X = cur_grid.Min_X + Grid_X;
 			cur_grid.Min_Y = pointMMM->ymin + Grid_Y*(j - 1);
 			cur_grid.Max_Y = cur_grid.Min_Y + Grid_Y;
-			
-			cur_grid.m_Row = i;//ĞĞºÅ
-			cur_grid.m_Col = j;//ÁĞºÅ
+
+			cur_grid.m_Row = i;// è¡Œå·
+			cur_grid.m_Col = j;// åˆ—å·
 
 			curGrid2D = new SingleGrid2D(cur_grid);
 
@@ -198,7 +201,7 @@ void GridNet::buildNetByNum(int RowNum, int ColNum){
 			}
 
 			float CenterX = 0.0, CenterY = 0.0;
-			for (const auto & curP : this->Points_List){
+			for (const auto & curP : this->Points_List) {
 				if (isPointInGrid(curP, curGrid2D)) {
 					curGrid2D->PointList.emplace_back(curP);
 					CenterX += curP.x();
@@ -209,7 +212,7 @@ void GridNet::buildNetByNum(int RowNum, int ColNum){
 			curGrid2D->curGridInfo.m_ID = ++gridNum;
 			curGrid2D->cur_PointNum = curGrid2D->PointList.size();
 
-			if (curGrid2D->cur_PointNum > 0){
+			if (curGrid2D->cur_PointNum > 0) {
 				++this->GridWithPoint_Num;
 				curGrid2D->hasPoint = true;
 				curGrid2D->CenterPoint.set(CenterX / curGrid2D->cur_PointNum, CenterY / curGrid2D->cur_PointNum);
@@ -218,11 +221,10 @@ void GridNet::buildNetByNum(int RowNum, int ColNum){
 			Grid_list.emplace_back(curGrid2D);
 		}
 	}
-
 	this->Grid_Num = gridNum;
 }
 
-//¸ù¾İÍø¸ñ´óĞ¡¹¹½¨¶şÎ¬¸ñÍø
+// æ ¹æ®ç½‘æ ¼å¤§å°æ„å»ºäºŒç»´æ ¼ç½‘
 void GridNet::buildNetBySize(float SizeX, float SizeY) {
 	Grid_X = SizeX;
 	Grid_Y = SizeY;
@@ -238,35 +240,34 @@ void GridNet::buildNetBySize(float SizeX, float SizeY) {
 	this->buildNetByNum(Row_Num, Col_Num);
 }
 
-//»ñÈ¡Íø¸ñÄÚÀëÉ¢µãµÄÖĞĞÄµã
-void GridNet::getCenterPoint(){
+// è·å–ç½‘æ ¼å†…ç¦»æ•£ç‚¹çš„ä¸­å¿ƒç‚¹
+void GridNet::getCenterPoint() {
 	int haspointGridNum = 0, GridOutsideNum = 0;
 	for (const auto & curGrid2D : this->Grid_list) {
-		if (curGrid2D->hasPoint){
+		if (curGrid2D->hasPoint) {
 			++haspointGridNum;
 
-			if (curGrid2D->nearByGridAllWithpoint == false){
+			if (curGrid2D->nearByGridAllWithpoint == false) {
 				++GridOutsideNum;
-			}		
+			}
 		}
-	}	
+	}
 	this->GridWithPoint_Num = haspointGridNum;
 	this->GridOutside_Num = GridOutsideNum;
 }
 
-
-//»ñÈ¡Íø¸ñÄÚÀëÉ¢µãµÄÖĞĞÄµãÓëÁÚÓòÍø¸ñÖĞĞÄµãµÄÁ¬½ÓÏòÁ¿
-void GridNet::getVectorOfOutSideGrid(){
+// è·å–ç½‘æ ¼å†…ç¦»æ•£ç‚¹çš„ä¸­å¿ƒç‚¹ä¸é‚»åŸŸç½‘æ ¼ä¸­å¿ƒç‚¹çš„è¿æ¥å‘é‡
+void GridNet::getVectorOfOutSideGrid() {
 	this->MaxVector_Grid = 0.0;
 	this->MinVector_Grid = 1 << 31;
 
-	for (const auto & curGrid : this->Grid_list){
-		//µ±Ç°Íø¸ñÄÚÎŞµã
+	for (const auto & curGrid : this->Grid_list) {
+		// å½“å‰ç½‘æ ¼å†…æ— ç‚¹
 		if (curGrid->hasPoint == false) {
 			continue;
 		}
 
-		//µ±Ç°Íø¸ñµÄ°ËÁÚÓòÍø¸ñ¾ùº¬ÓĞµã
+		// å½“å‰ç½‘æ ¼çš„å…«é‚»åŸŸç½‘æ ¼å‡å«æœ‰ç‚¹
 		if (curGrid->nearByGridAllWithpoint == true) {
 			continue;
 		}
@@ -279,30 +280,30 @@ void GridNet::getVectorOfOutSideGrid(){
 		curGrid->curVectorGrid.set(0.0, 0.0);
 		SingleGrid2D* nearGrid = nullptr;
 
-		//Í³¼Æµ±Ç°Íø¸ñµÄÉÏÏÂ×óÓÒµÄÁÚÓòÍø¸ñ£¬¶ø²»ÊÇ°ËÍø¸ñ
-		for (int k = curRowID - 1; k <= curRowID + 1; ++k){
-			for (int j = curColID - 1; j <= curColID + 1; ++j){
-				if ((k == curRowID) && (j == curColID))	{
+		// ç»Ÿè®¡å½“å‰ç½‘æ ¼çš„ä¸Šä¸‹å·¦å³çš„é‚»åŸŸç½‘æ ¼ï¼Œè€Œä¸æ˜¯å…«ç½‘æ ¼
+		for (int k = curRowID - 1; k <= curRowID + 1; ++k) {
+			for (int j = curColID - 1; j <= curColID + 1; ++j) {
+				if ((k == curRowID) && (j == curColID)) {
 					continue;
 				}
 
-				if (k < 0 || j < 0)	{
+				if (k < 0 || j < 0) {
 					continue;
 				}
 
-				if (k >= (this->Row_Num + 2) || j >= (this->Col_Num + 2)){
+				if (k >= (this->Row_Num + 2) || j >= (this->Col_Num + 2)) {
 					continue;
 				}
 
 				nearGrid = this->getGridByRowAndCol(k, j);
 
-				if (nullptr == nearGrid){
+				if (nullptr == nearGrid) {
 					continue;
 				}
 
-				if (nearGrid->hasPoint == true)	{
-					//ÁÚÓòÍø¸ñÒ²ÊôÓÚ±ß½çÍø¸ñ
-					if (nearGrid->nearByGridAllWithpoint == false){
+				if (nearGrid->hasPoint == true) {
+					// é‚»åŸŸç½‘æ ¼ä¹Ÿå±äºè¾¹ç•Œç½‘æ ¼
+					if (nearGrid->nearByGridAllWithpoint == false) {
 						const osg::Vec2 &nearGridCenterPoint = nearGrid->CenterPoint;
 						curGrid->curVectorGrid += (nearGridCenterPoint - curGridCenterPoint);
 						curGrid->VectorList.emplace_back(nearGridCenterPoint - curGridCenterPoint);
@@ -310,45 +311,43 @@ void GridNet::getVectorOfOutSideGrid(){
 				}
 			}
 		}
-		
+
 		float curVectorDis = curGrid->curVectorGrid.length();
 
-		if (curVectorDis > this->MaxVector_Grid){
+		if (curVectorDis > this->MaxVector_Grid) {
 			this->MaxVector_Grid = curVectorDis;
 		}
 
-		if (curVectorDis < this->MinVector_Grid){
+		if (curVectorDis < this->MinVector_Grid) {
 			this->MinVector_Grid = curVectorDis;
 		}
 	}
 }
 
-
-static float AngleBetweenVector(osg::Vec2 vector1, osg::Vec2 vector2){
+static float AngleBetweenVector(osg::Vec2 vector1, osg::Vec2 vector2) {
 	double sin = vector1.x() * vector2.y() - vector2.x() * vector1.y();
 	double cos = vector1.x() * vector2.x() + vector1.y() * vector2.y();
-
 	return std::atan2(sin, cos) * (180.0 / 3.1415926);
 }
 
-//¼ì²âÍâ²¿±ß½çÍø¸ñµÄÆ½»¬¶È£¬É¸Ñ¡³ö²»Æ½»¬µÄÍø¸ñ£¬ÓÃÓÚµ¥¶À´¦Àí
-void GridNet::DetectSmoothForOutSideGrid(){
+// æ£€æµ‹å¤–éƒ¨è¾¹ç•Œç½‘æ ¼çš„å¹³æ»‘åº¦ï¼Œç­›é€‰å‡ºä¸å¹³æ»‘çš„ç½‘æ ¼ï¼Œç”¨äºå•ç‹¬å¤„ç†
+void GridNet::DetectSmoothForOutSideGrid() {
 	for (const auto & curGrid : this->Grid_list) {
-		//µ±Ç°Íø¸ñÄÚÎŞµã
-		if (curGrid->hasPoint == false){
+		// å½“å‰ç½‘æ ¼å†…æ— ç‚¹
+		if (curGrid->hasPoint == false) {
 			continue;
 		}
 
-		//µ±Ç°Íø¸ñµÄ°ËÁÚÓòÍø¸ñ¾ùº¬ÓĞµã
-		if (curGrid->nearByGridAllWithpoint == true){
+		// å½“å‰ç½‘æ ¼çš„å…«é‚»åŸŸç½‘æ ¼å‡å«æœ‰ç‚¹
+		if (curGrid->nearByGridAllWithpoint == true) {
 			continue;
 		}
 
-		//¸ù¾İÁÚÓòÍø¸ñµÄÊıÁ¿½øĞĞÅĞ¶Ï
+		// æ ¹æ®é‚»åŸŸç½‘æ ¼çš„æ•°é‡è¿›è¡Œåˆ¤æ–­
 		int FullgridNum = curGrid->connectGridID_List.size();
 		int needCalculateGridNum = 0;
 
-		vector<SingleGrid2D*> needCalculateGrid_list;
+		std::vector<SingleGrid2D*> needCalculateGrid_list;
 		SingleGrid2D* nearGrid = nullptr;
 		for (int k = 0; k < FullgridNum; ++k) {
 			nearGrid = this->Grid_list[curGrid->connectGridID_List[k]];
@@ -356,28 +355,28 @@ void GridNet::DetectSmoothForOutSideGrid(){
 				continue;
 			}
 
-			if (nearGrid->hasPoint)	{
-				if (nearGrid->nearByGridAllWithpoint == false){
+			if (nearGrid->hasPoint) {
+				if (nearGrid->nearByGridAllWithpoint == false) {
 					++needCalculateGridNum;
 					needCalculateGrid_list.emplace_back(nearGrid);
 				}
 			}
 		}
 
-		//ÈôÁÚÓòÍø¸ñÊıÁ¿Ğ¡ÓÚÉè¶¨ãĞÖµ£¬ÔòÈÏÎª´Ö²Ú¶È½Ï´ó
+		// è‹¥é‚»åŸŸç½‘æ ¼æ•°é‡å°äºè®¾å®šé˜ˆå€¼ï¼Œåˆ™è®¤ä¸ºç²—ç³™åº¦è¾ƒå¤§
 		if (needCalculateGridNum < 2) {
 			curGrid->isSmoothGrid = false;
 			curGrid->SmoothDegree = 2;
 			continue;
 		}
 
-		if (needCalculateGridNum == 7){
+		if (needCalculateGridNum == 7) {
 			curGrid->isSmoothGrid = true;
 			curGrid->SmoothDegree = 0;
 			continue;
 		}
 
-		if (needCalculateGridNum == 2){
+		if (needCalculateGridNum == 2) {
 			SingleGrid2D* nearGrid_1 = needCalculateGrid_list[0];
 			SingleGrid2D* nearGrid_2 = needCalculateGrid_list[1];
 
@@ -389,19 +388,19 @@ void GridNet::DetectSmoothForOutSideGrid(){
 			int curCol = curGrid->curGridInfo.m_Col;
 			int curRow = curGrid->curGridInfo.m_Row;
 
-			if ((col1 == curCol) && (col2 == curCol)){
+			if ((col1 == curCol) && (col2 == curCol)) {
 				curGrid->isSmoothGrid = true;
 				curGrid->SmoothDegree = 0;
 				continue;
 			}
 
-			if ((row1 == curRow) && (row2 == curRow)){
+			if ((row1 == curRow) && (row2 == curRow)) {
 				curGrid->isSmoothGrid = true;
 				curGrid->SmoothDegree = 0;
 				continue;
 			}
 
-			if (((col1 + col2) == (curCol * 2)) && ((row1 + row2) == (curRow * 2))){
+			if (((col1 + col2) == (curCol * 2)) && ((row1 + row2) == (curRow * 2))) {
 				curGrid->isSmoothGrid = true;
 				curGrid->SmoothDegree = 0;
 				continue;
@@ -411,13 +410,13 @@ void GridNet::DetectSmoothForOutSideGrid(){
 			curGrid->SmoothDegree = 2;
 			continue;
 		}
-		
-		if ((needCalculateGridNum == 3) || (needCalculateGridNum == 4))	{
+
+		if ((needCalculateGridNum == 3) || (needCalculateGridNum == 4)) {
 			curGrid->isSmoothGrid = false;
 			curGrid->SmoothDegree = 1;
 		}
 
-		//¸ù¾İÁÚÓòÍø¸ñµÄÏòÁ¿¼Ğ½ÇºÍºÏÏòÁ¿¾àÀë½øĞĞÅĞ¶Ï
+		//æ ¹æ®é‚»åŸŸç½‘æ ¼çš„å‘é‡å¤¹è§’å’Œåˆå‘é‡è·ç¦»è¿›è¡Œåˆ¤æ–­
 		int cur_VectorDis = curGrid->curVectorGrid.length();
 		int baseValue = (this->MaxVector_Grid - this->MinVector_Grid) / 2.5 + this->MinVector_Grid;
 
@@ -425,9 +424,9 @@ void GridNet::DetectSmoothForOutSideGrid(){
 		float AngleValue = 45.0;
 		bool isBeyondAngle = false;
 
-		for (int j = 0; j < vectorNum; ++j)	{
+		for (int j = 0; j < vectorNum; ++j) {
 			osg::Vec2 curVector = curGrid->VectorList[j];
-			for (int k = j + 1; k < vectorNum; ++k)	{
+			for (int k = j + 1; k < vectorNum; ++k) {
 				osg::Vec2 nextVector = curGrid->VectorList[k];
 				if (AngleBetweenVector(curVector, nextVector) > AngleValue) {
 					isBeyondAngle = true;
@@ -437,13 +436,13 @@ void GridNet::DetectSmoothForOutSideGrid(){
 
 		bool islittleSmooth = false;
 
-		if (cur_VectorDis > baseValue){
-			if (isBeyondAngle){
+		if (cur_VectorDis > baseValue) {
+			if (isBeyondAngle) {
 				islittleSmooth = true;
 			}
 		}
 
-		if (islittleSmooth)	{
+		if (islittleSmooth) {
 			curGrid->isSmoothGrid = false;
 			curGrid->SmoothDegree = 1;
 		}
@@ -451,7 +450,7 @@ void GridNet::DetectSmoothForOutSideGrid(){
 }
 
 
-AlphaShape::AlphaShape(const vector<osg::Vec2> & point_list){
+AlphaShape::AlphaShape(const std::vector<osg::Vec2> & point_list) {
 	m_radius = 0.0;
 	m_points.insert(m_points.end(), point_list.begin(), point_list.end());
 }
@@ -464,7 +463,7 @@ AlphaShape::AlphaShape(GridNet * curGridNet) {
 	}
 }
 
-AlphaShape::~AlphaShape(){
+AlphaShape::~AlphaShape() {
 	m_radius = 0.0;
 
 	m_points.clear();
@@ -485,42 +484,37 @@ bool sortFun(const float & angle1, const float & angle2) {
 }
 
 
-//¼ÆËãÃ¿¸öµãÎªÖĞĞÄµÄ°ü¹üÔ²£¬Í³¼ÆÂäÔÚÔ²ĞÎÄÚ²¿µÄµãµÄÊıÁ¿,Í¨¹ıÊıÁ¿¶ÔÖĞĞÄµãÊÇ·ñÊôÓÚ±ß½çµã½øĞĞÅĞ¶Ï
+// è®¡ç®—æ¯ä¸ªç‚¹ä¸ºä¸­å¿ƒçš„åŒ…è£¹åœ†ï¼Œç»Ÿè®¡è½åœ¨åœ†å½¢å†…éƒ¨çš„ç‚¹çš„æ•°é‡,é€šè¿‡æ•°é‡å¯¹ä¸­å¿ƒç‚¹æ˜¯å¦å±äºè¾¹ç•Œç‚¹è¿›è¡Œåˆ¤æ–­
 void AlphaShape::Detect_Shape_By_PackCirlce(GridNet* curGridNet, float radius, int pointMaxNum) {
 	this->m_shape_points.clear();
 
-	//±éÀúËùÓĞÍø¸ñ
-	for (int i = 0; i < curGridNet->Grid_Num; i++)
-	{
-		//µ±Ç°Íø¸ñ
+	// éå†æ‰€æœ‰ç½‘æ ¼
+	for (int i = 0; i < curGridNet->Grid_Num; i++) {
+		// å½“å‰ç½‘æ ¼
 		SingleGrid2D* curGrid = curGridNet->Grid_list[i];
 
-		if (curGrid)
-		{
-			curGrid->hasDetected = true;//Íø¸ñ±»¼ì²â¹ıÁË
+		if (curGrid) {
+			curGrid->hasDetected = true;// ç½‘æ ¼è¢«æ£€æµ‹è¿‡äº†
 		}
 
 		int curRowID = curGrid->curGridInfo.m_Row;
 		int curColID = curGrid->curGridInfo.m_Col;
 
-		//µ±Ç°Íø¸ñÄÚÎŞµã£¬Îª¿ÕÍø¸ñ£¬Ö±½ÓÌø¹ı
-		if (curGrid->hasPoint == false)
-		{
+		// å½“å‰ç½‘æ ¼å†…æ— ç‚¹ï¼Œä¸ºç©ºç½‘æ ¼ï¼Œç›´æ¥è·³è¿‡
+		if (curGrid->hasPoint == false) {
 			continue;
 		}
 
-		//µ±Ç°Íø¸ñµÄ°ËÁÚÓòÍø¸ñ¾ùº¬ÓĞµã£¬ËµÃ÷²»ÊÇ±ß½çÍø¸ñ£¬Ö±½ÓÌø¹ı
-		if (curGrid->nearByGridAllWithpoint == true)
-		{
+		// å½“å‰ç½‘æ ¼çš„å…«é‚»åŸŸç½‘æ ¼å‡å«æœ‰ç‚¹ï¼Œè¯´æ˜ä¸æ˜¯è¾¹ç•Œç½‘æ ¼ï¼Œç›´æ¥è·³è¿‡
+		if (curGrid->nearByGridAllWithpoint == true) {
 			continue;
 		}
 
-	    //µ±Ç°±ß½çÍø¸ñÄÚµãÊıÁ¿
+	    // å½“å‰è¾¹ç•Œç½‘æ ¼å†…ç‚¹æ•°é‡
 		int pointListNum = curGrid->PointList.size();
 
-		//ÖğÒ»ÅĞ¶Ïµ±Ç°Íø¸ñÄÚµã£¬ÒÔ´ËµãÎªÔ²ĞÄ£¬ÒÔÉèÖÃµÄ°ë¾¶»­Ô²£¬ÅĞ¶ÏÂäÔÚÔ²ÄÚµãµÄÊıÁ¿
-		for (int k = 0; k < pointListNum; k++)
-		{
+		// é€ä¸€åˆ¤æ–­å½“å‰ç½‘æ ¼å†…ç‚¹ï¼Œä»¥æ­¤ç‚¹ä¸ºåœ†å¿ƒï¼Œä»¥è®¾ç½®çš„åŠå¾„ç”»åœ†ï¼Œåˆ¤æ–­è½åœ¨åœ†å†…ç‚¹çš„æ•°é‡
+		for (int k = 0; k < pointListNum; k++) {
 			float curPointX = curGrid->PointList[k].x();
 			float curPointY = curGrid->PointList[k].y();
 
@@ -530,8 +524,7 @@ void AlphaShape::Detect_Shape_By_PackCirlce(GridNet* curGridNet, float radius, i
 
 			int PointInCircleNum = 0;
 
-			for (int m = 0; m < allpointNum; m++)
-			{
+			for (int m = 0; m < allpointNum; m++) {
 				float nerPointX = curGridNet->Points_List[m].x();
 				float nerPointY = curGridNet->Points_List[m].y();
 
@@ -539,99 +532,82 @@ void AlphaShape::Detect_Shape_By_PackCirlce(GridNet* curGridNet, float radius, i
 
 				float distance = Distance_point(curPoint, nerPoint);
 
-				if (distance< radius && distance>0.000001)
-				{
+				if (distance < radius && distance > 0.000001) {
 					PointInCircleNum++;
 				}
 			}
 
-			if (PointInCircleNum < pointMaxNum)
-			{
+			if (PointInCircleNum < pointMaxNum) {
 				this->m_shape_points.push_back(curPoint);
 			}
 		}
 	}
 }
 
-//¼ÆËãÃ¿¸öµãÎªÖĞĞÄµÄ°ü¹üÔ²£¬Í³¼ÆÂäÔÚÔ²ĞÎÄÚ²¿µÄµãµÄÊıÁ¿ÒÔ¼°·½Î»½Ç£¬Í¨¹ıÊıÁ¿ÒÔ¼°·½Î»¼Ğ½Ç¶ÔÖĞĞÄµãÊÇ·ñÊôÓÚ±ß½çµã½øĞĞÅĞ¶Ï
-void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius, int pointNum)
-{
-	//ÓÃÓÚÅĞ¶Ï¼ì²âÔ²ÊÇ·ñº¬ÓĞµãµÄÅĞ¶ÏµãÔÆ
-	vector<osg::Vec2> detect_point_list;
+// è®¡ç®—æ¯ä¸ªç‚¹ä¸ºä¸­å¿ƒçš„åŒ…è£¹åœ†ï¼Œç»Ÿè®¡è½åœ¨åœ†å½¢å†…éƒ¨çš„ç‚¹çš„æ•°é‡ä»¥åŠæ–¹ä½è§’ï¼Œé€šè¿‡æ•°é‡ä»¥åŠæ–¹ä½å¤¹è§’å¯¹ä¸­å¿ƒç‚¹æ˜¯å¦å±äºè¾¹ç•Œç‚¹è¿›è¡Œåˆ¤æ–­
+void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius, int pointNum) {
+	// ç”¨äºåˆ¤æ–­æ£€æµ‹åœ†æ˜¯å¦å«æœ‰ç‚¹çš„åˆ¤æ–­ç‚¹äº‘
+	std::vector<osg::Vec2> detect_point_list;
 
-	for (int i = 0; i < curGridNet->Grid_Num; i++)
-	{
+	for (int i = 0; i < curGridNet->Grid_Num; i++) {
 		SingleGrid2D* curGrid = curGridNet->Grid_list[i];
 
-		if (curGrid)
-		{
+		if (curGrid) {
 			curGrid->hasDetected = true;
 		}
 
 		int curRowID = curGrid->curGridInfo.m_Row;
 		int curColID = curGrid->curGridInfo.m_Col;
 
-		//m_points.clear();
+		// m_points.clear();
 
-		//µ±Ç°Íø¸ñÄÚÎŞµã
-		if (curGrid->hasPoint == false)
-		{
+		// å½“å‰ç½‘æ ¼å†…æ— ç‚¹
+		if (curGrid->hasPoint == false) {
 			continue;
 		}
 
-		//µ±Ç°Íø¸ñµÄ°ËÁÚÓòÍø¸ñ¾ùº¬ÓĞµã
-		if (curGrid->nearByGridAllWithpoint == true)
-		{
+		// å½“å‰ç½‘æ ¼çš„å…«é‚»åŸŸç½‘æ ¼å‡å«æœ‰ç‚¹
+		if (curGrid->nearByGridAllWithpoint == true) {
 			continue;
 		}
-		
+
 		detect_point_list.clear();
 
-		for (int k = curRowID - 1; k <= curRowID + 1; k++)
-		{
-			for (int j = curColID - 1; j <= curColID + 1; j++)
-			{
-				if ((k == curRowID) && (j == curColID))
-				{
-					//continue;
+		for (int k = curRowID - 1; k <= curRowID + 1; k++) {
+			for (int j = curColID - 1; j <= curColID + 1; j++) {
+				if ((k == curRowID) && (j == curColID)) {
+					// continue;
 				}
 
-				if (k < 0 || j < 0)
-				{
+				if (k < 0 || j < 0) {
 					continue;
 				}
 
-				if (k >= (curGridNet->Row_Num + 2) || j >= (curGridNet->Col_Num + 2))
-				{
+				if (k >= (curGridNet->Row_Num + 2) || j >= (curGridNet->Col_Num + 2)) {
 					continue;
 				}
 
 				SingleGrid2D* nearGrid = curGridNet->getGridByRowAndCol(k, j);
 
-				if (nearGrid == NULL)
-				{
+				if (nullptr == nearGrid) {
 					continue;
 				}
 
-				if (nearGrid->hasPoint == true)
-				{
-					for (int m = 0; m < nearGrid->cur_PointNum; m++)
-					{
+				if (nearGrid->hasPoint == true) {
+					for (int m = 0; m < nearGrid->cur_PointNum; m++) {
 						float nearPointX = nearGrid->PointList[m].x();
 						float nearPointY = nearGrid->PointList[m].y();
 
 						osg::Vec2 nearPoint(nearPointX, nearPointY);
 						detect_point_list.push_back(nearPoint);
-					}					
+					}
 				}
-
 			}
 		}
 
 		int pointListNum = curGrid->PointList.size();
 
-		for (int k = 0; k < pointListNum; k++)
-		{
+		for (int k = 0; k < pointListNum; k++) {
 			float curPointX = curGrid->PointList[k].x();
 			float curPointY = curGrid->PointList[k].y();
 
@@ -639,12 +615,11 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 
 			int circlePointNum = 0;
 
-			vector<float> angle_List;
+			std::vector<float> angle_List;
 			angle_List.clear();
 
-			//¼ÆËãÂäÔÚÖ¸¶¨¼ì²âÔ²ÄÚµÄµã£¬²¢¼ÆËã·½Î»½Ç¶È
-			for (int m = 0; m < detect_point_list.size(); m++)
-			{
+			//è®¡ç®—è½åœ¨æŒ‡å®šæ£€æµ‹åœ†å†…çš„ç‚¹ï¼Œå¹¶è®¡ç®—æ–¹ä½è§’åº¦
+			for (int m = 0; m < detect_point_list.size(); m++) {
 				float nerPointX = detect_point_list[m].x();
 				float nerPointY = detect_point_list[m].y();
 
@@ -652,23 +627,20 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 
 				float distance = Distance_point(curPoint, nerPoint);
 
-				if (distance< radius && distance>0.000001)
-				{
+				if (distance< radius && distance>0.000001) {
 					circlePointNum++;
 
 					float deltX = nerPointX - curPointX;
 					float deltY = nerPointY - curPointY;
 
-					//atan2(y,x)Ëù±í´ïµÄÒâË¼ÊÇ×ø±êÔ­µãÎªÆğµã£¬Ö¸Ïò(x,y)µÄÉäÏßÔÚ×ø±êÆ½ÃæÉÏÓëxÖáÕı·½ÏòÖ®¼äµÄ½ÇµÄ½Ç¶È¡£
+					// atan2(y,x)æ‰€è¡¨è¾¾çš„æ„æ€æ˜¯åæ ‡åŸç‚¹ä¸ºèµ·ç‚¹ï¼ŒæŒ‡å‘(x,y)çš„å°„çº¿åœ¨åæ ‡å¹³é¢ä¸Šä¸xè½´æ­£æ–¹å‘ä¹‹é—´çš„è§’çš„è§’åº¦ã€‚
 					float auizumAngle = std::atan2(deltY, deltX) * 180 / 3.1415926;
-					//½á¹ûÎªÕı±íÊ¾´Ó X ÖáÄæÊ±ÕëĞı×ªµÄ½Ç¶È£¬½á¹ûÎª¸º±íÊ¾´Ó X ÖáË³Ê±ÕëĞı×ªµÄ½Ç¶È¡£
+					// ç»“æœä¸ºæ­£è¡¨ç¤ºä» X è½´é€†æ—¶é’ˆæ—‹è½¬çš„è§’åº¦ï¼Œç»“æœä¸ºè´Ÿè¡¨ç¤ºä» X è½´é¡ºæ—¶é’ˆæ—‹è½¬çš„è§’åº¦ã€‚
 
-					if (auizumAngle < 0)
-					{
-						//½á¹û±íÊ¾´Ó X ÖáÄæÊ±ÕëĞı×ªµÄ½Ç¶È
+					if (auizumAngle < 0) {
+						// ç»“æœè¡¨ç¤ºä» X è½´é€†æ—¶é’ˆæ—‹è½¬çš„è§’åº¦
 						auizumAngle += 360.0;
 					}
-
 					angle_List.push_back(auizumAngle);
 				}
 			}
@@ -679,33 +651,24 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 
 			bool isBeyondAngle = false;
 
-			if (angle_List.size()>0)
-			{
-				for (int x = 0; x < angle_List.size() - 1; x++)
-				{
+            if (angle_List.size() > 0) {
+				for (int x = 0; x < angle_List.size() - 1; x++) {
 					int y = x + 1;
 
-					if (y < (angle_List.size() - 1))
-					{
+					if (y < (angle_List.size() - 1)) {
 						deltAngle = abs(angle_List[y] - angle_List[x]);
 					}
 
-					if (y == (angle_List.size() - 1))
-					{
+					if (y == (angle_List.size() - 1)) {
 						deltAngle = (360 - angle_List[y]) + angle_List[0];
 					}
 
-					if (deltAngle > 90.0)
-					{
+					if (deltAngle > 90.0) {
 						isBeyondAngle = true;
 					}
 				}
 			}
-
-			//if ((circlePointNum < pointNum)||(isBeyondAngle == true))
-
-			if (circlePointNum < pointNum)
-			{
+            if (circlePointNum < pointNum) {
 				m_shape_points.push_back(curPoint);
 			}
 		}
@@ -713,22 +676,20 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 }
 
 void AlphaShape::Detect_Shape_By_GridNet_New(float radius) {
-	if (nullptr == m_gridNet){
+	if (nullptr == m_gridNet) {
 		return;
 	}
 
 	this->Detect_Shape_line_by_Grid_New(radius, m_gridNet->Grid_list);
 }
 
-//·½·¨ËÄ£º»ùÓÚ·½·¨¶ş£¬²»Í¬Ö®´¦ÔÚÓÚ¹ö¶¯Ô²µÄ¼ì²â°ë¾¶¿É±ä
+//æ–¹æ³•å››ï¼šåŸºäºæ–¹æ³•äºŒï¼Œä¸åŒä¹‹å¤„åœ¨äºæ»šåŠ¨åœ†çš„æ£€æµ‹åŠå¾„å¯å˜
 void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<SingleGrid2D*> & allGridList) {
 	all_edges.clear();
 	all_circles.clear();
 	all_shape_points.clear();
-	all_point_pair_N = 0;	
-	
+	all_point_pair_N = 0;
 	float scaleRate = 0.8f;
-
 	int cur_point_pair_N = 0;
 
 	PointV2List cur_shape_points;
@@ -743,24 +704,23 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<S
 			continue;
 		}
 
-		//ÈôÁÚÓòÍø¸ñÄÚµãÊıÁ¿½ÏÉÙÇÒ½ÏÎªÀëÉ¢£¬¿ÉÄÜ»á³öÏÖÂ©¼ìÇé¿ö£¬ËùÒÔ×îºÃ±ğÌø¹ı
+		//è‹¥é‚»åŸŸç½‘æ ¼å†…ç‚¹æ•°é‡è¾ƒå°‘ä¸”è¾ƒä¸ºç¦»æ•£ï¼Œå¯èƒ½ä¼šå‡ºç°æ¼æ£€æƒ…å†µï¼Œæ‰€ä»¥æœ€å¥½åˆ«è·³è¿‡
 		if (centerGrid->nearByGridAllWithpoint) {
 			continue;
 		}
 
-		//µ±Ç°Íø¸ñ²»Æ½»¬£¬ĞèÒªËõĞ¡¼ì²â°ë¾¶£¬¼ì²â¸üÎªÏ¸ÖÂ
-		if (centerGrid->isSmoothGrid == false)	{
+		// å½“å‰ç½‘æ ¼ä¸å¹³æ»‘ï¼Œéœ€è¦ç¼©å°æ£€æµ‹åŠå¾„ï¼Œæ£€æµ‹æ›´ä¸ºç»†è‡´
+		if (centerGrid->isSmoothGrid == false) {
 			circleSize = centerGrid->SmoothDegree;
-		
-			if (circleSize == 1){
+
+			if (circleSize == 1) {
 				m_radius = radius * scaleRate;
 			}
-		
-			if (circleSize == 2){
+
+			if (circleSize == 2) {
 				m_radius = radius * scaleRate * scaleRate;
 			}
-		}
-		else {
+		} else {
 			m_radius = radius;
 			circleSize = 0;
 		}
@@ -788,33 +748,31 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<S
 
 				++cur_point_pair_N;
 
-				const osg::Vec2 &mid_point = (centerPoint + outPoint) / 2;//Ïß¶ÎÖĞµã
-				const osg::Vec2 &vector_line = centerPoint - outPoint;//Ïß¶ÎµÄ·½ÏòÏòÁ¿
+				const osg::Vec2 &mid_point = (centerPoint + outPoint) / 2;//çº¿æ®µä¸­ç‚¹
+				const osg::Vec2 &vector_line = centerPoint - outPoint;//çº¿æ®µçš„æ–¹å‘å‘é‡
 
 				float a = 1.0, b = 1.0;
 
 				if (abs(vector_line.x()) < 0.001) {
 					b = 0.0;
-				}
-				else {
+				} else {
 					a = (-b * vector_line.y()) / vector_line.x();
 				}
 
-				//Ïß¶ÎµÄ´¹Ö±ÏòÁ¿
+				//çº¿æ®µçš„å‚ç›´å‘é‡
 				osg::Vec2 normal(a, b);
-				normal.normalize();//µ¥Î»ÏòÁ¿»¯
+				normal.normalize();//å•ä½å‘é‡åŒ–
 
 				float line_length = vector_line.length() / 2.0;
 				float length = sqrt(std::pow(radius, 2) - std::pow(line_length, 2));
 
-				//Á½Íâ½ÓÔ²Ô²ĞÄ
+				//ä¸¤å¤–æ¥åœ†åœ†å¿ƒ
 				const osg::Vec2 &center1 = mid_point + normal * length;
 				const osg::Vec2 &center2 = mid_point - normal * length;
 
 				bool hasPointInCircle1 = false, hasPointInCircle2 = false;
 
 				for (const auto & checkPoint : detectAreaAllPointList) {
-
 					if (checkPointSame(centerPoint, checkPoint) ||
 						checkPointSame(outPoint, checkPoint)) {
 						continue;
@@ -852,11 +810,11 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<S
 			}
 		}
 	}
-	
+
 	all_edges.insert(all_edges.end(), cur_edges.begin(), cur_edges.end());
 	all_circles.insert(all_circles.end(), cur_circles.begin(), cur_circles.end());
 	m_shape_points.insert(m_shape_points.end(), cur_shape_points.begin(), cur_shape_points.end());
-	all_point_pair_N += cur_point_pair_N;	
+	all_point_pair_N += cur_point_pair_N;
 
 	std::set<Edge> edge_set(all_edges.begin(), all_edges.end());
 	m_edges.assign(edge_set.begin(), edge_set.end());
@@ -865,8 +823,8 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<S
 	m_circles.assign(circle_set.begin(), circle_set.end());
 }
 
-//·½·¨ÈıµÄ×Óº¯Êı£º»ùÓÚÍø¸ñÉ¸Ñ¡µÄalpha shape´¦Àíº¯Êı£¬¹©¶àÏß³Ìµ÷ÓÃ
-void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & centerGridList, const std::vector<SingleGrid2D*> & allGridList){
+// æ–¹æ³•ä¸‰çš„å­å‡½æ•°ï¼šåŸºäºç½‘æ ¼ç­›é€‰çš„alpha shapeå¤„ç†å‡½æ•°ï¼Œä¾›å¤šçº¿ç¨‹è°ƒç”¨
+void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & centerGridList, const std::vector<SingleGrid2D*> & allGridList) {
 	thread_local int cur_point_pair_N = 0;
 
 	thread_local PointV2List cur_shape_points;
@@ -880,7 +838,7 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 			continue;
 		}
 
-		//ÈôÁÚÓòÍø¸ñÄÚµãÊıÁ¿½ÏÉÙÇÒ½ÏÎªÀëÉ¢£¬¿ÉÄÜ»á³öÏÖÂ©¼ìÇé¿ö£¬ËùÒÔ×îºÃ±ğÌø¹ı
+		//è‹¥é‚»åŸŸç½‘æ ¼å†…ç‚¹æ•°é‡è¾ƒå°‘ä¸”è¾ƒä¸ºç¦»æ•£ï¼Œå¯èƒ½ä¼šå‡ºç°æ¼æ£€æƒ…å†µï¼Œæ‰€ä»¥æœ€å¥½åˆ«è·³è¿‡
 		if (centerGrid->nearByGridAllWithpoint) {
 			continue;
 		}
@@ -891,7 +849,7 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 			const auto & curNearGrid = allGridList[nearGirdID];
 			if (nullptr == curNearGrid || !curNearGrid->hasPoint) {
 				continue;
-			}			
+			}
 			detectAreaAllPointList.insert(detectAreaAllPointList.end(), curNearGrid->PointList.begin(), curNearGrid->PointList.end());
 		}
 
@@ -908,26 +866,25 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 
 				++cur_point_pair_N;
 
-				const osg::Vec2 &mid_point = (centerPoint + outPoint) / 2;//Ïß¶ÎÖĞµã
-				const osg::Vec2 &vector_line = centerPoint - outPoint;//Ïß¶ÎµÄ·½ÏòÏòÁ¿
+				const osg::Vec2 &mid_point = (centerPoint + outPoint) / 2;//çº¿æ®µä¸­ç‚¹
+				const osg::Vec2 &vector_line = centerPoint - outPoint;//çº¿æ®µçš„æ–¹å‘å‘é‡
 
 				float a = 1.0, b = 1.0;
 
 				if (abs(vector_line.x()) < 0.001) {
 					b = 0.0;
-				}
-				else {
+				} else {
 					a = (-b * vector_line.y()) / vector_line.x();
 				}
 
-				//Ïß¶ÎµÄ´¹Ö±ÏòÁ¿
+				//çº¿æ®µçš„å‚ç›´å‘é‡
 				osg::Vec2 normal(a, b);
-				normal.normalize();//µ¥Î»ÏòÁ¿»¯
+				normal.normalize();//å•ä½å‘é‡åŒ–
 
 				float line_length = vector_line.length() / 2.0;
 				float length = sqrt(std::pow(radius, 2) - std::pow(line_length, 2));
 
-				//Á½Íâ½ÓÔ²Ô²ĞÄ
+				//ä¸¤å¤–æ¥åœ†åœ†å¿ƒ
 				const osg::Vec2 &center1 = mid_point + normal * length;
 				const osg::Vec2 &center2 = mid_point - normal * length;
 
@@ -973,8 +930,8 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 		}
 	}
 
-	//¼ÓËø£¬±ÜÃâ¶àÏß³Ì×ÊÔ´³åÍ»
-	{
+	// åŠ é”ï¼Œé¿å…å¤šçº¿ç¨‹èµ„æºå†²çª
+    {
 		std::lock_guard<std::mutex> lock(all_mutex);
 		all_edges.insert(all_edges.end(), cur_edges.begin(), cur_edges.end());
 		all_circles.insert(all_circles.end(), cur_circles.begin(), cur_circles.end());
@@ -983,7 +940,7 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 	}
 }
 
-//·½·¨Èı£º»ùÓÚ·½·¨¶ş£¬ÀûÓÃ¶àÏß³Ì½øĞĞ¼ÓËÙ
+// æ–¹æ³•ä¸‰ï¼šåŸºäºæ–¹æ³•äºŒï¼Œåˆ©ç”¨å¤šçº¿ç¨‹è¿›è¡ŒåŠ é€Ÿ
 void AlphaShape::Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threadNum) {
 	if (nullptr == m_gridNet) {
 		return;
@@ -1001,8 +958,8 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threa
 	m_edges.clear();
 
 	const auto & gridList = m_gridNet->Grid_list;
-	int step = (int)(gridList.size() / threadNum);
-	
+	int step = static_cast<int>(gridList.size() / threadNum);
+
 	std::vector<std::thread> threadList;
 	std::vector<SingleGrid2D*> curList;
 	for (int i = 0; i < threadNum; ++i) {
@@ -1015,7 +972,7 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threa
 		threadList.emplace_back(std::thread(thread_detect_By_GridList, m_radius, curList, std::ref(gridList)));
 	}
 
-	for (auto & curThread : threadList) {		
+	for (auto & curThread : threadList) {
 		curThread.join();
 	}
 
@@ -1027,10 +984,10 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threa
 
 	m_shape_points.assign(all_shape_points.begin(), all_shape_points.end());
 
-	this->point_pair_scale = (float)(all_point_pair_N * 2) / (point_num*(point_num - 1));
+	this->point_pair_scale = static_cast<float>((all_point_pair_N * 2) / (point_num*(point_num - 1)));
 }
 
-//·½·¨¶ş£º¹¹Ôì¶şÎ¬¸ñÍø£¬½ö¶Ô3x3´°¿ÚÍø¸ñÄÚµÄµã½øĞĞalpha shape¼ì²â£¬´Ó¶øÌáÉı¼ì²âĞ§ÂÊ
+// æ–¹æ³•äºŒï¼šæ„é€ äºŒç»´æ ¼ç½‘ï¼Œä»…å¯¹3x3çª—å£ç½‘æ ¼å†…çš„ç‚¹è¿›è¡Œalpha shapeæ£€æµ‹ï¼Œä»è€Œæå‡æ£€æµ‹æ•ˆç‡
 void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 	if (nullptr == m_gridNet) {
 		return;
@@ -1055,7 +1012,7 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 			continue;
 		}
 
-		//ÈôÁÚÓòÍø¸ñÄÚµãÊıÁ¿½ÏÉÙÇÒ½ÏÎªÀëÉ¢£¬¿ÉÄÜ»á³öÏÖÂ©¼ìÇé¿ö
+		//è‹¥é‚»åŸŸç½‘æ ¼å†…ç‚¹æ•°é‡è¾ƒå°‘ä¸”è¾ƒä¸ºç¦»æ•£ï¼Œå¯èƒ½ä¼šå‡ºç°æ¼æ£€æƒ…å†µ
 		if (centerGrid->nearByGridAllWithpoint) {
 			continue;
 		}
@@ -1083,33 +1040,31 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 
 				++point_pair_N;
 
-				const osg::Vec2 &mid_point = (centerPoint + outPoint) / 2;//Ïß¶ÎÖĞµã
-				const osg::Vec2 &vector_line = centerPoint - outPoint;//Ïß¶ÎµÄ·½ÏòÏòÁ¿
+				const osg::Vec2 &mid_point = (centerPoint + outPoint) / 2;//çº¿æ®µä¸­ç‚¹
+				const osg::Vec2 &vector_line = centerPoint - outPoint;//çº¿æ®µçš„æ–¹å‘å‘é‡
 
 				float a = 1.0, b = 1.0;
 
 				if (abs(vector_line.x()) < 0.001) {
 					b = 0.0;
-				}
-				else {
+				} else {
 					a = (-b * vector_line.y()) / vector_line.x();
 				}
 
-				//Ïß¶ÎµÄ´¹Ö±ÏòÁ¿
+				//çº¿æ®µçš„å‚ç›´å‘é‡
 				osg::Vec2 normal(a, b);
-				normal.normalize();//µ¥Î»ÏòÁ¿»¯
+				normal.normalize();//å•ä½å‘é‡åŒ–
 
 				float line_length = vector_line.length() / 2.0;
 				float length = sqrt(std::pow(m_radius, 2) - std::pow(line_length, 2));
 
-				//Á½Íâ½ÓÔ²Ô²ĞÄ
+				//ä¸¤å¤–æ¥åœ†åœ†å¿ƒ
 				const osg::Vec2 &center1 = mid_point + normal * length;
 				const osg::Vec2 &center2 = mid_point - normal * length;
 
 				bool hasPointInCircle1 = false, hasPointInCircle2 = false;
 
 				for (const auto & checkPoint : detectAreaAllPointList) {
-					
 					if (checkPointSame(centerPoint, checkPoint) ||
 						checkPointSame(outPoint, checkPoint)) {
 						continue;
@@ -1153,10 +1108,10 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 	std::set<Circle> circle_set(m_circles.begin(), m_circles.end());
 	m_circles.assign(circle_set.begin(), circle_set.end());
 
-	this->point_pair_scale = (float)(point_pair_N * 2) / (point_num*(point_num - 1));
+	this->point_pair_scale = static_cast<float>((point_pair_N * 2) / (point_num*(point_num - 1)));
 }
 
-//·½·¨Ò»£º³£¹æµÄAlpha ShapesËã·¨
+// æ–¹æ³•ä¸€ï¼šå¸¸è§„çš„Alpha Shapesç®—æ³•
 void AlphaShape::Detect_Shape_line(float radius) {
 	m_radius = radius;
 	int point_pair_N = 0;
@@ -1170,34 +1125,34 @@ void AlphaShape::Detect_Shape_line(float radius) {
 	m_edges.clear();
 	m_circles.clear();
 
-	for (int i = 0; i < point_num; ++i){
+	for (int i = 0; i < point_num; ++i) {
 		for (int k = i + 1; k < point_num; ++k) {
-			//ÅĞ¶ÏÈÎÒâÁ½µãµÄµã¶Ô¾àÀëÊÇ·ñ´óÓÚ¹ö¶¯Ô²µÄÖ±¾¶´óĞ¡
-			if (Distance_point(m_points[i], m_points[k]) > 2 * m_radius){
+			// åˆ¤æ–­ä»»æ„ä¸¤ç‚¹çš„ç‚¹å¯¹è·ç¦»æ˜¯å¦å¤§äºæ»šåŠ¨åœ†çš„ç›´å¾„å¤§å°
+			if (Distance_point(m_points[i], m_points[k]) > 2 * m_radius) {
 				continue;
 			}
 
 			++point_pair_N;
-			
-			const osg::Vec2 &mid_point = (m_points[i] + m_points[k]) / 2;//Ïß¶ÎÖĞµã
-			const osg::Vec2 &vector_line = m_points[i] - m_points[k];//Ïß¶ÎµÄ·½ÏòÏòÁ¿
 
-			float a = 1.0, b = 1.0;			
+			const osg::Vec2 &mid_point = (m_points[i] + m_points[k]) / 2;//çº¿æ®µä¸­ç‚¹
+			const osg::Vec2 &vector_line = m_points[i] - m_points[k];//çº¿æ®µçš„æ–¹å‘å‘é‡
+
+     		float a = 1.0, b = 1.0;
 
 			if (abs(vector_line.x()) < 0.001) {
 				b = 0.0;
-			}else {
+			} else {
 				a = (-b * vector_line.y()) / vector_line.x();
 			}
 
-			//Ïß¶ÎµÄ´¹Ö±ÏòÁ¿
+			//çº¿æ®µçš„å‚ç›´å‘é‡
 			osg::Vec2 normal(a, b);
-			normal.normalize();//µ¥Î»ÏòÁ¿»¯
+			normal.normalize();//å•ä½å‘é‡åŒ–
 
 			float line_length = vector_line.length() / 2.0;
 			float length = sqrt(std::pow(m_radius, 2) - std::pow(line_length, 2));
 
-			//Á½Íâ½ÓÔ²Ô²ĞÄ
+			//ä¸¤å¤–æ¥åœ†åœ†å¿ƒ
 			const osg::Vec2 &center1 = mid_point + normal*length;
 			const osg::Vec2 &center2 = mid_point - normal*length;
 
@@ -1208,20 +1163,20 @@ void AlphaShape::Detect_Shape_line(float radius) {
 					continue;
 				}
 
-				if (hasPointInCircle1 && hasPointInCircle2){
+				if (hasPointInCircle1 && hasPointInCircle2) {
 					break;
 				}
 
-				if (!hasPointInCircle1 && Distance_point(m_points[m], center1) < m_radius){
+				if (!hasPointInCircle1 && Distance_point(m_points[m], center1) < m_radius) {
 					hasPointInCircle1 = true;
 				}
 
-				if (!hasPointInCircle2 && Distance_point(m_points[m], center2) < m_radius){
+				if (!hasPointInCircle2 && Distance_point(m_points[m], center2) < m_radius) {
 					hasPointInCircle2 = true;
 				}
 			}
 
-			if (!hasPointInCircle1 || !hasPointInCircle2){
+			if (!hasPointInCircle1 || !hasPointInCircle2) {
 				m_edges.emplace_back(Edge(m_points[i], m_points[k]));
 
 				if (false == hasPointInCircle1) {
@@ -1231,12 +1186,12 @@ void AlphaShape::Detect_Shape_line(float radius) {
 				if (false == hasPointInCircle2) {
 					m_circles.emplace_back(Circle(center2, m_radius));
 				}
-			
+
 				if (m_shape_id_set.find(i) == m_shape_id_set.end()) {
 					m_shape_id_set.emplace(i);
 					m_shape_points.emplace_back(m_points[i]);
 				}
-				
+
 				if (m_shape_id_set.find(k) == m_shape_id_set.end()) {
 					m_shape_id_set.emplace(k);
 					m_shape_points.emplace_back(m_points[k]);
@@ -1245,5 +1200,5 @@ void AlphaShape::Detect_Shape_line(float radius) {
 		}
 	}
 
-	this->point_pair_scale = (float)(point_pair_N * 2)/ (point_num*(point_num - 1));
+	this->point_pair_scale = static_cast<float>((point_pair_N * 2)/ (point_num*(point_num - 1)));
 }

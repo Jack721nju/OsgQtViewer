@@ -1,7 +1,9 @@
+ï»¿/* CopyrightÂ© 2022 Jack721 */
 #pragma once
 
 #include <Windows.h>
 #include <chrono>
+#include <string>
 #include <liblas/liblas.hpp>
 
 #include "osgQt.h"
@@ -12,32 +14,32 @@
 #include "ProjectToXY.h"
 #include "QuadTree.h"
 
-//¶àÊÓ¾°Æ÷
+//å¤šè§†æ™¯å™¨
 class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {
 	Q_OBJECT
 
-public:
+ public:
 	explicit OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel = osgViewer::ViewerBase::SingleThreaded);
 	virtual ~OsgQtTest();
 
-	//¶¨Ê±Æ÷ÊÂ¼þ
+	//å®šæ—¶å™¨äº‹ä»¶
 	void timerEvent(QTimerEvent*) {
 		frame();
 	}
 
 	bool eventFilter(QObject * obj, QEvent * event);
 
-private:
+ private:
 	QWidget* addViewWidget(osgQt::GraphicsWindowQt* gw, osg::ref_ptr<osg::Group> scence);
-	
+
 	osgQt::GraphicsWindowQt* createGraphicsWindow(int x, int y, int w, int h, const std::string& name = "", bool windowDecoration = false);
 
 	void SetCamerToObjectCenter(osg::ref_ptr<osg::Node> cur_node);
 
-protected:
-	TimerClock _timerClock;     //¼ÆÊ±Æ÷
+ protected:
+	TimerClock _timerClock;     //è®¡æ—¶å™¨
 
-private:
+ private:
 	void Init_Mian_Menu();
 
 	void Init_Tool_Bar();
@@ -54,7 +56,7 @@ private:
 
 	void Init_Point_Info_Widget(const std::string &itemName);
 
-private:
+ private:
 	OsgContainer* MainWidget;
 
 	QMenuBar* menu_bar;
@@ -116,14 +118,14 @@ private:
 	QDialog * m_octree_bulid_Dialog;
 
 	QLineEdit *m_Octree_depth;
-	
+
 	QLineEdit *m_Octree_size;
 
 	QLineEdit *m_Quad_Tree_maxDepth;
 
 	QLineEdit *m_Quad_minPointNum;
 
-private:
+ private:
 	void AddToConsoleSlot(const QString& show_text);
 
 	void AddNodeToDataTree(const std::string & nodeName, int type = 1);
@@ -131,13 +133,13 @@ private:
 	void SetCameraDirection(int direct_type);
 
 	osg::Node * createScalarBar_HUD(osgSim::ColorRange* cr);
-	
-private:
+
+ private:
 	osg::ref_ptr<osg::Group> mainView_root{nullptr};
 
 	QMutex m_mutex;
 
-public slots:
+ public slots:
 	void slot_OpenData();
 
 	void slot_SaveData();
@@ -204,7 +206,7 @@ public slots:
 
 	void slot_build_Octree();
 
-public:
+ public:
 	void ReadLasData(const std::string & fileName);
 
 	void ReadTxtData(const std::string & fileName);
@@ -213,6 +215,6 @@ public:
 
 	void setMaxReadPointNum(int MaxValue);
 
-public:
+ public:
 	bool hasSelectedPcloud();
 };

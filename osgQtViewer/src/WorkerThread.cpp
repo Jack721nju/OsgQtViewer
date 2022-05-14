@@ -1,7 +1,7 @@
+﻿/* Copyright© 2022 Jack721 */
 #include "WorkerThread.h"
 
-WorkerThread::WorkerThread(osg::ref_ptr<PointCloud> Pcloud, int minValue, int maxValue, QObject * parent)
-	:QThread (parent) {
+WorkerThread::WorkerThread(osg::ref_ptr<PointCloud> Pcloud, int minValue, int maxValue, QObject * parent) : QThread(parent) {
 	readPcloud = Pcloud;
 	fileName = readPcloud->getName();
 	m_Rate = minValue;

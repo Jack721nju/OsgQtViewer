@@ -1,4 +1,8 @@
+﻿/* Copyright© 2022 Jack721 */
 #include "JsonMgr.h"
+
+#include <iostream>
+#include <fstream>
 
 Json::Value JsonMgr::getReadValue(const std::string &jsonName) {
 	Json::Value rootValue;

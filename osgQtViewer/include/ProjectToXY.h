@@ -1,9 +1,12 @@
+ï»¿/* CopyrightÂ© 2022 Jack721 */
 #pragma once
+#include <vector>
+
 #include "osgQt.h"
 #include "AlphaShape.h"
 
 class PaintArea : public QWidget {
-public:
+ public:
 	explicit PaintArea(QWidget* parent = nullptr);
 	PaintArea(int widthX, int heightY);
 
@@ -11,8 +14,8 @@ public:
 	void drawAxis();
 	void drawPoints(QPointF points[], int point_num, int point_size = 1.0, const QColor& point_color = Qt::blue);
 	void drawCircles(const std::vector<osg::Vec2> &center_list, int radius);
-	void drawCircles(const vector<osg::Vec3> &circle_list, const std::vector<int> & Size_List);
-	void drawLines(const vector<Edge> & line_list);
+	void drawCircles(const std::vector<osg::Vec3> &circle_list, const std::vector<int> & Size_List);
+	void drawLines(const std::vector<Edge> & line_list);
 	void drawText(QPointF pos, QString text);
 
 	void drawGrid(SingleGrid2D* eachGrid);
@@ -20,14 +23,14 @@ public:
 	void drawGridWithFillColor(float xmin, float ymin, float xmax, float ymax, const QColor& curGridColor, int delt_x = -10, int delt_y = 32);
 
 	void drawDegreeLines(QString x_axis_name, QString y_axis_name, float base_x, float base_y, float delt_x, float delt_y);
-	
-private:
+
+ private:
 	QImage *image{nullptr};
 
-public:
+ public:
 	int origin_point_X;
-	int origin_point_Y;//×ø±êÏµÔ­µã
+	int origin_point_Y;//åæ ‡ç³»åŸç‚¹
 
-	int axis_width;//È·¶¨×ø±êÖá¿í¶ÈºÍ¸ß¶È
+	int axis_width;//ç¡®å®šåæ ‡è½´å®½åº¦å’Œé«˜åº¦
 	int axis_height;
 };

@@ -1,28 +1,29 @@
+ï»¿/* CopyrightÂ© 2022 Jack721 */
 #pragma once
 
-#include "struct.h"
-#include "osgQt.h"
-
 #include <Windows.h>
+#include <stdio.h>
+#include <pcl/io/io.h>
 
 #include <iostream>
-#include <stdio.h>
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <ostream>
 #include <iomanip>
-
-#include <pcl/io/io.h> 
-
-#include "TimerClock.h"
+#include <list>
+#include <map>
 
 #include <liblas/liblas.hpp>
 #include <liblas/reader.hpp>
 #include <liblas/writer.hpp>
 
-#include "lasreader.hpp"
-#include "laswriter.hpp"
+#include <lasreader.hpp>
+#include <laswriter.hpp>
+
+#include "TimerClock.h"
+#include "./struct.h"
+#include "osgQt.h"
 
 enum POINT_FILE_TYPE {
 	LAS = 0,
@@ -32,9 +33,8 @@ enum POINT_FILE_TYPE {
 	UNKNOWN
 };
 
-class PointCloud : public osg::Geode
-{
-private:
+class PointCloud : public osg::Geode {
+ private:
 	explicit PointCloud(osg::ref_ptr<osg::Group> root = nullptr);
 	virtual ~PointCloud();
 
@@ -42,19 +42,19 @@ private:
 	PointCloud & operator=(const PointCloud& other) = delete;
 
 	friend class PCloudManager;
-	
-private:
-	size_t point_num;//µãÊıÁ¿
+
+ private:
+	size_t point_num;//ç‚¹æ•°é‡
 	size_t point_size;
 	std::string point_name;
 
-	osg::ref_ptr<osg::Geometry> geo_point;//µãÊı¾İ¼¸ºÎÌåÖ¸Õë
+	osg::ref_ptr<osg::Geometry> geo_point;//ç‚¹æ•°æ®å‡ ä½•ä½“æŒ‡é’ˆ
 
 	osg::ref_ptr<osg::Geode> geo_bounding_node;
 
 	osg::ref_ptr<osg::Geode> geo_octree_node;
 
-	osg::ref_ptr<osg::Geometry> geo_bounding_box;//Íâ½Ó¾ØĞÎ¿ò¼¸ºÎÌåÖ¸Õë
+	osg::ref_ptr<osg::Geometry> geo_bounding_box;//å¤–æ¥çŸ©å½¢æ¡†å‡ ä½•ä½“æŒ‡é’ˆ
 
 	bool hasBuildBox{false};
 
@@ -66,21 +66,21 @@ private:
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr m_loadCloud;
 
-private:
-	void clearData();		
+ private:
+    void clearData();
 
 	void initBoundingBox();
 
 	void setShowBoundingBox(bool isShow);
 
-public:
-	//»ñÈ¡¸ø¶¨µãÔÆÊı¾İµÄ×î´ó×îĞ¡·¶Î§
+ public:
+	//è·å–ç»™å®šç‚¹äº‘æ•°æ®çš„æœ€å¤§æœ€å°èŒƒå›´
 	point_MAXMIN* getMinMaxXYZ_POINTS();
 
 	template <typename type>
 	auto getVertArry() {
 		if (geo_point == nullptr) {
-			return (type *)nullptr;
+			return static_cast<type *>(nullptr);
 		}
 		return dynamic_cast<type *>(geo_point->getVertexArray());
 	}
@@ -100,27 +100,27 @@ public:
 
 	void setName(const std::string & fullName) {
 		point_name = fullName;
-	};
+	}
 
 	void setType(POINT_FILE_TYPE fileType) {
 		m_Type = fileType;
-	};
+	}
 
 	POINT_FILE_TYPE getType() {
 		return m_Type;
-	};
+	}
 
 	const std::string & getName() {
 		return point_name;
-	};
+	}
 
 	void setPointNum(size_t num) {
 		point_num = num;
-	};
+	}
 
 	const size_t getPointNum() {
 		return point_num;
-	};
+	}
 
 	const size_t getPointSize() {
 		return point_size;
@@ -132,7 +132,7 @@ public:
 
 	void setPointColor(const QColor & color) {
 		if (geo_point) {
-			osg::ref_ptr<osg::Vec4Array> colorList = new osg::Vec4Array;//´´½¨ÑÕÉ«Êı×é,ÄæÊ±ÕëÅÅĞò
+			osg::ref_ptr<osg::Vec4Array> colorList = new osg::Vec4Array;//åˆ›å»ºé¢œè‰²æ•°ç»„,é€†æ—¶é’ˆæ’åº
 			osg::Vec4 new_color(color.red() / 255., color.green() / 255., color.blue() / 255., color.alpha() / 255.);
 			colorList->push_back(new_color);
 
@@ -170,8 +170,8 @@ public:
 };
 
 class PCloudManager {
-private:
-	PCloudManager(osg::ref_ptr<osg::Group> root = nullptr);
+ private:
+	explicit PCloudManager(osg::ref_ptr<osg::Group> root = nullptr);
 
 	~PCloudManager();
 
@@ -179,7 +179,7 @@ private:
 
 	PCloudManager & operator=(const PCloudManager& other) = delete;
 
-public:
+ public:
 	static PCloudManager * Instance(osg::ref_ptr<osg::Group> root = nullptr) {
 		static PCloudManager instance(root);
 		return &instance;
@@ -213,7 +213,7 @@ public:
 
 	void setSelectPointColor(const QColor & color);
 
-public:
+ public:
 	osg::ref_ptr<osg::Group> m_root;
 	std::map<std::string, PointCloud*> all_pcloud_map;
 	std::list<PointCloud*> selected_pcloud_list;

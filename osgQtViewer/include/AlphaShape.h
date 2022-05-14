@@ -1,24 +1,25 @@
+ï»¿/* CopyrightÂ© 2022 Jack721 */
 #pragma once
 #include <Windows.h>
 #include <math.h>
+#include <osg/Array>
+
 #include <vector>
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
 #include <algorithm>
-#include <osg/Array>
 #include <bitset>
 #include <climits>
 #include <set>
 #include <mutex>
 #include <thread>
 
-#include "struct.h"
+#include "./struct.h"
 
-using namespace std;
 typedef std::vector<osg::Vec2> PointV2List;
 
-//¼ì²â±ß½çÏßµÄĞÅÏ¢
+// æ£€æµ‹è¾¹ç•Œçº¿çš„ä¿¡æ¯
 struct Edge {
 	osg::Vec2 point_A;
 	osg::Vec2 point_B;
@@ -33,19 +34,17 @@ struct Edge {
 		if ((((*this).point_A - other.point_A).length() < 0.000001) &&
 			(((*this).point_B - other.point_B).length() < 0.000001)) {
 			return false;
-		}
-		else {
+		} else {
 			if (((*this).point_A - other.point_A).length() > 0.000001) {
 				return (*this).point_A.length() < other.point_A.length();
-			}
-			else {
+			} else {
 				return (*this).point_B.length() < other.point_B.length();
 			}
 		}
 	}
 };
 
-//¼ì²âÔ²µÄĞÅÏ¢
+// æ£€æµ‹åœ†çš„ä¿¡æ¯
 struct Circle {
 	osg::Vec2 m_center;
 	float m_radius;
@@ -68,20 +67,17 @@ struct Circle {
 		if ((((*this).m_center - other.m_center).length() < 0.000001) &&
 			(((*this).m_radius - other.m_radius) < 0.000001)) {
 			return false;
-		}
-		else {
+		} else {
 			if (((*this).m_center - other.m_center).length() > 0.000001) {
 				return ((*this).m_center.length() < other.m_center.length());
-			}
-			else{
+			} else {
 				return ((*this).m_radius < other.m_radius);
 			}
-		}		
+       }
 	}
-
 };
 
-//µ¥Ò»Íø¸ñµÄĞÅÏ¢
+// å•ä¸€ç½‘æ ¼çš„ä¿¡æ¯
 struct GridInfo {
 	float Min_X;
 	float Min_Y;
@@ -98,173 +94,173 @@ struct GridInfo {
 	GridInfo() = default;
 };
 
-//µ¥¸ö¶şÎ¬Íø¸ñÀà
+// å•ä¸ªäºŒç»´ç½‘æ ¼ç±»
 class SingleGrid2D {
-public:
-	//¸ù¾İÍø¸ñ³¤¿íÉú³É
+ public:
+	// æ ¹æ®ç½‘æ ¼é•¿å®½ç”Ÿæˆ
 	SingleGrid2D(float Grid_X, float Grid_Y);
 
-	//¸ù¾İÍø¸ñĞÅÏ¢Éú³É
-	SingleGrid2D(const GridInfo &curGrid);
+	// æ ¹æ®ç½‘æ ¼ä¿¡æ¯ç”Ÿæˆ
+	explicit SingleGrid2D(const GridInfo &curGrid);
 
-public:
-	//Íø¸ñÄÚº¬ÓĞµÄµãÁĞ±í
+ public:
+	// ç½‘æ ¼å†…å«æœ‰çš„ç‚¹åˆ—è¡¨
 	PointV2List PointList;
 
-	//Íø¸ñÄÚµÄµãÊıÁ¿
+	// ç½‘æ ¼å†…çš„ç‚¹æ•°é‡
 	unsigned int cur_PointNum;
 
-	//µ±Ç°Íø¸ñÓëÁÚÓòÍø¸ñµÄÆ½¾ùÖĞĞÄµãµÄÏòÁ¿ÁĞ±í
+	// å½“å‰ç½‘æ ¼ä¸é‚»åŸŸç½‘æ ¼çš„å¹³å‡ä¸­å¿ƒç‚¹çš„å‘é‡åˆ—è¡¨
 	std::vector<osg::Vec2> VectorList;
 
-	//ÊÇ·ñº¬ÓĞµã
+	// æ˜¯å¦å«æœ‰ç‚¹
 	bool hasPoint;
 
-	//µ±Ç°Íø¸ñÄÚµãµÄ¸ß³Ì²îÖµ
+	// å½“å‰ç½‘æ ¼å†…ç‚¹çš„é«˜ç¨‹å·®å€¼
 	float heightDifference;
 
-	//µ±Ç°Íø¸ñµÄÖÜÎ§°ËÁÚÓòÍø¸ñÊÇ·ñ¾ùº¬ÓĞµã£¬¼´±íÊ¾µ±Ç°Íø¸ñÊÇ·ñÎªÄÚ²¿Íø¸ñ
+	// å½“å‰ç½‘æ ¼çš„å‘¨å›´å…«é‚»åŸŸç½‘æ ¼æ˜¯å¦å‡å«æœ‰ç‚¹ï¼Œå³è¡¨ç¤ºå½“å‰ç½‘æ ¼æ˜¯å¦ä¸ºå†…éƒ¨ç½‘æ ¼
 	bool nearByGridAllWithpoint;
 
-	//ÊÇ·ñ±»¼ì²â¹ı
+	// æ˜¯å¦è¢«æ£€æµ‹è¿‡
 	bool hasDetected;
 
-	//ÊÇ·ñÎªÆ½»¬Íø¸ñ
+	// æ˜¯å¦ä¸ºå¹³æ»‘ç½‘æ ¼
 	bool isSmoothGrid;
 
-	//µ±Ç°Íø¸ñµÄÆ½»¬¶È£¬Ô½Æ½»¬ÖµÔ½Ğ¡
+	// å½“å‰ç½‘æ ¼çš„å¹³æ»‘åº¦ï¼Œè¶Šå¹³æ»‘å€¼è¶Šå°
 	int SmoothDegree;
 
-	//µ±Ç°Íø¸ñÄÚµãµÄÆ½¾ù¼¸ºÎÖĞĞÄµã
+	// å½“å‰ç½‘æ ¼å†…ç‚¹çš„å¹³å‡å‡ ä½•ä¸­å¿ƒç‚¹
 	osg::Vec2 CenterPoint;
 
-	//µ±Ç°Íø¸ñÓëÁÚÓòÍø¸ñµÄºÏÏòÁ¿
+	// å½“å‰ç½‘æ ¼ä¸é‚»åŸŸç½‘æ ¼çš„åˆå‘é‡
 	osg::Vec2 curVectorGrid;
 
-	//ÁÚÓòÍø¸ñµÄIDÖµÁĞ±í
+	// é‚»åŸŸç½‘æ ¼çš„IDå€¼åˆ—è¡¨
 	std::vector<int> connectGridID_List;
 
-	//µ±Ç°Íø¸ñµÄÍø¸ñĞÅÏ¢
+	// å½“å‰ç½‘æ ¼çš„ç½‘æ ¼ä¿¡æ¯
 	GridInfo curGridInfo;
 };
 
-//¶şÎ¬¸ñÍøÀà
+// äºŒç»´æ ¼ç½‘ç±»
 class GridNet {
-public:
-	//¸ù¾İµãÔÆÉú³Éµ±Ç°µÄ¶şÎ¬Íø¸ñ
-	GridNet(const PointV2List & pList);
+ public:
+	// æ ¹æ®ç‚¹äº‘ç”Ÿæˆå½“å‰çš„äºŒç»´ç½‘æ ¼
+	explicit GridNet(const PointV2List & pList);
 
-public:
-	//ËùÓĞµãµÄÁĞ±í
+ public:
+	// æ‰€æœ‰ç‚¹çš„åˆ—è¡¨
 	PointV2List Points_List;
 
-	//ËùÓĞ¶şÎ¬Íø¸ñÁĞ±í
+	// æ‰€æœ‰äºŒç»´ç½‘æ ¼åˆ—è¡¨
 	std::vector<SingleGrid2D*> Grid_list;
 
-	//Ô­Ê¼µãÔÆµÄ·¶Î§ĞÅÏ¢
+	// åŸå§‹ç‚¹äº‘çš„èŒƒå›´ä¿¡æ¯
 	point_MAXMIN* pointMMM;
 
-	//Íø¸ñµÄ³¤¿í
+	//ç½‘æ ¼çš„é•¿å®½
 	float Grid_X;
 	float Grid_Y;
 
-	//º¬ÓĞµãµÄÍø¸ñÊıÁ¿
+	// å«æœ‰ç‚¹çš„ç½‘æ ¼æ•°é‡
 	int GridWithPoint_Num;
 
-	//±ß½çÍø¸ñÊıÁ¿£¬¼´·ÇÄÚ²¿Íø¸ñ
+	// è¾¹ç•Œç½‘æ ¼æ•°é‡ï¼Œå³éå†…éƒ¨ç½‘æ ¼
 	int GridOutside_Num;
 
-	//Íø¸ñÊıÁ¿ÒÔ¼°ĞĞÁĞÊı
+	// ç½‘æ ¼æ•°é‡ä»¥åŠè¡Œåˆ—æ•°
 	unsigned int Grid_Num;
 	unsigned int Col_Num;
 	unsigned int Row_Num;
 
-	//µ¥Ò»Íø¸ñÄÚº¬ÓĞµãµÄ×î´ó¡¢×îĞ¡Öµ
+	// å•ä¸€ç½‘æ ¼å†…å«æœ‰ç‚¹çš„æœ€å¤§ã€æœ€å°å€¼
 	int MaxPointNum_InOneGrid;
 	int MinPointNum_InOneGrid;
 
-	//Íø¸ñµÄ×î´ó¡¢×îĞ¡ºÏÏòÁ¿¾àÀë
+	// ç½‘æ ¼çš„æœ€å¤§ã€æœ€å°åˆå‘é‡è·ç¦»
 	float MaxVector_Grid;
 	float MinVector_Grid;
 
-public:
-	//¸ù¾İÉè¶¨µÄÍø¸ñ³¤¿íÉú³É¶şÎ¬¸ñÍø
+ public:
+	// æ ¹æ®è®¾å®šçš„ç½‘æ ¼é•¿å®½ç”ŸæˆäºŒç»´æ ¼ç½‘
 	void buildNetBySize(float SizeX, float SizeY);
 
-	//¸ù¾İÉè¶¨µÄÍø¸ñĞĞÁĞÊıÉú³É¶şÎ¬¸ñÍø
+	// æ ¹æ®è®¾å®šçš„ç½‘æ ¼è¡Œåˆ—æ•°ç”ŸæˆäºŒç»´æ ¼ç½‘
 	void buildNetByNum(int RowNum, int ColNum);
 
-	//ÅĞ¶Ïµ±Ç°Ä³µãÊÇ·ñ´¦ÓÚÄ³Ò»Íø¸ñÖĞ
+	// åˆ¤æ–­å½“å‰æŸç‚¹æ˜¯å¦å¤„äºæŸä¸€ç½‘æ ¼ä¸­
 	bool isPointInGrid(const osg::Vec2 &curPoint, SingleGrid2D *test_Grid);
 
-	//»ñÈ¡Íø¸ñµÄµãµÄÆ½¾ùÖĞĞÄµã
+	// è·å–ç½‘æ ¼çš„ç‚¹çš„å¹³å‡ä¸­å¿ƒç‚¹
 	[[deprecated]] void getCenterPoint();
 
-	//»ñÈ¡Íâ²¿Íø¸ñµÄºÏÏòÁ¿
+	// è·å–å¤–éƒ¨ç½‘æ ¼çš„åˆå‘é‡
 	void getVectorOfOutSideGrid();
 
-	//¼ÆËãÍâ²¿Íø¸ñµÄÆ½»¬¶È
+	// è®¡ç®—å¤–éƒ¨ç½‘æ ¼çš„å¹³æ»‘åº¦
 	void DetectSmoothForOutSideGrid();
 
-	//¸ù¾İÍø¸ñµÄĞĞÁĞºÅ»ñÈ¡¸ÃÍø¸ñÖ¸Õë
+	// æ ¹æ®ç½‘æ ¼çš„è¡Œåˆ—å·è·å–è¯¥ç½‘æ ¼æŒ‡é’ˆ
 	SingleGrid2D* getGridByRowAndCol(int RowID, int ColID);
 
-	//¼ì²â¶şÎ¬¸ñÍøÖĞÍø¸ñµÄÁ¬Í¨ĞÔ£¬´Ó¶øÇø·ÖÍâ²¿ºÍÄÚ²¿Íø¸ñ
+	// æ£€æµ‹äºŒç»´æ ¼ç½‘ä¸­ç½‘æ ¼çš„è¿é€šæ€§ï¼Œä»è€ŒåŒºåˆ†å¤–éƒ¨å’Œå†…éƒ¨ç½‘æ ¼
 	void detectGridWithConnection();
 };
 
-//Alpha ShapËã·¨
+// Alpha Shapç®—æ³•
 class AlphaShape {
-public:
-	AlphaShape(const std::vector<osg::Vec2> &point_list);
-	AlphaShape(GridNet * curGridNet);
+ public:
+	explicit AlphaShape(const std::vector<osg::Vec2> &point_list);
+	explicit AlphaShape(GridNet * curGridNet);
 	~AlphaShape();
 
-public:
-	//¸ù¾İÉèÖÃµÄ°ë¾¶£¬¼ì²âµãÔÆ±ß½çÏß£¬Ä¬ÈÏµÄ³£¹æËã·¨£¬½«ÅĞ¶ÏËùÓĞµã£¬Ğ§ÂÊ½ÏÂı
+ public:
+	// æ ¹æ®è®¾ç½®çš„åŠå¾„ï¼Œæ£€æµ‹ç‚¹äº‘è¾¹ç•Œçº¿ï¼Œé»˜è®¤çš„å¸¸è§„ç®—æ³•ï¼Œå°†åˆ¤æ–­æ‰€æœ‰ç‚¹ï¼Œæ•ˆç‡è¾ƒæ…¢
 	void Detect_Shape_line(float radius);
 
-	//¶àÏß³Ì¼ì²â
+	// å¤šçº¿ç¨‹æ£€æµ‹
 	void Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threadNum = 2);
 
-	//¸ù¾İÉú³ÉµÄÍø¸ñ¶ÔÄ¬ÈÏËã·¨½øĞĞÓÅ»¯£¬¼ì²âÁÚÓòÓòÍø¸ñÄÚµÄµã£¬²¢²»ÅĞ¶ÏËùÓĞµÄµã
+	// æ ¹æ®ç”Ÿæˆçš„ç½‘æ ¼å¯¹é»˜è®¤ç®—æ³•è¿›è¡Œä¼˜åŒ–ï¼Œæ£€æµ‹é‚»åŸŸåŸŸç½‘æ ¼å†…çš„ç‚¹ï¼Œå¹¶ä¸åˆ¤æ–­æ‰€æœ‰çš„ç‚¹
 	void Detect_Alpha_Shape_by_Grid(float radius);
 
-	//¸ù¾İÉú³ÉµÄÍø¸ñºÍ°ë¾¶£¬ÒÔ¼°ÁÚÓòµãÔÆ¼ì²â±ß½çÏß£¬´«µİÖµÎªÍø¸ñÁĞ±í
+	// æ ¹æ®ç”Ÿæˆçš„ç½‘æ ¼å’ŒåŠå¾„ï¼Œä»¥åŠé‚»åŸŸç‚¹äº‘æ£€æµ‹è¾¹ç•Œçº¿ï¼Œä¼ é€’å€¼ä¸ºç½‘æ ¼åˆ—è¡¨
 	void Detect_Shape_line_by_Grid_New(float radius, const std::vector<SingleGrid2D*> & allGridList);
 
-	//¸ù¾İÉú³ÉµÄÍø¸ñºÍ°ë¾¶¼ì²â±ß½ç(ĞÂ)
+	// æ ¹æ®ç”Ÿæˆçš„ç½‘æ ¼å’ŒåŠå¾„æ£€æµ‹è¾¹ç•Œ(æ–°)
 	void Detect_Shape_By_GridNet_New(float radius);
 
-	//¸ù¾İ°ü¹üÔ²£¬Í¨¹ıÂäµãÊıÁ¿ºÍµãµÄ·Ö²¼½Ç¶È£¬¼ì²â±ß½çµã
+	// æ ¹æ®åŒ…è£¹åœ†ï¼Œé€šè¿‡è½ç‚¹æ•°é‡å’Œç‚¹çš„åˆ†å¸ƒè§’åº¦ï¼Œæ£€æµ‹è¾¹ç•Œç‚¹
 	void Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius, int pointNum);
 
-	//¸ù¾İ°ü¹üÔ²£¬½ö½öÍ¨¹ıÂäµãÊıÁ¿£¬¼ì²â±ß½çµã
+	// æ ¹æ®åŒ…è£¹åœ†ï¼Œä»…ä»…é€šè¿‡è½ç‚¹æ•°é‡ï¼Œæ£€æµ‹è¾¹ç•Œç‚¹
 	void Detect_Shape_By_PackCirlce(GridNet* curGridNet, float radius, int pointMaxNum);
-	
-public:
-	//ÓÃÓÚ¼ì²âµÄµãÁĞ±í
+
+ public:
+	// ç”¨äºæ£€æµ‹çš„ç‚¹åˆ—è¡¨
 	std::vector<osg::Vec2> m_points;
 
-	//ÓÃÓÚ¼ì²âµÄ¸ñÍøÖ¸Õë
+	// ç”¨äºæ£€æµ‹çš„æ ¼ç½‘æŒ‡é’ˆ
 	GridNet * m_gridNet{nullptr};
 
-	//ÂÖÀªµã
+	// è½®å»“ç‚¹
 	std::vector<osg::Vec2> m_shape_points;
 
-	//ÂÖÀªµã¶ÔÓ¦µÄµãID
+	// è½®å»“ç‚¹å¯¹åº”çš„ç‚¹ID
 	std::vector<int> m_shape_id;
 
-	//ÂÖÀªÏßÁĞ±í
+	// è½®å»“çº¿åˆ—è¡¨
 	std::vector<Edge> m_edges;
 
-	//¼ì²âÔ²ÁĞ±í
+	// æ£€æµ‹åœ†åˆ—è¡¨
 	std::vector<Circle> m_circles;
 
-	//³õÊ¼µÄ¼ì²â°ë¾¶
+	// åˆå§‹çš„æ£€æµ‹åŠå¾„
 	float m_radius;
-	
-	//·ûºÏ¼ì²â°ë¾¶µÄµã¶Ô±ÈÀı
+
+	// ç¬¦åˆæ£€æµ‹åŠå¾„çš„ç‚¹å¯¹æ¯”ä¾‹
 	float point_pair_scale;
 
 	int m_point_pair_N;

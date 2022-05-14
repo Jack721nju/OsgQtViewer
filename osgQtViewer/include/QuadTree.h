@@ -1,33 +1,34 @@
+ï»¿/* CopyrightÂ© 2022 Jack721 */
 #pragma once
 
 #include <QPoint>
 #include <vector>
 
-#include "struct.h"
+#include "./struct.h"
 
-//¶¨ÒåËÄ²æÊ÷½ÚµãÀà
+//å®šä¹‰å››å‰æ ‘èŠ‚ç‚¹ç±»
 class QuadTreeNode {
-public:
+ public:
 	QuadTreeNode() : m_depth(0), m_point_num(0) {}
 
 	~QuadTreeNode() = default;
 
-public:
-	//½ÚµãÉî¶È
+ public:
+	//èŠ‚ç‚¹æ·±åº¦
 	int m_depth;
 
 	static int maxTreeDepth;
 
 	static int minPointNumPerGrid;
 
-	//½Úµã×ø±ê
+	//èŠ‚ç‚¹åæ ‡
 	point2D_MAXMIN m_XY_Size;
 
-	//Íø¸ñÖĞĞÄ×ø±ê
+	//ç½‘æ ¼ä¸­å¿ƒåæ ‡
 	float m_CenterX;
 	float m_CenterY;
 
-	//Íø¸ñ³ß´ç
+	//ç½‘æ ¼å°ºå¯¸
 	float m_SizeX;
 	float m_SizeY;
 
@@ -43,9 +44,9 @@ public:
 	QuadTreeNode * m_bottom_left{ nullptr };
 	QuadTreeNode * m_bottom_right{ nullptr };
 
-public:
+ public:
 	static void createQuadTree(QuadTreeNode* &rootNode, int treeDepth, const std::vector<QPointF> &point_list, float m_CenterX, float m_CenterY, float m_SizeX, float m_SizeY);
-	
+
 	static void getMaxDepQuadNode(QuadTreeNode* curNode, std::vector<QuadTreeNode*> &node_list);
 
 	static void getAllQuadNode(QuadTreeNode* curNode, std::vector<QuadTreeNode*> &node_list);

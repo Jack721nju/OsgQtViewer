@@ -1,3 +1,4 @@
+﻿/* Copyright© 2022 Jack721 */
 #pragma once
 
 #include <QTimer>
@@ -17,31 +18,33 @@
 #include <QMutex>
 
 #include <atomic>
+#include <string>
+
 #include "PointCloud.h"
 
 class WorkerThread : public QThread {
 	Q_OBJECT
 
-public:
+ public:
 	explicit WorkerThread(osg::ref_ptr<PointCloud> Pcloud, int minValue = 0, int maxValue = 100, QObject *parent = nullptr);
 	~WorkerThread();
 
-protected:
+ protected:
 	virtual void run();
 
 	void runTxt();
 
 	void runLas();
 
-public slots :
+ public slots :
 	void updateRate();
 
 	void stopRun();
 
-signals:
+ signals:
 	void signal_ProgressVal(int);
 
-private:
+ private:
 	osg::ref_ptr<PointCloud> readPcloud;
 
 	std::string fileName;
@@ -53,37 +56,41 @@ private:
 	int m_MaxRateValue;
 
 	bool b_Stop;
-
-
 };
 
 class MyQtWorker : public QObject {
 	Q_OBJECT
 
-public:
+ public:
 	MyQtWorker(osg::ref_ptr<PointCloud> Pcloud, const std::string & fileName);
+
 	~MyQtWorker();
 
 	void start();
 
 	void setReadFileName(const std::string & fileName) {
 		m_fileName = fileName;
-	};
+	}
 
 	static int m_rate;
 
-private:
+ private:
 	QThread m_thread;
+
 	std::string m_fileName;
+
 	PointCloud * m_Pcloud;
 
 	QTimer * m_timer;
 
-signals:
+ signals:
 	void progress(int m_rate);
+
 	void done();
 
 	public slots:
+
 	void doMyJob();
+
 	void updateRate();
 };

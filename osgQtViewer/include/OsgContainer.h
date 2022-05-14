@@ -1,6 +1,5 @@
-#ifndef OSGCONTAINER_H
-#define OSGCONTAINER_H
-
+﻿/* Copyright© 2022 Jack721 */
+#pragma once
 #include <QOpenGLWidget>
 #include <osgViewer/Viewer>
 
@@ -9,7 +8,7 @@ class QInputEvent;
 class OsgContainer : public QOpenGLWidget, public osgViewer::Viewer {
 	Q_OBJECT
 
-public:
+ public:
 	explicit OsgContainer(QWidget *parent = 0);
 	~OsgContainer();
 
@@ -37,15 +36,14 @@ public:
 		root = curRoot;
 	}
 
-protected:
+ protected:
 	virtual void paintGL();
 
-private:
+ private:
 	void init3D();
 	osg::ref_ptr<osg::Camera> createCamera(int x, int y, int w, int h);
 
-private:
+ private:
 	osg::ref_ptr<osg::Group> root;
 	osgViewer::GraphicsWindow *window;
 };
-#endif // OSGCONTAINER_H

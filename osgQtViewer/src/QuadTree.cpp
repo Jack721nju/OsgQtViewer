@@ -2,8 +2,8 @@
 #include <math.h>
 #include <vector>
 
-const int minPointNumPerGrid = 10;
-const int maxTreeDepth = 6;
+int QuadTreeNode::minPointNumPerGrid = 10;
+int QuadTreeNode::maxTreeDepth = 6;
 
 using namespace std;
 

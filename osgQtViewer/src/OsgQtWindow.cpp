@@ -1458,7 +1458,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	ProjectToXY_dialog->setWindowModality(Qt::WindowModal);
 	ProjectToXY_dialog->setAttribute(Qt::WA_DeleteOnClose);
 	//背景窗口范围
-	ProjectToXY_dialog->setFixedSize(1000, 660);
+	ProjectToXY_dialog->setFixedSize(1200, 660);
 
 	//在背景窗口上新建绘图区
 	Project_widget = new PaintArea(ProjectToXY_dialog);
@@ -1630,12 +1630,47 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	grid_layout->addWidget(detect_shape_using_GridNet, 0);
 	grid_layout->addStretch(8);
 	grid_tab_widget->setLayout(grid_layout);
-	
+
+	QWidget * quad_tab_widget = new QWidget();
+	QVBoxLayout * quad_layout = new QVBoxLayout();
+	{
+		QPushButton * build_quad_tree = new QPushButton("Build", ProjectToXY_dialog);
+		build_quad_tree->setFixedSize(100, 30);
+		connect(build_quad_tree, SIGNAL(clicked()), this, SLOT(slot_BuildQuadGridForPoints()));
+
+		QLabel *m_label_Quad_Tree_maxDepth = new QLabel(ProjectToXY_dialog);
+		m_label_Quad_Tree_maxDepth->setText("Max Depth:");
+		m_label_Quad_Tree_maxDepth->setFixedSize(100, 30);
+
+		m_Quad_Tree_maxDepth = new QLineEdit(ProjectToXY_dialog);
+		m_Quad_Tree_maxDepth->setFixedSize(100, 30);
+
+		QLabel *m_label_Quad_minPointNum = new QLabel(ProjectToXY_dialog);
+		m_label_Quad_minPointNum->setText("Point Num:");
+		m_label_Quad_minPointNum->setFixedSize(100, 30);
+
+		m_Quad_minPointNum = new QLineEdit(ProjectToXY_dialog);
+		m_Quad_minPointNum->setFixedSize(100, 30);
+
+		quad_layout->addStretch(0);
+		quad_layout->addWidget(m_label_Quad_Tree_maxDepth, 0);
+		quad_layout->addStretch(0);
+		quad_layout->addWidget(m_Quad_Tree_maxDepth, 0);
+		quad_layout->addStretch(0);
+		quad_layout->addWidget(m_label_Quad_minPointNum, 0);
+		quad_layout->addStretch(0);
+		quad_layout->addWidget(m_Quad_minPointNum, 0);
+		quad_layout->addStretch(1);
+		quad_layout->addWidget(build_quad_tree, 0);
+		quad_layout->addStretch(8);
+		quad_tab_widget->setLayout(quad_layout);
+	}
 
 	QTabWidget * project_Tab_Widget = new QTabWidget();
-	project_Tab_Widget->setFixedSize(300, 600);
+	project_Tab_Widget->setFixedSize(360, 600);
 	project_Tab_Widget->addTab(alpha_tab_widget, QString("Alpha Shape"));
 	project_Tab_Widget->addTab(grid_tab_widget, QString("Grid Shape"));
+	project_Tab_Widget->addTab(quad_tab_widget, QString("Quad Shape"));
 
 	QVBoxLayout *VV_layout = new QVBoxLayout();
 	VV_layout->addWidget(project_Tab_Widget);
@@ -1833,6 +1868,86 @@ void OsgQtTest::slot_DetectPointShape() {
 	}
 
 	outf.close();
+}
+
+void OsgQtTest::slot_BuildQuadGridForPoints() {
+	if (this->pointlist_bulidGrid2D.size() < 1) {
+		this->AddToConsoleSlot("No projected points! \n");
+		return;
+	}
+
+	if (nullptr == m_Quad_Tree_maxDepth && nullptr == m_Quad_minPointNum) {
+		this->AddToConsoleSlot("Input max depth or min point num! \n");
+	}
+
+	PaintArea *Project_widget_grid_net = new PaintArea();
+	Project_widget_grid_net->setFixedSize(660, 660);
+	Project_widget_grid_net->setAttribute(Qt::WA_DeleteOnClose);
+	Project_widget_grid_net->setVisible(true);
+	Project_widget_grid_net->setWindowTitle(tr("Quad Grid"));
+
+	_timerClock.start();
+
+	int delt_x = -10, delt_y = 32;
+	int allPointNum = pointlist_bulidGrid2D.size();
+	QPointF *all_point = new QPointF[allPointNum];
+	int pointID = -1;
+
+	vector<QPointF> QpointList;
+
+	for (const auto & curP : pointlist_bulidGrid2D) {
+		QPointF curP(curP.x() + delt_x, curP.y() + delt_y);
+		all_point[++pointID] = curP;
+		QpointList.emplace_back(curP);
+	}
+
+	QuadTreeNode * rootNode = new QuadTreeNode();
+	if (m_Quad_Tree_maxDepth) {
+		if (m_Quad_Tree_maxDepth->text().toInt() > 0) {
+			QuadTreeNode::setMaxDepth(m_Quad_Tree_maxDepth->text().toInt());
+		}
+	}
+
+	if (m_Quad_minPointNum) {
+		if (m_Quad_minPointNum->text().toInt() > 0) {
+			QuadTreeNode::setMinPointNum(m_Quad_minPointNum->text().toInt());
+		}
+	}
+
+	point2D_MAXMIN curSize = QuadTreeNode::getMinMaxXY(QpointList);
+	QuadTreeNode::createQuadTree(rootNode, 0, QpointList, (curSize.xmin + curSize.xmax) * 0.5, (curSize.ymin + curSize.ymax) * 0.5, curSize.xmax - curSize.xmin, curSize.ymax - curSize.ymin);
+	
+	std::vector<QuadTreeNode*> node_list;
+	QuadTreeNode::getMaxDepQuadNode(rootNode, node_list);
+
+	std::vector<QuadTreeNode*> all_node_list;
+	QuadTreeNode::getAllQuadNode(rootNode, all_node_list);
+	
+	//绘制所有离散点云,离散点默认颜色为纯黑色
+	Project_widget_grid_net->drawPoints(all_point, allPointNum, 1, QColor(0, 0, 0, 125));
+
+	QColor new_color(0, 0, 0, 0);
+
+	//for (const auto & curNode : node_list) {
+	//	new_color.setRgb(125, 0, 0, 125);
+	//	Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color, 0, 0);
+	//}
+
+	for (const auto & curNode : all_node_list) {
+		new_color.setRgb(20 + curNode->m_depth * 40, 0, 0, 25);
+		if (curNode->m_point_num < 1) {
+			new_color.setRgb(0, 0, 0, 0);
+		}
+		if (curNode->m_isSonNode) {
+			new_color.setRgb(125, 0, 0, 125);
+		}
+		Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color, 0, 0);
+	}
+	
+	//计算四叉树格网的总耗时
+	float runTimeAll = _timerClock.getTime<Ms>() / 1000.0;
+	const QString & cost_timeAll = QString::number(runTimeAll);
+	this->AddToConsoleSlot(QString("The all cost time of building 2D grid net is :  ") + cost_timeAll + QString("s"));
 }
 
 void OsgQtTest::slot_Build2DGridForPoints() {

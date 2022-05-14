@@ -16,6 +16,10 @@ public:
 	//节点深度
 	int m_depth;
 
+	static int maxTreeDepth;
+
+	static int minPointNumPerGrid;
+
 	//节点坐标
 	point2D_MAXMIN m_XY_Size;
 
@@ -47,4 +51,12 @@ public:
 	static void getAllQuadNode(QuadTreeNode* curNode, std::vector<QuadTreeNode*> &node_list);
 
 	static point2D_MAXMIN getMinMaxXY(const std::vector<QPointF> & all_list);
+
+	static void setMaxDepth(int depth) {
+		maxTreeDepth = depth;
+	}
+
+	static void setMinPointNum(int pNum) {
+		minPointNumPerGrid = pNum;
+	}
 };

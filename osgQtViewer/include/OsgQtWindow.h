@@ -119,6 +119,10 @@ private:
 	
 	QLineEdit *m_Octree_size;
 
+	QLineEdit *m_Quad_Tree_maxDepth;
+
+	QLineEdit *m_Quad_minPointNum;
+
 private:
 	void AddToConsoleSlot(const QString& show_text);
 
@@ -179,6 +183,8 @@ public slots:
 	void slot_DetectPointShape();
 
 	void slot_Build2DGridForPoints();
+
+	void slot_BuildQuadGridForPoints();
 
 	void slot_DetectPointShapeUsingGridNet();
 

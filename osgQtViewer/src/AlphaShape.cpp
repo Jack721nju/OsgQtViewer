@@ -1,5 +1,6 @@
 ﻿/* Copyright© 2022 Jack721 */
 #include "AlphaShape.h"
+#include <math.h>
 
 // 用于多线程处理
 static std::mutex all_mutex;
@@ -14,7 +15,6 @@ static bool checkPointSame(osg::Vec2 pointA, osg::Vec2 pointB) {
 	}
 	return false;
 }
-
 
 // 获取给定点云数据的XY最大最小范围
 point_MAXMIN* getMinMaxXYZ(const PointV2List & all_list) {

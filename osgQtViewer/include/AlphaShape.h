@@ -1,7 +1,6 @@
 ﻿/* Copyright© 2022 Jack721 */
 #pragma once
 #include <Windows.h>
-#include <math.h>
 #include <osg/Array>
 
 #include <vector>

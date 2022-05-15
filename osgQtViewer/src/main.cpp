@@ -7,7 +7,8 @@ int main(int argc, char* argv[]) {
 	const Json::Value &curValue = JsonMgr::getReadValue();
 
 	std::string &iconPath = curValue["IconPath"].asString();
-	QPixmap loadingMap(QString::fromStdString(iconPath.append("Load/loading.png")));
+	QString mapPath(iconPath.append("Load/loading.png").c_str());
+	QPixmap loadingMap(mapPath);
 	QSplashScreen splash(loadingMap);
 	splash.show();
 	a.processEvents();

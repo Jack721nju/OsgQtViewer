@@ -32,7 +32,7 @@ class QuadTreeNode {
 	float m_SizeX;
 	float m_SizeY;
 
-	int m_tree_Index;
+	int m_tree_Index{0};
 	int m_point_num;
 
 	bool m_isSonNode{false};
@@ -45,7 +45,9 @@ class QuadTreeNode {
 	QuadTreeNode * m_bottom_right{ nullptr };
 
  public:
-	static void createQuadTree(QuadTreeNode* &rootNode, int treeDepth, const std::vector<QPointF> &point_list, float m_CenterX, float m_CenterY, float m_SizeX, float m_SizeY);
+	static void createQuadTree(QuadTreeNode* &curNode, int treeDepth, const std::vector<QPointF> &point_list, float m_CenterX, float m_CenterY, float m_SizeX, float m_SizeY);
+
+	static void createQuadAuto(QuadTreeNode* &rootNode, int treeDepth, const std::vector<QPointF> &point_list, float m_CenterX, float m_CenterY, float m_SizeX, float m_SizeY);
 
 	static void getMaxDepQuadNode(QuadTreeNode* curNode, std::vector<QuadTreeNode*> &node_list);
 

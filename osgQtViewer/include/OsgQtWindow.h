@@ -125,6 +125,10 @@ class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {
 
 	QLineEdit *m_Quad_minPointNum;
 
+	QRadioButton * m_Quad_depth_first_radio;
+
+	QRadioButton * m_Quad_Breadth_first_radio;
+
  private:
 	void AddToConsoleSlot(const QString& show_text);
 

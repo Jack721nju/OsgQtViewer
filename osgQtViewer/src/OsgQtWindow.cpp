@@ -1630,6 +1630,12 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	m_Quad_minPointNum = new QLineEdit(ProjectToXY_dialog);
 	m_Quad_minPointNum->setFixedSize(100, 30);
 
+	m_Quad_depth_first_radio = new QRadioButton("depth first");
+	m_Quad_depth_first_radio->setChecked(true);
+
+	m_Quad_Breadth_first_radio = new QRadioButton("breadth first");
+	m_Quad_depth_first_radio->setChecked(false);
+
 	quad_layout->addStretch(0);
 	quad_layout->addWidget(m_label_Quad_Tree_maxDepth, 0);
 	quad_layout->addStretch(0);
@@ -1639,10 +1645,13 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	quad_layout->addStretch(0);
 	quad_layout->addWidget(m_Quad_minPointNum, 0);
 	quad_layout->addStretch(1);
+	quad_layout->addWidget(m_Quad_depth_first_radio, 0);
+	quad_layout->addStretch(1);
+	quad_layout->addWidget(m_Quad_Breadth_first_radio, 0);
+	quad_layout->addStretch(1);
 	quad_layout->addWidget(build_quad_tree, 0);
 	quad_layout->addStretch(8);
 	quad_tab_widget->setLayout(quad_layout);
-
 
 	QTabWidget * project_Tab_Widget = new QTabWidget();
 	project_Tab_Widget->setFixedSize(360, 600);
@@ -1888,8 +1897,12 @@ void OsgQtTest::slot_BuildQuadGridForPoints() {
 	}
 
 	point2D_MAXMIN curSize = QuadTreeNode::getMinMaxXY(QpointList);
-	//QuadTreeNode::createQuadTree(rootNode, 0, QpointList, (curSize.xmin + curSize.xmax) * 0.5, (curSize.ymin + curSize.ymax) * 0.5, curSize.xmax - curSize.xmin, curSize.ymax - curSize.ymin);
-	QuadTreeNode::createQuadAuto(rootNode, 0, QpointList, (curSize.xmin + curSize.xmax) * 0.5, (curSize.ymin + curSize.ymax) * 0.5, curSize.xmax - curSize.xmin, curSize.ymax - curSize.ymin);
+	if (m_Quad_depth_first_radio->isChecked()) {
+		QuadTreeNode::createQuadTreeDFS(rootNode, 0, QpointList, (curSize.xmin + curSize.xmax) * 0.5, (curSize.ymin + curSize.ymax) * 0.5, curSize.xmax - curSize.xmin, curSize.ymax - curSize.ymin);
+	}
+	else if (m_Quad_Breadth_first_radio->isChecked()) {
+		QuadTreeNode::createQuadTreeBFS(rootNode, 0, QpointList, (curSize.xmin + curSize.xmax) * 0.5, (curSize.ymin + curSize.ymax) * 0.5, curSize.xmax - curSize.xmin, curSize.ymax - curSize.ymin);
+	}
 
 	std::vector<QuadTreeNode*> node_list;
 	QuadTreeNode::getMaxDepQuadNode(rootNode, node_list);

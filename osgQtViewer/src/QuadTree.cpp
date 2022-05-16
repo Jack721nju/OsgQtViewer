@@ -2,6 +2,7 @@
 #include "QuadTree.h"
 #include <math.h>
 #include <vector>
+#include <queue>
 #include <stack>
 
 int QuadTreeNode::minPointNumPerGrid = 10;
@@ -29,17 +30,18 @@ point2D_MAXMIN QuadTreeNode::getMinMaxXY(const std::vector<QPointF> & all_list) 
 	return Max_area;
 }
 
-void QuadTreeNode::createQuadAuto(QuadTreeNode* &rootNode, int treeDepth, const std::vector<QPointF> &point_list, float m_CenterX, float m_CenterY, float m_SizeX, float m_SizeY) {
-	std::stack<QuadTreeNode*> nodeList;
-	nodeList.push(rootNode);
+void QuadTreeNode::createQuadTreeBFS(QuadTreeNode* &rootNode, int treeDepth, const std::vector<QPointF> &point_list, float m_CenterX, float m_CenterY, float m_SizeX, float m_SizeY) {
+	std::queue<QuadTreeNode*> nodeList;
+	nodeList.emplace(rootNode);
 
 	float halfX = m_SizeX * 0.5;
 	float halfY = m_SizeY * 0.5;
 	rootNode->m_XY_Size = point2D_MAXMIN(m_CenterX - halfX, m_CenterY - halfY, m_CenterX + halfX, m_CenterY + halfY);
 	rootNode->m_depth = 0;
+	rootNode->point_list.assign(point_list.begin(), point_list.end());
 
 	while (!nodeList.empty()) {
-		const auto & tempNode = nodeList.top();
+		auto tempNode = nodeList.front();
 		nodeList.pop();
 
 		if (nullptr == tempNode) {
@@ -47,18 +49,19 @@ void QuadTreeNode::createQuadAuto(QuadTreeNode* &rootNode, int treeDepth, const 
 		}
 
 		const auto &xySize = tempNode->m_XY_Size;
-		int curTreeDepth = tempNode->m_depth;
+		const auto & parentNode = tempNode->parentNode;
+		if (parentNode) {
+			for (const auto & curP : parentNode->point_list) {
+				float xx = curP.x();
+				float yy = curP.y();
 
-		for (const auto & curP : point_list) {
-			float xx = curP.x();
-			float yy = curP.y();
-
-			//该点坐标超出了当前网格的坐标范围
-			if (xx < (xySize.xmin) || xx >(xySize.xmax) || yy < (xySize.ymin) || yy >(xySize.ymax)) {
-				continue;
+				//该点坐标超出了当前网格的坐标范围
+				if (xx < (xySize.xmin) || xx >(xySize.xmax) || yy < (xySize.ymin) || yy >(xySize.ymax)) {
+					continue;
+				}
+				//将点存入此节点的数据列表中
+				tempNode->point_list.emplace_back(curP);
 			}
-			//将点存入此节点的数据列表中
-			tempNode->point_list.emplace_back(curP);
 		}
 
 		tempNode->m_point_num = static_cast<int>(tempNode->point_list.size());
@@ -67,15 +70,25 @@ void QuadTreeNode::createQuadAuto(QuadTreeNode* &rootNode, int treeDepth, const 
 		//四叉树划分中止条件，网格内点达到最小值
 		if (tempNode->m_point_num < minPointNumPerGrid) {
 			tempNode->m_isSonNode = true;
+			if (parentNode) {
+				parentNode->subSonNodeIsNullNum++;
+			}
 		}
 
 		//四叉树划分中止条件，网格达到最大深度
+		auto curTreeDepth = tempNode->m_depth;
 		if (curTreeDepth > maxTreeDepth) {
 			tempNode->m_isSonNode = true;
-		}
+		}		
 
 		if (tempNode->m_isSonNode) {
 			continue;
+		}
+
+		if (parentNode) {
+			if (parentNode->subSonNodeIsNullNum >= 3) {
+				// parentNode->m_isSonNode = true;
+			}
 		}
 
 		tempNode->m_bottom_left = new QuadTreeNode();
@@ -83,30 +96,35 @@ void QuadTreeNode::createQuadAuto(QuadTreeNode* &rootNode, int treeDepth, const 
 		tempNode->m_top_left = new QuadTreeNode();
 		tempNode->m_top_right = new QuadTreeNode();
 
+		tempNode->m_bottom_left->parentNode = tempNode;
+		tempNode->m_bottom_right->parentNode = tempNode;
+		tempNode->m_top_left->parentNode = tempNode;
+		tempNode->m_top_right->parentNode = tempNode;
+
 		float soncenterX = (xySize.xmax + xySize.xmin) * 0.5;
 		float soncenterY = (xySize.ymax + xySize.ymin) * 0.5;
 
-		float sonhalfX = (xySize.xmax - xySize.xmin) * 0.25;
-		float sonhalfY = (xySize.ymax - xySize.ymin) * 0.25;
+		float sonhalfX = (xySize.xmax - xySize.xmin) * 0.5;
+		float sonhalfY = (xySize.ymax - xySize.ymin) * 0.5;
 
 		tempNode->m_bottom_left->m_XY_Size = point2D_MAXMIN(soncenterX - sonhalfX, soncenterY - sonhalfY, soncenterX, soncenterY);
-		tempNode->m_bottom_right->m_XY_Size = point2D_MAXMIN(soncenterX + sonhalfX, soncenterY - sonhalfY, soncenterX, soncenterY);
-		tempNode->m_top_left->m_XY_Size = point2D_MAXMIN(soncenterX - sonhalfX, soncenterY + sonhalfY, soncenterX, soncenterY);
-		tempNode->m_top_right->m_XY_Size = point2D_MAXMIN(soncenterX + sonhalfX, soncenterY + sonhalfY, soncenterX, soncenterY);
+		tempNode->m_bottom_right->m_XY_Size = point2D_MAXMIN(soncenterX, soncenterY - sonhalfY, soncenterX + sonhalfX, soncenterY);
+		tempNode->m_top_left->m_XY_Size = point2D_MAXMIN(soncenterX - sonhalfX, soncenterY, soncenterX, soncenterY + sonhalfY);
+		tempNode->m_top_right->m_XY_Size = point2D_MAXMIN(soncenterX, soncenterY, soncenterX + sonhalfX, soncenterY + sonhalfY);
 
 		tempNode->m_bottom_left->m_depth = curTreeDepth + 1;
 		tempNode->m_bottom_right->m_depth = curTreeDepth + 1;
 		tempNode->m_top_left->m_depth = curTreeDepth + 1;
 		tempNode->m_top_right->m_depth = curTreeDepth + 1;
 
-		nodeList.push(tempNode->m_bottom_left);
-		nodeList.push(tempNode->m_bottom_right);
-		nodeList.push(tempNode->m_top_left);
-		nodeList.push(tempNode->m_top_right);
+		nodeList.emplace(tempNode->m_bottom_left);
+		nodeList.emplace(tempNode->m_bottom_right);
+		nodeList.emplace(tempNode->m_top_left);
+		nodeList.emplace(tempNode->m_top_right);
 	}
 }
 
-void QuadTreeNode::createQuadTree(QuadTreeNode* &curNode, int treeDepth, const std::vector<QPointF> & point_list, float m_CenterX, float m_CenterY, float m_SizeX, float m_SizeY) {
+void QuadTreeNode::createQuadTreeDFS(QuadTreeNode* &curNode, int treeDepth, const std::vector<QPointF> & point_list, float m_CenterX, float m_CenterY, float m_SizeX, float m_SizeY) {
 	if (nullptr == curNode) {
 		curNode = new QuadTreeNode();
 	}
@@ -153,10 +171,10 @@ void QuadTreeNode::createQuadTree(QuadTreeNode* &curNode, int treeDepth, const s
 	float sonhalfY = halfY * 0.5;
 
 	//递归创建子树，根据节点的编号决定其子节点的坐标
-	createQuadTree(curNode->m_bottom_left, treeDepth, curNode->point_list, m_CenterX - sonhalfX, m_CenterY - sonhalfY, halfX, halfY);
-	createQuadTree(curNode->m_bottom_right, treeDepth, curNode->point_list, m_CenterX + sonhalfX, m_CenterY - sonhalfY, halfX, halfY);
-	createQuadTree(curNode->m_top_left, treeDepth, curNode->point_list, m_CenterX - sonhalfX, m_CenterY + sonhalfY, halfX, halfY);
-	createQuadTree(curNode->m_top_right, treeDepth, curNode->point_list, m_CenterX + sonhalfX, m_CenterY + sonhalfY, halfX, halfY);
+	createQuadTreeDFS(curNode->m_bottom_left, treeDepth, curNode->point_list, m_CenterX - sonhalfX, m_CenterY - sonhalfY, halfX, halfY);
+	createQuadTreeDFS(curNode->m_bottom_right, treeDepth, curNode->point_list, m_CenterX + sonhalfX, m_CenterY - sonhalfY, halfX, halfY);
+	createQuadTreeDFS(curNode->m_top_left, treeDepth, curNode->point_list, m_CenterX - sonhalfX, m_CenterY + sonhalfY, halfX, halfY);
+	createQuadTreeDFS(curNode->m_top_right, treeDepth, curNode->point_list, m_CenterX + sonhalfX, m_CenterY + sonhalfY, halfX, halfY);
 }
 
 void QuadTreeNode::getAllQuadNode(QuadTreeNode* curNode, std::vector<QuadTreeNode*> &node_list) {
@@ -183,6 +201,7 @@ void QuadTreeNode::getMaxDepQuadNode(QuadTreeNode* curNode, std::vector<QuadTree
 
 	if (curNode->m_isSonNode) {
 		node_list.emplace_back(curNode);
+		return;
 	}
 
 	getMaxDepQuadNode(curNode->m_bottom_left, node_list);

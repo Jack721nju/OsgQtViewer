@@ -29,6 +29,10 @@ class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {
 
 	bool eventFilter(QObject * obj, QEvent * event);
 
+	virtual void dragEnterEvent(QDragEnterEvent *event);
+
+	virtual void dropEvent(QDropEvent * event);
+
  private:
 	QWidget* addViewWidget(osgQt::GraphicsWindowQt* gw, osg::ref_ptr<osg::Group> scence);
 

@@ -27,7 +27,7 @@ point2D_MAXMIN QuadTreeNode::getMinMaxXY(const std::vector<QPointF> & all_list) 
 	Max_area.xmin = *xmin;
 	Max_area.ymin = *ymin;
 
-	return Max_area;
+	return std::move(Max_area);
 }
 
 void QuadTreeNode::createQuadTreeBFS(QuadTreeNode* &rootNode, int treeDepth, const std::vector<QPointF> &point_list, float m_CenterX, float m_CenterY, float m_SizeX, float m_SizeY) {
@@ -70,9 +70,6 @@ void QuadTreeNode::createQuadTreeBFS(QuadTreeNode* &rootNode, int treeDepth, con
 		//四叉树划分中止条件，网格内点达到最小值
 		if (tempNode->m_point_num < minPointNumPerGrid) {
 			tempNode->m_isSonNode = true;
-			if (parentNode) {
-				parentNode->subSonNodeIsNullNum++;
-			}
 		}
 
 		//四叉树划分中止条件，网格达到最大深度
@@ -81,14 +78,14 @@ void QuadTreeNode::createQuadTreeBFS(QuadTreeNode* &rootNode, int treeDepth, con
 			tempNode->m_isSonNode = true;
 		}		
 
-		if (tempNode->m_isSonNode) {
-			continue;
+		if (parentNode) {
+			if (parentNode->m_point_num == tempNode->m_point_num) {
+				tempNode->m_isSonNode = false;
+			}
 		}
 
-		if (parentNode) {
-			if (parentNode->subSonNodeIsNullNum >= 3) {
-				// parentNode->m_isSonNode = true;
-			}
+		if (tempNode->m_isSonNode) {
+			continue;
 		}
 
 		tempNode->m_bottom_left = new QuadTreeNode();

@@ -71,6 +71,8 @@ class QuadTreeNode {
 
 	bool m_isSonNode{ false };
 
+	bool m_isSonNull{ false };
+
 	std::vector<QPointF> point_list;
 
 	int subSonNodeIsNullNum{ 0 };

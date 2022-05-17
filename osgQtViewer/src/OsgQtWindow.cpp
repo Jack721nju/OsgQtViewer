@@ -65,6 +65,40 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel):QMain
 
 OsgQtTest::~OsgQtTest() { }
 
+void OsgQtTest::dragEnterEvent(QDragEnterEvent *event) {
+	if (event->mimeData()->hasFormat("text/uri-list")) {
+		event->acceptProposedAction();
+	} else {
+		event->ignore();
+	}
+}
+
+void OsgQtTest::dropEvent(QDropEvent * event) {
+	QList<QUrl> urls = event->mimeData()->urls();
+	if (urls.isEmpty()) {
+		return;
+	}
+
+	const QString &fileName = urls.first().toLocalFile();
+
+	if (fileName.isEmpty()) {
+		return;
+	}
+
+	const std::string &fullname = fileName.toStdString();
+	const std::string &type_name = fullname.substr(fullname.find_last_of('.') + 1, fullname.length());
+
+	_timerClock.start();//开始计时
+
+	if (type_name == "las") {
+		ReadLasData(fullname);
+	} else if (type_name == "txt") {
+		ReadTxtData(fullname);
+	} else if (type_name == "pcd") {
+		ReadPCDData(fullname);
+	}
+}
+
 //构建图形窗口，设置窗口渲染相关参数
 osgQt::GraphicsWindowQt* OsgQtTest::createGraphicsWindow(int x, int y, int w, int h, const std::string& name, bool windowDecoration) {
 	osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
@@ -1899,8 +1933,7 @@ void OsgQtTest::slot_BuildQuadGridForPoints() {
 	point2D_MAXMIN curSize = QuadTreeNode::getMinMaxXY(QpointList);
 	if (m_Quad_depth_first_radio->isChecked()) {
 		QuadTreeNode::createQuadTreeDFS(rootNode, 0, QpointList, (curSize.xmin + curSize.xmax) * 0.5, (curSize.ymin + curSize.ymax) * 0.5, curSize.xmax - curSize.xmin, curSize.ymax - curSize.ymin);
-	}
-	else if (m_Quad_Breadth_first_radio->isChecked()) {
+	} else if (m_Quad_Breadth_first_radio->isChecked()) {
 		QuadTreeNode::createQuadTreeBFS(rootNode, 0, QpointList, (curSize.xmin + curSize.xmax) * 0.5, (curSize.ymin + curSize.ymax) * 0.5, curSize.xmax - curSize.xmin, curSize.ymax - curSize.ymin);
 	}
 
@@ -1909,9 +1942,6 @@ void OsgQtTest::slot_BuildQuadGridForPoints() {
 
 	std::vector<QuadTreeNode*> all_node_list;
 	QuadTreeNode::getAllQuadNode(rootNode, all_node_list);
-
-	//绘制所有离散点云,离散点默认颜色为纯黑色
-	Project_widget_grid_net->drawPoints(all_point, allPointNum, 1, QColor(0, 0, 0, 125));
 
 	QColor new_color(0, 0, 0, 0);
 
@@ -1925,6 +1955,9 @@ void OsgQtTest::slot_BuildQuadGridForPoints() {
 		}
 		Project_widget_grid_net->drawGridWithFillColor(curNode->m_XY_Size.xmin, curNode->m_XY_Size.ymin, curNode->m_XY_Size.xmax, curNode->m_XY_Size.ymax, new_color, 0, 0);
 	}
+
+	//绘制所有离散点云,离散点默认颜色为纯黑色
+	Project_widget_grid_net->drawPoints(all_point, allPointNum, 3, QColor(0, 200, 0, 225));
 
 	//计算四叉树格网的总耗时
 	float runTimeAll = _timerClock.getTime<Ms>() / 1000.0;

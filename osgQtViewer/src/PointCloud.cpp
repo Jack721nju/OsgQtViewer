@@ -209,6 +209,73 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 	this->addDrawable(geo_point.get());//加入当前新的点云几何绘制体
 }
 
+void PointCloud::readLasDataMultiThread(const std::string & openfileName, size_t startID, size_t endID) {
+	LASreadOpener opener;
+	opener.set_file_name(openfileName.c_str());
+	if (false == opener.active()) {
+		return;
+	}
+	LASreader * reader = opener.open();
+	if (reader == nullptr) {
+		return;
+	}
+
+	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
+	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//创建顶点数组,逆时针排序
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
+
+	size_t count = startID;
+	std::string errInfo;
+	try {
+		reader->seek(startID);
+		while (reader->read_point() && count < endID) {
+			double  x, y, z;
+			double  r, g, b, w;
+
+			const LASpoint & p = reader->point;
+
+			x = p.get_x();
+			y = p.get_y();
+			z = p.get_z();
+
+			r = p.get_R() / 255.0;
+			g = p.get_G() / 255.0;
+			b = p.get_B() / 255.0;
+			w = 1.0;
+
+			osg::Vec3 single_point(x, y, z);
+			osg::Vec4 single_color(r, g, b, w);
+
+			vert->push_back(single_point);
+			color->push_back(single_color);
+
+			++count;// points num
+		}
+
+		reader->close();
+		delete reader;
+		reader = nullptr;
+	}
+	catch (std::exception & e) {
+		errInfo = e.what();
+	}
+	catch (...) {
+		errInfo = "get unknown exception";
+	}
+
+	if (geo_point_vert) {
+		geo_point_vert->insert(geo_point_vert->begin(), vert->begin(), vert->end());
+	}
+
+	if (geo_point_normal) {
+		geo_point_normal->insert(geo_point_normal->begin(), normal->begin(), normal->end());
+	}
+
+	if (geo_point_color) {
+		geo_point_color->insert(geo_point_color->begin(), color->begin(), color->end());
+	}
+}
+
 void PointCloud::readLasData(const std::string & openfileName) {
 	LASreadOpener opener;
 	opener.set_file_name(openfileName.c_str());
@@ -224,12 +291,10 @@ void PointCloud::readLasData(const std::string & openfileName) {
 	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
 	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//创建顶点数组,逆时针排序
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
-	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
 
 	if (this->point_num > 0) {
 		vert->reserve(point_num + 1);
 		color->reserve(point_num + 1);
-		point->reserve(point_num + 1);
 	}
 
 	size_t count = 0;
@@ -256,7 +321,6 @@ void PointCloud::readLasData(const std::string & openfileName) {
 			vert->push_back(single_point);
 			color->push_back(single_color);
 
-			point->push_back(count);
 			++count;// points num
 		}
 
@@ -287,8 +351,9 @@ void PointCloud::readLasData(const std::string & openfileName) {
 void PointCloud::readLasDataByLibLas(const std::string & openfileName) {
 	std::fstream ifs;
 	ifs.open(openfileName.c_str(), std::ios::in | std::ios::binary);
-	if (!ifs)
+	if (!ifs) {
 		return;
+	}
 
 	liblas::ReaderFactory f;
 	liblas::Reader reader = f.CreateWithStream(ifs);

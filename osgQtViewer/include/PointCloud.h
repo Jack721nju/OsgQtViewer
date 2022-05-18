@@ -44,17 +44,20 @@ class PointCloud : public osg::Geode {
 	friend class PCloudManager;
 
  private:
-	size_t point_num;//点数量
+	size_t point_num;// 点数量
 	size_t point_size;
 	std::string point_name;
 
-	osg::ref_ptr<osg::Geometry> geo_point;//点数据几何体指针
+	osg::ref_ptr<osg::Geometry> geo_point;// 点数据几何体指针
+	osg::ref_ptr<osg::Vec3Array> geo_point_vert{ nullptr };// 顶点数组
+	osg::ref_ptr<osg::Vec3Array> geo_point_normal{ nullptr };
+	osg::ref_ptr<osg::Vec4Array> geo_point_color{ nullptr };
 
 	osg::ref_ptr<osg::Geode> geo_bounding_node;
 
 	osg::ref_ptr<osg::Geode> geo_octree_node;
 
-	osg::ref_ptr<osg::Geometry> geo_bounding_box;//外接矩形框几何体指针
+	osg::ref_ptr<osg::Geometry> geo_bounding_box;// 外接矩形框几何体指针
 
 	bool hasBuildBox{false};
 
@@ -74,7 +77,7 @@ class PointCloud : public osg::Geode {
 	void setShowBoundingBox(bool isShow);
 
  public:
-	//获取给定点云数据的最大最小范围
+	// 获取给定点云数据的最大最小范围
 	point_MAXMIN* getMinMaxXYZ_POINTS();
 
 	template <typename type>
@@ -157,6 +160,8 @@ class PointCloud : public osg::Geode {
 	}
 
 	void readLasData(const std::string & openfileName);
+
+	void readLasDataMultiThread(const std::string & openfileName, size_t startID, size_t endID);
 
 	void readLasDataByLibLas(const std::string & openfileName);
 

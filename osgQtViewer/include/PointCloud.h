@@ -161,7 +161,7 @@ class PointCloud : public osg::Geode {
 
 	void readLasData(const std::string & openfileName);
 
-	void readLasDataMultiThread(const std::string & openfileName, size_t startID, size_t endID);
+	void readLasDataMultiThread(const std::string & openfileName);
 
 	void readLasDataByLibLas(const std::string & openfileName);
 

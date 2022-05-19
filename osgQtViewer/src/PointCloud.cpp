@@ -7,6 +7,9 @@
 #include <pcl/kdtree/kdtree.h>
 #include <pcl/kdtree/kdtree_flann.h>
 
+#include <thread>
+#include <mutex>
+
 PointCloud::PointCloud(osg::ref_ptr<osg::Group> root) {
 	point_num = 0;
 	point_size = 1.0;
@@ -209,26 +212,23 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 	this->addDrawable(geo_point.get());//加入当前新的点云几何绘制体
 }
 
-void PointCloud::readLasDataMultiThread(const std::string & openfileName, size_t startID, size_t endID) {
-	LASreadOpener opener;
-	opener.set_file_name(openfileName.c_str());
-	if (false == opener.active()) {
-		return;
-	}
-	LASreader * reader = opener.open();
+osg::ref_ptr<osg::Vec3Array> static_geo_point_vert{ nullptr };
+osg::ref_ptr<osg::Vec4Array> static_geo_point_color{ nullptr };
+static std::mutex read_mutex;
+
+void readLasDataSonThread(LASreader * reader, size_t startID, size_t endID) {
 	if (reader == nullptr) {
 		return;
 	}
 
 	osg::ref_ptr<osg::Vec3Array> vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
-	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;//创建顶点数组,逆时针排序
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 
 	size_t count = startID;
 	std::string errInfo;
 	try {
 		reader->seek(startID);
-		while (reader->read_point() && count < endID) {
+		while (reader->read_point() && count <= endID) {
 			double  x, y, z;
 			double  r, g, b, w;
 
@@ -251,10 +251,6 @@ void PointCloud::readLasDataMultiThread(const std::string & openfileName, size_t
 
 			++count;// points num
 		}
-
-		reader->close();
-		delete reader;
-		reader = nullptr;
 	}
 	catch (std::exception & e) {
 		errInfo = e.what();
@@ -263,17 +259,76 @@ void PointCloud::readLasDataMultiThread(const std::string & openfileName, size_t
 		errInfo = "get unknown exception";
 	}
 
-	if (geo_point_vert) {
-		geo_point_vert->insert(geo_point_vert->begin(), vert->begin(), vert->end());
+	// 加锁，避免多线程资源冲突
+	{
+		std::lock_guard<std::mutex> lock(read_mutex);
+		if (static_geo_point_vert) {
+			static_geo_point_vert->insert(static_geo_point_vert->begin(), vert->begin(), vert->end());
+		}
+
+		if (static_geo_point_color) {
+			static_geo_point_color->insert(static_geo_point_color->begin(), color->begin(), color->end());
+		}
+	}
+}
+
+void PointCloud::readLasDataMultiThread(const std::string & openfileName) {
+	LASreadOpener opener;
+	opener.set_file_name(openfileName.c_str());
+	if (false == opener.active()) {
+		return;
+	}
+	LASreader * reader = opener.open();
+	if (reader == nullptr) {
+		return;
 	}
 
-	if (geo_point_normal) {
-		geo_point_normal->insert(geo_point_normal->begin(), normal->begin(), normal->end());
+	auto threadNum = std::thread::hardware_concurrency();
+	threadNum = 2;
+	std::vector<std::thread> threadList;
+	auto pointNum = this->point_num;
+	int step = static_cast<int>(pointNum / threadNum);
+
+	if (nullptr == static_geo_point_vert) {
+		static_geo_point_vert = new osg::Vec3Array;
+		static_geo_point_vert->clear();
 	}
 
-	if (geo_point_color) {
-		geo_point_color->insert(geo_point_color->begin(), color->begin(), color->end());
+	if (nullptr == static_geo_point_color) {
+		static_geo_point_color = new osg::Vec4Array;
+		static_geo_point_color->clear();
 	}
+
+	for (int i = 0; i < threadNum; ++i) {
+		size_t startID = step * i;
+		size_t endID = step * (i + 1) - 1;
+		if (i == (threadNum - 1)) {
+			endID = pointNum;
+		}
+		threadList.emplace_back(std::thread(readLasDataSonThread, reader, startID, endID));
+	}
+
+	for (auto & curThread : threadList) {
+		curThread.join();
+	}
+
+	reader->close();
+	delete reader;
+	reader = nullptr;
+
+	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;
+	normal->push_back(osg::Vec3(0.0, 0.0, 1.0));
+
+	geo_point = new osg::Geometry;//创建一个几何体对象
+	geo_point->setVertexArray(static_geo_point_vert.get());
+	geo_point->setNormalArray(normal.get());
+	geo_point->setNormalBinding(osg::Geometry::BIND_OVERALL);
+	geo_point->setColorArray(static_geo_point_color.get());
+	geo_point->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+	geo_point->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, pointNum));
+
+	this->removeDrawables(0, this->getNumDrawables());//读取文件前先剔除节点内所有的几何体
+	this->addDrawable(geo_point.get());//加入当前新的点云几何绘制体
 }
 
 void PointCloud::readLasData(const std::string & openfileName) {

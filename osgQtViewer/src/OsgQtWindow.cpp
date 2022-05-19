@@ -1077,7 +1077,8 @@ void OsgQtTest::ReadLasData(const std::string & fileName) {
 		scene_Pcloud->setPointNum(pointNum);
 
 		if (pointNum < MaxUsingThreadReadNum) {
-			scene_Pcloud->readLasData(fileName);
+			// scene_Pcloud->readLasData(fileName);
+			scene_Pcloud->readLasDataMultiThread(fileName);
 			AddNodeToDataTree(fileName);
 			SetCamerToObjectCenter(scene_Pcloud->getGeoPoint());
 			float showTime = static_cast<float>(_timerClock.getTime<Ms>() * 0.001);

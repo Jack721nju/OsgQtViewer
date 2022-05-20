@@ -212,11 +212,17 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 	this->addDrawable(geo_point.get());//加入当前新的点云几何绘制体
 }
 
-osg::ref_ptr<osg::Vec3Array> static_geo_point_vert{ nullptr };
-osg::ref_ptr<osg::Vec4Array> static_geo_point_color{ nullptr };
+static osg::ref_ptr<osg::Vec3Array> static_geo_point_vert = new osg::Vec3Array;
+static osg::ref_ptr<osg::Vec4Array> static_geo_point_color = new osg::Vec4Array;
 static std::mutex read_mutex;
 
-void readLasDataSonThread(LASreader * reader, size_t startID, size_t endID) {
+void readLasDataSonThread(const std::string & openfileName, size_t startID, size_t endID) {
+	LASreadOpener opener;
+	opener.set_file_name(openfileName.c_str());
+	if (false == opener.active()) {
+		return;
+	}
+	LASreader * reader = opener.open();
 	if (reader == nullptr) {
 		return;
 	}
@@ -284,18 +290,16 @@ void PointCloud::readLasDataMultiThread(const std::string & openfileName) {
 	}
 
 	auto threadNum = std::thread::hardware_concurrency();
-	threadNum = 2;
+	threadNum = 4;
 	std::vector<std::thread> threadList;
 	auto pointNum = this->point_num;
 	int step = static_cast<int>(pointNum / threadNum);
 
-	if (nullptr == static_geo_point_vert) {
-		static_geo_point_vert = new osg::Vec3Array;
+	if (static_geo_point_vert) {
 		static_geo_point_vert->clear();
 	}
 
-	if (nullptr == static_geo_point_color) {
-		static_geo_point_color = new osg::Vec4Array;
+	if (static_geo_point_color) {
 		static_geo_point_color->clear();
 	}
 
@@ -305,7 +309,7 @@ void PointCloud::readLasDataMultiThread(const std::string & openfileName) {
 		if (i == (threadNum - 1)) {
 			endID = pointNum;
 		}
-		threadList.emplace_back(std::thread(readLasDataSonThread, reader, startID, endID));
+		threadList.emplace_back(std::thread(readLasDataSonThread, openfileName, startID, endID));
 	}
 
 	for (auto & curThread : threadList) {

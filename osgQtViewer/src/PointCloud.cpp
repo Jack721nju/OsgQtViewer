@@ -850,11 +850,11 @@ void PointCloud::computeNormal() {
 	if (nullptr == m_pcl_loadCloud) {
 		return;
     }
-	pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> m_normal;
+	pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> m_normal;
 	pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
 	pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTree(new pcl::search::KdTree<pcl::PointXYZ>);
-	
-	// m_normal.setNumberOfThreads(4);
+
+	m_normal.setNumberOfThreads(10);
 	m_normal.setInputCloud(m_pcl_loadCloud);
 	m_normal.setSearchMethod(kdTree);
 	m_normal.setKSearch(10);

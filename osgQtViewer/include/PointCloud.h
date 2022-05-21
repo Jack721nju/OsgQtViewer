@@ -67,7 +67,7 @@ class PointCloud : public osg::Geode {
 
 	point_MAXMIN * Max_area{ nullptr };
 
-	pcl::PointCloud<pcl::PointXYZ>::Ptr m_loadCloud;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr m_pcl_loadCloud;
 
  private:
     void clearData();
@@ -172,6 +172,8 @@ class PointCloud : public osg::Geode {
 	void readPCDData(const std::string & openfileName);
 
 	void buildOtree(float minSize);
+
+	void computeNormal();
 };
 
 class PCloudManager {

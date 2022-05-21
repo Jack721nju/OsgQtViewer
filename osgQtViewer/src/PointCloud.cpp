@@ -6,6 +6,8 @@
 #include <pcl/octree/octree.h>
 #include <pcl/kdtree/kdtree.h>
 #include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/features/normal_3d_omp.h>
 
 #include <thread>
 #include <mutex>
@@ -28,9 +30,9 @@ void PointCloud::clearData() {
 	point_size = 1.0;
 	point_name = "";
 
-	if (m_loadCloud) {
-		m_loadCloud->clear();
-		m_loadCloud->~PointCloud();
+	if (m_pcl_loadCloud) {
+		m_pcl_loadCloud->clear();
+		m_pcl_loadCloud->~PointCloud();
 	}
 
 	this->removeDrawables(0, this->getNumDrawables());//剔除节点内所有的几何体
@@ -51,13 +53,13 @@ void PointCloud::clearData() {
 }
 
 void PointCloud::buildOtree(float minSize) {
-	if (nullptr == m_loadCloud) {
+	if (nullptr == m_pcl_loadCloud) {
 		return;
 	}
 
 	pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> curOctree(minSize);
 	// curOctree.setTreeDepth(treeDepth);
-	curOctree.setInputCloud(m_loadCloud);
+	curOctree.setInputCloud(m_pcl_loadCloud);
 	curOctree.addPointsFromInputCloud();
 
 	size_t maxTreeDepth = curOctree.getTreeDepth();
@@ -163,12 +165,12 @@ void PointCloud::buildOtree(float minSize) {
 
 void PointCloud::readPCDData(const std::string & openfileName) {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr curPointCloud(new pcl::PointCloud<pcl::PointXYZ>);
-	m_loadCloud = curPointCloud;
-	if (-1 == pcl::io::loadPCDFile(openfileName.c_str(), *m_loadCloud)) {
+	m_pcl_loadCloud = curPointCloud;
+	if (-1 == pcl::io::loadPCDFile(openfileName.c_str(), *m_pcl_loadCloud)) {
 		return;
 	}
 
-	if (nullptr == m_loadCloud) {
+	if (nullptr == m_pcl_loadCloud) {
 		return;
 	}
 
@@ -178,7 +180,7 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;//创建颜色数组,逆时针排序
 	osg::ref_ptr<osg::DrawElementsUByte> point = new osg::DrawElementsUByte(GL_POINTS);
 
-	size_t allPointNum = m_loadCloud->points.size();
+	size_t allPointNum = m_pcl_loadCloud->points.size();
 	if (allPointNum > 0) {
 		vert->reserve(allPointNum + 1);
 		point->reserve(allPointNum + 1);
@@ -188,14 +190,14 @@ void PointCloud::readPCDData(const std::string & openfileName) {
 	osg::Vec4 single_color(0.0, 0.0, 1.0, 1.0);//默认为蓝色点
 	color->push_back(single_color);
 
-	for (const auto & curP : m_loadCloud->points) {
+	for (const auto & curP : m_pcl_loadCloud->points) {
 		vert->push_back(osg::Vec3(curP.x, curP.y, curP.z));
 		point->push_back(count);
 		++count;
 	}
 
-	// m_loadCloud->clear();
-	// m_loadCloud->~PointCloud();
+	// m_pcl_loadCloud->clear();
+	// m_pcl_loadCloud->~PointCloud();
 
 	// all points num
 	this->point_num = count;
@@ -842,6 +844,21 @@ point_MAXMIN* PointCloud::getMinMaxXYZ_POINTS() {
 	Max_area->zmin = *zmin;
 
 	return Max_area;
+}
+
+void PointCloud::computeNormal() {
+	if (nullptr == m_pcl_loadCloud) {
+		return;
+    }
+	pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> m_normal;
+	pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+	pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTree(new pcl::search::KdTree<pcl::PointXYZ>);
+	
+	// m_normal.setNumberOfThreads(4);
+	m_normal.setInputCloud(m_pcl_loadCloud);
+	m_normal.setSearchMethod(kdTree);
+	m_normal.setKSearch(10);
+	m_normal.compute(*normals);
 }
 
 PCloudManager::PCloudManager(osg::ref_ptr<osg::Group> root) {

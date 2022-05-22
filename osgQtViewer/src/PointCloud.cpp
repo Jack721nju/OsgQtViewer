@@ -6,7 +6,7 @@
 #include <pcl/octree/octree.h>
 #include <pcl/kdtree/kdtree.h>
 #include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/features/normal_3d.h>
+
 #include <pcl/features/normal_3d_omp.h>
 
 #include <thread>
@@ -736,6 +736,7 @@ void PointCloud::initBoundingBox() {
 	osg::Vec3 p7(box_xmin, box_ymax, box_zmax);
 
 	osg::Vec4 out_line_color(1.0, 1.0, 0.0, 1.0);//定义外部线框的颜色
+	color->push_back(out_line_color);
 
 	//单一网格的八顶点
 	vert->push_back(p0);
@@ -747,10 +748,7 @@ void PointCloud::initBoundingBox() {
 	vert->push_back(p6);
 	vert->push_back(p7);
 
-	for (int k = 0; k < 8; ++k) {
-		color->push_back(out_line_color);
-	}
-
+	
 	quad->push_back(0);
 	quad->push_back(1);
 
@@ -789,7 +787,7 @@ void PointCloud::initBoundingBox() {
 
 	geo_bounding_box->setVertexArray(vert.get());
 	geo_bounding_box->setColorArray(color.get());
-	geo_bounding_box->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+	geo_bounding_box->setColorBinding(osg::Geometry::BIND_OVERALL);
 	geo_bounding_box->addPrimitiveSet(quad);
 	geo_bounding_node->addDrawable(geo_bounding_box.get());
 	this->addChild(geo_bounding_node.get());
@@ -852,13 +850,69 @@ void PointCloud::computeNormal() {
     }
 	pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> m_normal;
 	pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+	m_pcl_normals = normals;
 	pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTree(new pcl::search::KdTree<pcl::PointXYZ>);
 
 	m_normal.setNumberOfThreads(10);
 	m_normal.setInputCloud(m_pcl_loadCloud);
 	m_normal.setSearchMethod(kdTree);
 	m_normal.setKSearch(10);
-	m_normal.compute(*normals);
+	m_normal.compute(*m_pcl_normals);
+
+	osg::ref_ptr<osg::Vec3Array> pcl_normal = new osg::Vec3Array;//创建顶点数组,逆时针排序
+	osg::ref_ptr<osg::Vec3Array> pcl_vert = new osg::Vec3Array;//创建顶点数组,逆时针排序
+	osg::ref_ptr<osg::Vec4Array> pcl_color = new osg::Vec4Array;//创建颜色数组,逆时针排序
+	osg::ref_ptr<osg::DrawElementsUByte> pcl_line = new osg::DrawElementsUByte(GL_LINES);
+
+	size_t pointNum = m_pcl_loadCloud->size();
+	for (size_t i = 0; i < pointNum; ++i) {
+		const auto & curPoint = m_pcl_loadCloud->at(i);
+		osg::Vec3 basePoint(curPoint.x, curPoint.y, curPoint.z);
+
+		const auto & curNormal = m_pcl_normals->at(i);
+		osg::Vec3 eachNormal(curNormal.normal_x, curNormal.normal_y, curNormal.normal_z);
+
+		pcl_vert->push_back(basePoint);
+		pcl_vert->push_back(basePoint + eachNormal);
+
+		pcl_line->push_back(2 * i);
+		pcl_line->push_back(2 * i + 1);
+	}
+
+	osg::Vec4 normal_line_color(1.0, 0.0, 0.0, 1.0);//定义点云的法向量颜色
+	pcl_color->push_back(normal_line_color);
+
+	if (nullptr == geo_normal_node) {
+		geo_normal_node = new osg::Geode;
+	}
+
+	if (nullptr == geo_normal_line) {
+		geo_normal_line = new osg::Geometry;//创建一个几何体对象
+	}
+
+	osg::ref_ptr<osg::Vec3Array> normal = new osg::Vec3Array;
+	normal->push_back(osg::Vec3(0.0, 0.0, 1.0));
+	geo_point->setNormalArray(normal.get());
+	geo_point->setNormalBinding(osg::Geometry::BIND_OVERALL);
+
+	geo_normal_line->setVertexArray(pcl_vert.get());
+	geo_normal_line->setColorArray(pcl_color.get());
+	geo_normal_line->setColorBinding(osg::Geometry::BIND_OVERALL);
+	// geo_normal_line->addPrimitiveSet(pcl_line.get());
+	geo_normal_line->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, pointNum * 2));
+	geo_normal_node->addDrawable(geo_normal_line.get());
+	this->addChild(geo_normal_node.get());
+
+	osg::ref_ptr<osg::StateSet> stateset = geo_normal_line->getOrCreateStateSet();
+	stateset->setMode(GL_BLEND, osg::StateAttribute::ON);// 开启Alpha混合，实现透明度
+	stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);// 设置渲染模式
+	stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);// 取消深度测试
+	stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);// 关闭关照效果，这样任意面均可实现半透明效果
+	osg::ref_ptr<osg::PolygonMode> polyMode = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);// 设置网格模式
+	stateset->setAttribute(polyMode);
+
+	osg::ref_ptr<osg::LineWidth> line_width = new osg::LineWidth(1.0);
+	stateset->setAttribute(line_width);
 }
 
 PCloudManager::PCloudManager(osg::ref_ptr<osg::Group> root) {

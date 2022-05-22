@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <pcl/io/io.h>
+#include <pcl/features/normal_3d.h>
 
 #include <iostream>
 #include <string>
@@ -68,6 +69,12 @@ class PointCloud : public osg::Geode {
 	point_MAXMIN * Max_area{ nullptr };
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr m_pcl_loadCloud;
+
+	pcl::PointCloud<pcl::Normal>::Ptr m_pcl_normals{ nullptr };
+
+	osg::ref_ptr<osg::Geode> geo_normal_node{ nullptr };
+
+	osg::ref_ptr<osg::Geometry> geo_normal_line{ nullptr };
 
  private:
     void clearData();

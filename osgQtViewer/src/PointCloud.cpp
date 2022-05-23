@@ -748,7 +748,6 @@ void PointCloud::initBoundingBox() {
 	vert->push_back(p6);
 	vert->push_back(p7);
 
-	
 	quad->push_back(0);
 	quad->push_back(1);
 
@@ -842,6 +841,64 @@ point_MAXMIN* PointCloud::getMinMaxXYZ_POINTS() {
 	Max_area->zmin = *zmin;
 
 	return Max_area;
+}
+
+void PointCloud::computeCurvture() {
+	if (nullptr == m_pcl_loadCloud) {
+		return;
+	}
+	pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> m_normal;
+	pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+	m_pcl_normals = normals;
+	pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTree(new pcl::search::KdTree<pcl::PointXYZ>);
+
+	m_normal.setNumberOfThreads(10);
+	m_normal.setInputCloud(m_pcl_loadCloud);
+	m_normal.setSearchMethod(kdTree);
+	m_normal.setKSearch(10);
+	m_normal.compute(*m_pcl_normals);
+
+	osg::ref_ptr<osg::Vec4Array> pcl_curve_color = new osg::Vec4Array;//创建颜色数组,逆时针排序
+
+	size_t pointNum = m_pcl_normals->size();
+
+	float minCurve = (1 << 31) * 1.0;
+	float maxCurve = 0.0;
+	float allCurve = 0.0;
+	for (const auto & curNormal : *m_pcl_normals) {
+		auto curCurve = curNormal.curvature;
+
+		if (curCurve > maxCurve) {
+			maxCurve = curNormal.curvature;
+		}
+
+		if (curCurve < minCurve) {
+			minCurve = curCurve;
+		}
+
+		allCurve += curCurve;
+	}
+
+	float averCurve = allCurve / pointNum;
+
+	osg::Vec4 point_color(0.0, 0.0, 1.0, 1.0);
+	osg::Vec4 hight_point_color(1.0, 0.0, 0.0, 1.0);
+	for (const auto & curNormal : *m_pcl_normals) {
+		auto curCurve = curNormal.curvature;
+		if (curCurve > averCurve) {
+			pcl_curve_color->push_back(hight_point_color);
+		} else {
+			pcl_curve_color->push_back(point_color);
+		}
+	}
+
+	if (nullptr == geo_point) {
+		return;
+	}
+
+	geo_point->setColorArray(pcl_curve_color.get());
+	geo_point->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+	geo_point->dirtyGLObjects();
 }
 
 void PointCloud::computeNormal() {

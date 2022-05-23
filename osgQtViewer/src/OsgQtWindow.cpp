@@ -1050,7 +1050,7 @@ void OsgQtTest::ReadPCDData(const std::string & fileName) {
 
 	scene_Pcloud->setType(POINT_FILE_TYPE::PCD);
 	scene_Pcloud->readPCDData(fileName);
-	scene_Pcloud->computeNormal();
+	scene_Pcloud->computeCurvture();
 	AddNodeToDataTree(fileName);
 	SetCamerToObjectCenter(scene_Pcloud->getGeoPoint());
 	float showTime = static_cast<float>(_timerClock.getTime<Ms>() * 0.001);

@@ -37,21 +37,28 @@ enum POINT_FILE_TYPE {
 class PointCloud : public osg::Geode {
  private:
 	explicit PointCloud(osg::ref_ptr<osg::Group> root = nullptr);
+
 	virtual ~PointCloud();
 
 	PointCloud(const PointCloud &other) = delete;
+
 	PointCloud & operator=(const PointCloud& other) = delete;
 
 	friend class PCloudManager;
 
  private:
 	size_t point_num;// 点数量
+
 	size_t point_size;
+
 	std::string point_name;
 
 	osg::ref_ptr<osg::Geometry> geo_point;// 点数据几何体指针
+
 	osg::ref_ptr<osg::Vec3Array> geo_point_vert{ nullptr };// 顶点数组
+
 	osg::ref_ptr<osg::Vec3Array> geo_point_normal{ nullptr };
+
 	osg::ref_ptr<osg::Vec4Array> geo_point_color{ nullptr };
 
 	osg::ref_ptr<osg::Geode> geo_bounding_node;
@@ -63,7 +70,9 @@ class PointCloud : public osg::Geode {
 	bool hasBuildBox{false};
 
 	QColor point_color;
+
 	POINT_FILE_TYPE m_Type;
+
 	bool b_isSelected;
 
 	point_MAXMIN * Max_area{ nullptr };
@@ -181,6 +190,8 @@ class PointCloud : public osg::Geode {
 	void buildOtree(float minSize);
 
 	void computeNormal();
+
+	void computeCurvture();
 };
 
 class PCloudManager {
@@ -229,6 +240,8 @@ class PCloudManager {
 
  public:
 	osg::ref_ptr<osg::Group> m_root;
+
 	std::map<std::string, PointCloud*> all_pcloud_map;
+
 	std::list<PointCloud*> selected_pcloud_list;
 };

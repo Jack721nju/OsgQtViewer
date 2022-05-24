@@ -14,6 +14,8 @@
 #include "ProjectToXY.h"
 #include "QuadTree.h"
 
+#include "easylogging++.h"
+
 //多视景器
 class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {
 	Q_OBJECT

@@ -1,7 +1,6 @@
 ﻿/* Copyright© 2022 Jack721 */
 #include "OsgQtWindow.h"
 #include "JsonMgr.h"
-#include "easylogging++.h"
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -26,8 +25,8 @@ int main(int argc, char* argv[]) {
 	OsgQtTest* viewWidget = new OsgQtTest();
 	viewWidget->setGeometry(startX, startY, width, height);
 	viewWidget->show();
-
+		
 	splash.finish(viewWidget);
-	LOG(INFO) << "QtViewer start successfully!";
+	LOG(INFO) << "osgQtViewer was build at " << __DATE__ << " " << __TIME__;
 	return a.exec();
 }

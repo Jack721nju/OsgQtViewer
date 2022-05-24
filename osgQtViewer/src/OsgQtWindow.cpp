@@ -13,6 +13,23 @@ static float eye_distance_rate = 5;
 
 #define MaxUsingThreadReadNum 5000000
 
+#define OUTPUT_LOG_AND_CONSOLE(info)                 \
+	LOG(INFO) << info;                               \
+    AddToConsoleSlot(QString::fromStdString(info));  
+
+static const char time_format_1[] = "%b %d %Y %H:%M:%S";
+static const char time_format_2[] = "%Y-%m-%d %H:%M:%S";
+
+static void getCurrentDateTime(std::string & dateTimeStr, const char * timeFormat) {
+	time_t now = time(nullptr);
+	char buffer[50];
+	if (0 == strftime(buffer, 50, timeFormat, localtime(&now))) {
+		LOG(ERROR) << "Get current local time failed";
+	} else {
+		dateTimeStr = buffer;
+	}
+}
+
 OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel):QMainWindow() {
 	setThreadingModel(threadingModel);
 	setKeyEventSetsDone(0);// 禁用Escape关闭视图
@@ -61,6 +78,11 @@ OsgQtTest::OsgQtTest(osgViewer::ViewerBase::ThreadingModel threadingModel):QMain
 
 	// 初始化点云数据管理器，单例模式
 	PCloudManager::Instance(mainView_root);
+
+	std::string timeInfo;
+	getCurrentDateTime(timeInfo, time_format_2);
+	std::string startInfo = std::string("start at ") + timeInfo;
+	OUTPUT_LOG_AND_CONSOLE(startInfo);
 }
 
 OsgQtTest::~OsgQtTest() { }

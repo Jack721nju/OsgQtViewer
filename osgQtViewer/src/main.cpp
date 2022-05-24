@@ -1,6 +1,9 @@
 ﻿/* Copyright© 2022 Jack721 */
 #include "OsgQtWindow.h"
 #include "JsonMgr.h"
+#include "easylogging++.h"
+
+INITIALIZE_EASYLOGGINGPP
 
 int main(int argc, char* argv[]) {
 	QApplication a(argc, argv);
@@ -25,5 +28,6 @@ int main(int argc, char* argv[]) {
 	viewWidget->show();
 
 	splash.finish(viewWidget);
+	LOG(INFO) << "QtViewer start successfully!";
 	return a.exec();
 }

@@ -1,5 +1,7 @@
 ﻿/* Copyright© 2022 Jack721 */
 #include "ProjectToXY.h"
+#include <algorithm>
+#include <math.h>
 
 PaintArea::PaintArea(QWidget* parent) : QWidget(parent) {
 	//初始化绘制区域范围
@@ -18,6 +20,31 @@ PaintArea::PaintArea(int widthX, int heightY) {
 void PaintArea::paintEvent(QPaintEvent *) {
 	QPainter painter(this);
 	painter.drawImage(20, 20, *image);
+}
+
+void PaintArea::drawPointsWithCurve(QPointF points[], std::vector<float> & curvatureList, int point_num, int point_size, const QColor& point_color) {
+	if (!image)
+		return;
+
+	std::vector<float>::iterator xmax = std::max_element(begin(curvatureList), end(curvatureList));
+	float maxcurve = *xmax;
+	
+	QPainter painter(image);
+	painter.setRenderHint(QPainter::Antialiasing, true);//设置反锯齿模式
+	
+	for (int i = 0; i < point_num; ++i) {
+		QPen pen;
+		pen.setWidth(point_size);
+		pen.setStyle(Qt::SolidLine);
+		pen.setColor(point_color);
+		float colorRate = curvatureList[i] / (maxcurve - 0.0);
+		if (colorRate > 0.3) {
+			pen.setColor(QColor(255, 0, 0, 255));
+			pen.setWidth(point_size * 2);
+		}
+		painter.setPen(pen);
+		painter.drawPoint(points[i]);
+	}
 }
 
 void PaintArea::drawPoints(QPointF points[], int point_num, int point_size, const QColor& point_color) {

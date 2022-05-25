@@ -13,6 +13,7 @@ class PaintArea : public QWidget {
 	void paintEvent(QPaintEvent *);
 	void drawAxis();
 	void drawPoints(QPointF points[], int point_num, int point_size = 1.0, const QColor& point_color = Qt::blue);
+	void drawPointsWithCurve(QPointF points[], std::vector<float> & curvatureList, int point_num, int point_size = 1.0, const QColor& point_color = Qt::blue);
 	void drawCircles(const std::vector<osg::Vec2> &center_list, int radius);
 	void drawCircles(const std::vector<osg::Vec3> &circle_list, const std::vector<int> & Size_List);
 	void drawLines(const std::vector<Edge> & line_list);

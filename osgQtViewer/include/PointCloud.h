@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <pcl/io/io.h>
 #include <pcl/features/normal_3d.h>
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/features/normal_3d_omp.h>
 
 #include <iostream>
 #include <string>

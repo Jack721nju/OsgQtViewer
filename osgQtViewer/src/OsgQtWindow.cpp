@@ -1532,6 +1532,12 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 		return;
 	}
 
+	pcl::PointCloud<pcl::PointXYZ>::Ptr project2DPoints(new pcl::PointCloud<pcl::PointXYZ>);
+	project2DPoints->width = pointArry->size();
+	project2DPoints->height = 1;
+	project2DPoints->is_dense = false;
+	project2DPoints->points.resize(project2DPoints->width * project2DPoints->height);
+
 	int id = -1;
 	for (const auto & curP : *pointArry) {
 		float Qpoint_x = (curP.x() - x_min) * ratio_pixel_x;
@@ -1539,14 +1545,39 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 
 		Qpoint_y = 500 - Qpoint_y;
 
-		QPointF each_point(Qpoint_x + 60, Qpoint_y + 10);
-		osg::Vec2 point2D(Qpoint_x + 60, Qpoint_y + 10);
+		float new_Qpoint_x = Qpoint_x + 60;
+		float new_Qpoint_y = Qpoint_y + 10;
+		QPointF each_point(new_Qpoint_x, new_Qpoint_y);
+		osg::Vec2 point2D(new_Qpoint_x, new_Qpoint_y);
 
 		point[++id] = each_point;
 		pointlist_bulidGrid2D.emplace_back(point2D);
+		project2DPoints->at(id).x = new_Qpoint_x;
+		project2DPoints->at(id).y = new_Qpoint_y;
+		if (id % 2 == 0) {
+			project2DPoints->at(id).z = 1.0;
+		} else {
+			project2DPoints->at(id).z = 0.0;
+		}
 	}
 
-	Project_widget->drawPoints(point, num);
+	pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> m_normal;
+	pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+	pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTree(new pcl::search::KdTree<pcl::PointXYZ>);
+
+	m_normal.setNumberOfThreads(10);
+	m_normal.setInputCloud(project2DPoints);
+	m_normal.setSearchMethod(kdTree);
+	m_normal.setKSearch(10);
+	m_normal.compute(*normals);
+
+	std::vector<float> pointCurveList;
+	for (const auto & curNormal : *normals) {
+		pointCurveList.push_back(curNormal.curvature);
+	}
+
+	//Project_widget->drawPoints(point, num);
+	Project_widget->drawPointsWithCurve(point, pointCurveList, num, 2);
 	Project_widget->drawDegreeLines(QString("X"), QString("Y"), x_min, y_min, delt_x, delt_y);
 
 	QVBoxLayout *v_layout = new QVBoxLayout();

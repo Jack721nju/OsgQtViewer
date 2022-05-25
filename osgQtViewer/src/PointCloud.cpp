@@ -4,10 +4,7 @@
 #include <pcl/io/pcd_io.h>// PCL的PCD格式文件的输入输出头文件
 #include <pcl/point_types.h>// PCL对各种格式点的支持头文件
 #include <pcl/octree/octree.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/kdtree/kdtree_flann.h>
 
-#include <pcl/features/normal_3d_omp.h>
 
 #include <thread>
 #include <mutex>

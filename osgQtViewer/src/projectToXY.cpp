@@ -1,7 +1,6 @@
 ﻿/* Copyright© 2022 Jack721 */
 #include "ProjectToXY.h"
 #include <algorithm>
-#include <math.h>
 
 PaintArea::PaintArea(QWidget* parent) : QWidget(parent) {
 	//初始化绘制区域范围
@@ -28,10 +27,10 @@ void PaintArea::drawPointsWithCurve(QPointF points[], std::vector<float> & curva
 
 	std::vector<float>::iterator xmax = std::max_element(begin(curvatureList), end(curvatureList));
 	float maxcurve = *xmax;
-	
+
 	QPainter painter(image);
 	painter.setRenderHint(QPainter::Antialiasing, true);//设置反锯齿模式
-	
+
 	for (int i = 0; i < point_num; ++i) {
 		QPen pen;
 		pen.setWidth(point_size);

@@ -15,7 +15,7 @@ static float eye_distance_rate = 5;
 
 #define OUTPUT_LOG_AND_CONSOLE(info)                 \
 	LOG(INFO) << info;                               \
-    AddToConsoleSlot(QString::fromStdString(info));  
+	AddToConsoleSlot(QString::fromStdString(info));
 
 static const char time_format_1[] = "%b %d %Y %H:%M:%S";
 static const char time_format_2[] = "%Y-%m-%d %H:%M:%S";
@@ -1101,7 +1101,7 @@ void OsgQtTest::ReadLasData(const std::string & fileName) {
 
 		if (pointNum < MaxUsingThreadReadNum) {
 			scene_Pcloud->readLasData(fileName);
-			//scene_Pcloud->readLasDataMultiThread(fileName);
+			// scene_Pcloud->readLasDataMultiThread(fileName);
 			AddNodeToDataTree(fileName);
 			SetCamerToObjectCenter(scene_Pcloud->getGeoPoint());
 			float showTime = static_cast<float>(_timerClock.getTime<Ms>() * 0.001);
@@ -1576,7 +1576,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 		pointCurveList.push_back(curNormal.curvature);
 	}
 
-	//Project_widget->drawPoints(point, num);
+	// Project_widget->drawPoints(point, num);
 	Project_widget->drawPointsWithCurve(point, pointCurveList, num, 2);
 	Project_widget->drawDegreeLines(QString("X"), QString("Y"), x_min, y_min, delt_x, delt_y);
 

@@ -6,6 +6,8 @@
 #include <string>
 #include <liblas/liblas.hpp>
 
+#include "easylogging.h"
+
 #include "osgQt.h"
 #include "PointCloud.h"
 #include "OsgContainer.h"
@@ -14,7 +16,6 @@
 #include "ProjectToXY.h"
 #include "QuadTree.h"
 
-#include "easylogging++.h"
 
 //多视景器
 class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {

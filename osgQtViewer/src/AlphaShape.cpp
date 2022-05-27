@@ -38,7 +38,6 @@ point_MAXMIN* getMinMaxXYZ(const PointV2List & all_list) {
 	return Max_area;
 }
 
-
 SingleGrid2D::SingleGrid2D(float Grid_X, float Grid_Y) {
 	cur_PointNum = 0;
 
@@ -54,7 +53,6 @@ SingleGrid2D::SingleGrid2D(float Grid_X, float Grid_Y) {
 
 	SmoothDegree = 0;
 }
-
 
 SingleGrid2D::SingleGrid2D(const GridInfo & curGrid) {
 	cur_PointNum = 0;
@@ -482,7 +480,6 @@ static float Distance_point(osg::Vec2 pointA, osg::Vec2 pointB) {
 bool sortFun(const float & angle1, const float & angle2) {
 	return angle1 < angle2;
 }
-
 
 // 计算每个点为中心的包裹圆，统计落在圆形内部的点的数量,通过数量对中心点是否属于边界点进行判断
 void AlphaShape::Detect_Shape_By_PackCirlce(GridNet* curGridNet, float radius, int pointMaxNum) {

@@ -5,7 +5,6 @@
 #include <pcl/point_types.h>// PCL对各种格式点的支持头文件
 #include <pcl/octree/octree.h>
 
-
 #include <thread>
 #include <mutex>
 

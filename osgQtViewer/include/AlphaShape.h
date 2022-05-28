@@ -16,8 +16,6 @@
 
 #include "./struct.h"
 
-typedef std::vector<osg::Vec2> PointV2List;
-
 // 检测边界线的信息
 struct Edge {
 	osg::Vec2 point_A;
@@ -104,7 +102,7 @@ class SingleGrid2D {
 
  public:
 	// 网格内含有的点列表
-	PointV2List PointList;
+	std::vector<osg::Vec2> PointList;
 
 	// 网格内的点数量
 	unsigned int cur_PointNum;
@@ -147,11 +145,11 @@ class SingleGrid2D {
 class GridNet {
  public:
 	// 根据点云生成当前的二维网格
-	explicit GridNet(const PointV2List & pList);
+	explicit GridNet(const std::vector<osg::Vec2> & pList);
 
  public:
 	// 所有点的列表
-	PointV2List Points_List;
+	std::vector<osg::Vec2> Points_List;
 
 	// 所有二维网格列表
 	std::vector<SingleGrid2D*> Grid_list;

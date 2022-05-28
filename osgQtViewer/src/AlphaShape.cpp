@@ -17,7 +17,7 @@ static bool checkPointSame(osg::Vec2 pointA, osg::Vec2 pointB) {
 }
 
 // 获取给定点云数据的XY最大最小范围
-point_MAXMIN* getMinMaxXYZ(const PointV2List & all_list) {
+point_MAXMIN* getMinMaxXYZ(const std::vector<osg::Vec2> & all_list) {
 	point_MAXMIN * Max_area = new point_MAXMIN;
 	std::vector<float> x_list, y_list, z_list;
 	for (int i = 0; i < all_list.size(); ++i) {
@@ -72,7 +72,7 @@ SingleGrid2D::SingleGrid2D(const GridInfo & curGrid) {
 	curGridInfo = curGrid;
 }
 
-GridNet::GridNet(const PointV2List &pList) {
+GridNet::GridNet(const std::vector<osg::Vec2> &pList) {
 	Points_List.insert(Points_List.end(), pList.begin(), pList.end());
 	Grid_list.clear();
 	pointMMM = getMinMaxXYZ(Points_List);
@@ -689,7 +689,7 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<S
 	float scaleRate = 0.8f;
 	int cur_point_pair_N = 0;
 
-	PointV2List cur_shape_points;
+	std::vector<osg::Vec2> cur_shape_points;
 	std::vector<Circle> cur_circles;
 	std::vector<Edge> cur_edges;
 
@@ -824,7 +824,7 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<S
 void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & centerGridList, const std::vector<SingleGrid2D*> & allGridList) {
 	thread_local int cur_point_pair_N = 0;
 
-	thread_local PointV2List cur_shape_points;
+	thread_local std::vector<osg::Vec2> cur_shape_points;
 	thread_local std::vector<Circle> cur_circles;
 	thread_local std::vector<Edge> cur_edges;
 

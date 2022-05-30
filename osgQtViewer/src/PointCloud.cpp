@@ -221,7 +221,7 @@ void readLasDataSonThread(const std::string & openfileName, size_t startID, size
 		return;
 	}
 	LASreader * reader = opener.open();
-	if (reader == nullptr) {
+	if (nullptr == reader) {
 		return;
 	}
 
@@ -283,7 +283,7 @@ void PointCloud::readLasDataMultiThread(const std::string & openfileName) {
 		return;
 	}
 	LASreader * reader = opener.open();
-	if (reader == nullptr) {
+	if (nullptr == reader) {
 		return;
 	}
 
@@ -340,7 +340,7 @@ void PointCloud::readLasData(const std::string & openfileName) {
 		return;
 	}
 	LASreader * reader = opener.open();
-	if (reader == nullptr) {
+	if (nullptr == reader) {
 		return;
 	}
 
@@ -487,7 +487,7 @@ void PointCloud::readLasData(const std::string & openfileName, int & rate, bool 
 		return;
 	}
 	LASreader * reader = opener.open();
-	if (reader == nullptr) {
+	if (nullptr == reader) {
 		return;
 	}
 
@@ -811,7 +811,7 @@ point_MAXMIN* PointCloud::getMinMaxXYZ_POINTS() {
 	std::vector<float> x_list, y_list, z_list;
 	osg::Vec3Array * pointArry = this->getVertArry<osg::Vec3Array>();
 
-	if (pointArry == nullptr) {
+	if (nullptr == pointArry) {
 		return nullptr;
 	}
 

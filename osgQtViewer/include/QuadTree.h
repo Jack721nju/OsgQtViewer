@@ -67,7 +67,8 @@ class QuadTreeNode {
 	float m_SizeY;
 
 	int m_tree_Index{ 0 };
-	int m_point_num;
+
+	int m_point_num{ 0 };
 
 	bool m_isSonNode{ false };
 

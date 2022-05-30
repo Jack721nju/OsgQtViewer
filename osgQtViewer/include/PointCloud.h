@@ -101,7 +101,7 @@ class PointCloud : public osg::Geode {
 
 	template <typename type>
 	auto getVertArry() {
-		if (geo_point == nullptr) {
+		if (nullptr == geo_point) {
 			return static_cast<type *>(nullptr);
 		}
 		return dynamic_cast<type *>(geo_point->getVertexArray());

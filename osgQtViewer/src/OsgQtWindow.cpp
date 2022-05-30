@@ -679,13 +679,12 @@ void OsgQtTest::Init_Dock_Data_Info_Widget() {
 }
 
 void OsgQtTest::Init_Point_Info_Widget(const std::string & itemName) {
-
-	if (DataInfo_TableWidget == nullptr) {
+	if (nullptr == DataInfo_TableWidget) {
 		return;
 	}
 
 	PointCloud* curPcloud = PCloudManager::Instance()->getPointCloud(itemName);
-	if (curPcloud == nullptr) {
+	if (nullptr == curPcloud) {
 		return;
 	}
 
@@ -702,7 +701,7 @@ void OsgQtTest::Init_Point_Info_Widget(const std::string & itemName) {
 	DataInfo_TableWidget->setItem(2, 1, t_item_type);
 
 	auto geoPointPtr = curPcloud->getGeoPoint();
-	if (geoPointPtr == nullptr) {
+	if (nullptr == geoPointPtr) {
 		return;
 	}
 	osg::Vec3 box_center = geoPointPtr->getBoundingBox().center();
@@ -828,7 +827,6 @@ void OsgQtTest::slot_setPointCloudColor() {
 }
 
 void OsgQtTest::slot_setPcloudPointSize(int size) {
-
 	QString str = QString("%1").arg(size);
 	m_slider_value->setText(str);
 
@@ -841,7 +839,7 @@ void OsgQtTest::slot_setPcloudPointSize(int size) {
 }
 
 void OsgQtTest::slot_Update_Data_Info_Widget(QTreeWidgetItem* item, int col) {
-	if (item == nullptr) {
+	if (nullptr == item) {
 		return;
 	}
 
@@ -1021,7 +1019,6 @@ void OsgQtTest::slot_OpenData() {
 }
 
 void OsgQtTest::slot_Init_Octree_Widget() {
-
 	m_octree_bulid_Dialog = new QDialog();
 	m_octree_bulid_Dialog->setVisible(true);
 	m_octree_bulid_Dialog->setFixedSize(250, 250);
@@ -1285,7 +1282,7 @@ void OsgQtTest::slot_build_Octree() {
 
 	PointCloud *cur_Pcloud = *(PCloudManager::Instance()->selected_pcloud_list.begin());
 
-	if (cur_Pcloud == nullptr) {
+	if (nullptr == cur_Pcloud) {
 		return;
 	}
 
@@ -1314,7 +1311,7 @@ void OsgQtTest::slot_setPointColorByHeight() {
 
 	PointCloud *cur_Pcloud = *(PCloudManager::Instance()->selected_pcloud_list.begin());
 
-	if (cur_Pcloud == nullptr) {
+	if (nullptr == cur_Pcloud) {
 		return;
 	}
 
@@ -1371,7 +1368,7 @@ void OsgQtTest::SetCameraDirection(int direct_type) {
 	}
 
 	auto curPcloud = *(PCloudManager::Instance()->selected_pcloud_list.begin());
-	if (curPcloud == nullptr) {
+	if (nullptr == curPcloud) {
 		return;
 	}
 
@@ -1452,7 +1449,7 @@ void OsgQtTest::slot_ZoomToScreen() {
 	}
 
 	auto curPcloud = *(PCloudManager::Instance()->selected_pcloud_list.begin());
-	if (curPcloud == nullptr) {
+	if (nullptr == curPcloud) {
 		return;
 	}
 
@@ -1464,7 +1461,7 @@ void OsgQtTest::slot_ZoomToScreen() {
 }
 
 void OsgQtTest::slot_SetBackGroundColor() {
-	if (MainWidget == nullptr) {
+	if (nullptr == MainWidget) {
 		return;
 	}
 	QColorDialog *palette = new QColorDialog(MainWidget);
@@ -1761,7 +1758,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 }
 
 void OsgQtTest::slot_DetectPointShape() {
-	if (ProjectToXY_dialog == nullptr || Project_widget == nullptr) {
+	if (nullptr == ProjectToXY_dialog || nullptr == Project_widget) {
 		this->AddToConsoleSlot(QString("[WARING] No project point!"));
 		return;
 	}

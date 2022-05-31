@@ -821,13 +821,14 @@ point_MAXMIN* PointCloud::getMinMaxXYZ_POINTS() {
 		z_list.push_back(curP.z());
 	}
 
-	std::vector<float>::iterator xmax = max_element(begin(x_list), end(x_list));
-	std::vector<float>::iterator ymax = max_element(begin(y_list), end(y_list));
-	std::vector<float>::iterator zmax = max_element(begin(z_list), end(z_list));
+	// auto = std::vector<float>::iterator
+	auto xmax = max_element(begin(x_list), end(x_list));
+	auto ymax = max_element(begin(y_list), end(y_list));
+	auto zmax = max_element(begin(z_list), end(z_list));
 
-	std::vector<float>::iterator xmin = min_element(begin(x_list), end(x_list));
-	std::vector<float>::iterator ymin = min_element(begin(y_list), end(y_list));
-	std::vector<float>::iterator zmin = min_element(begin(z_list), end(z_list));
+	auto xmin = min_element(begin(x_list), end(x_list));
+	auto ymin = min_element(begin(y_list), end(y_list));
+	auto zmin = min_element(begin(z_list), end(z_list));
 
 	Max_area->xmax = *xmax;
 	Max_area->ymax = *ymax;

@@ -218,7 +218,7 @@ class AlphaShape {
 	void Detect_Shape_line(float radius);
 
 	// 多线程检测
-	void Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threadNum = 2);
+	void Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threadNum = 4);
 
 	// 根据生成的网格对默认算法进行优化，检测邻域域网格内的点，并不判断所有的点
 	void Detect_Alpha_Shape_by_Grid(float radius);

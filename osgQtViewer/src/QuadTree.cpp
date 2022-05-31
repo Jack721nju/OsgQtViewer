@@ -16,11 +16,11 @@ point2D_MAXMIN QuadTreeNode::getMinMaxXY(const std::vector<QPointF> & all_list) 
 		x_list.push_back(all_list[i].x());
 		y_list.push_back(all_list[i].y());
 	}
-	std::vector<float>::iterator xmax = max_element(begin(x_list), end(x_list));
-	std::vector<float>::iterator ymax = max_element(begin(y_list), end(y_list));
+	auto xmax = max_element(begin(x_list), end(x_list));
+	auto ymax = max_element(begin(y_list), end(y_list));
 
-	std::vector<float>::iterator xmin = min_element(begin(x_list), end(x_list));
-	std::vector<float>::iterator ymin = min_element(begin(y_list), end(y_list));
+	auto xmin = min_element(begin(x_list), end(x_list));
+	auto ymin = min_element(begin(y_list), end(y_list));
 
 	Max_area.xmax = *xmax;
 	Max_area.ymax = *ymax;

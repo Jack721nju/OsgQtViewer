@@ -1077,13 +1077,13 @@ bool PCloudManager::setSelectState(const std::string & pName, bool isSelected) {
 	if (pName.empty()) {
 		return false;
 	}
-	PointCloud * curPCl = getPointCloud(pName);
-	if (curPCl) {
-		curPCl->setSelected(isSelected);
+	PointCloud * curPcl = getPointCloud(pName);
+	if (curPcl) {
+		curPcl->setSelected(isSelected);
 		if (isSelected) {
-			selected_pcloud_list.emplace_back(curPCl);
+			selected_pcloud_list.emplace_back(curPcl);
 		} else {
-			selected_pcloud_list.remove(curPCl);
+			selected_pcloud_list.remove(curPcl);
 		}
 		return true;
 	}
@@ -1117,11 +1117,11 @@ void PCloudManager::saveSelectedToFile(const std::string & saveFileName) {
 	int pos = saveFileName.find_last_of('.');
 	const std::string &fileFormat = saveFileName.substr(pos + 1);
 	outf.setf(std::ios::fixed, std::ios::floatfield);
-	if (fileFormat == "txt") {
+	if ("txt" == fileFormat) {
 		for (const auto & curVert : *vertAll) {
 			outf << setiosflags(std::ios::left) << std::setprecision(3) << curVert.x() << " " << curVert.y() << " " << curVert.z() << " " << std::endl;
 		}
-	} else if (fileFormat == "las") {
+	} else if ("las" == fileFormat) {
 		LASwriteOpener writerOpener;
 		writerOpener.set_file_name(saveFileName.c_str());
 		LASheader header;

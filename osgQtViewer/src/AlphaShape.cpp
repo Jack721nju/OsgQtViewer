@@ -245,7 +245,7 @@ void GridNet::getCenterPoint() {
 		if (curGrid2D->hasPoint) {
 			++haspointGridNum;
 
-			if (curGrid2D->nearByGridAllWithpoint == false) {
+			if (false == curGrid2D->nearByGridAllWithpoint) {
 				++GridOutsideNum;
 			}
 		}
@@ -261,12 +261,12 @@ void GridNet::getVectorOfOutSideGrid() {
 
 	for (const auto & curGrid : this->Grid_list) {
 		// 当前网格内无点
-		if (curGrid->hasPoint == false) {
+		if (false == curGrid->hasPoint) {
 			continue;
 		}
 
 		// 当前网格的八邻域网格均含有点
-		if (curGrid->nearByGridAllWithpoint == true) {
+		if (curGrid->nearByGridAllWithpoint) {
 			continue;
 		}
 
@@ -299,9 +299,9 @@ void GridNet::getVectorOfOutSideGrid() {
 					continue;
 				}
 
-				if (nearGrid->hasPoint == true) {
+				if (nearGrid->hasPoint) {
 					// 邻域网格也属于边界网格
-					if (nearGrid->nearByGridAllWithpoint == false) {
+					if (false == nearGrid->nearByGridAllWithpoint) {
 						const osg::Vec2 &nearGridCenterPoint = nearGrid->CenterPoint;
 						curGrid->curVectorGrid += (nearGridCenterPoint - curGridCenterPoint);
 						curGrid->VectorList.emplace_back(nearGridCenterPoint - curGridCenterPoint);
@@ -332,12 +332,12 @@ static float AngleBetweenVector(osg::Vec2 vector1, osg::Vec2 vector2) {
 void GridNet::DetectSmoothForOutSideGrid() {
 	for (const auto & curGrid : this->Grid_list) {
 		// 当前网格内无点
-		if (curGrid->hasPoint == false) {
+		if (false == curGrid->hasPoint) {
 			continue;
 		}
 
 		// 当前网格的八邻域网格均含有点
-		if (curGrid->nearByGridAllWithpoint == true) {
+		if (curGrid->nearByGridAllWithpoint) {
 			continue;
 		}
 
@@ -498,12 +498,12 @@ void AlphaShape::Detect_Shape_By_PackCirlce(GridNet* curGridNet, float radius, i
 		int curColID = curGrid->curGridInfo.m_Col;
 
 		// 当前网格内无点，为空网格，直接跳过
-		if (curGrid->hasPoint == false) {
+		if (false == curGrid->hasPoint) {
 			continue;
 		}
 
 		// 当前网格的八邻域网格均含有点，说明不是边界网格，直接跳过
-		if (curGrid->nearByGridAllWithpoint == true) {
+		if (curGrid->nearByGridAllWithpoint) {
 			continue;
 		}
 
@@ -559,12 +559,12 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 		// m_points.clear();
 
 		// 当前网格内无点
-		if (curGrid->hasPoint == false) {
+		if (false == curGrid->hasPoint) {
 			continue;
 		}
 
 		// 当前网格的八邻域网格均含有点
-		if (curGrid->nearByGridAllWithpoint == true) {
+		if (curGrid->nearByGridAllWithpoint) {
 			continue;
 		}
 
@@ -590,7 +590,7 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 					continue;
 				}
 
-				if (nearGrid->hasPoint == true) {
+				if (nearGrid->hasPoint) {
 					for (int m = 0; m < nearGrid->cur_PointNum; m++) {
 						float nearPointX = nearGrid->PointList[m].x();
 						float nearPointY = nearGrid->PointList[m].y();

@@ -89,7 +89,7 @@ GridNet::GridNet(const std::vector<osg::Vec2> &pList) {
 }
 
 SingleGrid2D* GridNet::getGridByRowAndCol(int RowID, int ColID) {
-	for (int i = 0; i < this->Grid_Num; ++i) {
+	for (size_t i = 0; i < this->Grid_Num; ++i) {
 		SingleGrid2D* curGrid = this->Grid_list[i];
 		if (curGrid->curGridInfo.m_Row == RowID) {
 			if (curGrid->curGridInfo.m_Col == ColID) {
@@ -182,8 +182,8 @@ void GridNet::buildNetByNum(int RowNum, int ColNum) {
 	SingleGrid2D *curGrid2D = nullptr;
 	int gridNum = -1;
 	// 向外部扩张一层空的网格，便于后续的邻域搜索
-	for (int i = 0; i < (Row_Num + 2); ++i) {
-		for (int j = 0; j < (Col_Num + 2); ++j) {
+	for (size_t i = 0; i < (Row_Num + 2); ++i) {
+		for (size_t j = 0; j < (Col_Num + 2); ++j) {
 			cur_grid.Min_X = pointMMM->xmin + Grid_X*(i - 1);
 			cur_grid.Max_X = cur_grid.Min_X + Grid_X;
 			cur_grid.Min_Y = pointMMM->ymin + Grid_Y*(j - 1);
@@ -279,8 +279,8 @@ void GridNet::getVectorOfOutSideGrid() {
 		SingleGrid2D* nearGrid = nullptr;
 
 		// 统计当前网格的上下左右的邻域网格，而不是八网格
-		for (int k = curRowID - 1; k <= curRowID + 1; ++k) {
-			for (int j = curColID - 1; j <= curColID + 1; ++j) {
+		for (size_t k = curRowID - 1; k <= curRowID + 1; ++k) {
+			for (size_t j = curColID - 1; j <= curColID + 1; ++j) {
 				if ((k == curRowID) && (j == curColID)) {
 					continue;
 				}
@@ -354,7 +354,7 @@ void GridNet::DetectSmoothForOutSideGrid() {
 			}
 
 			if (nearGrid->hasPoint) {
-				if (nearGrid->nearByGridAllWithpoint == false) {
+				if (false == nearGrid->nearByGridAllWithpoint) {
 					++needCalculateGridNum;
 					needCalculateGrid_list.emplace_back(nearGrid);
 				}
@@ -423,9 +423,9 @@ void GridNet::DetectSmoothForOutSideGrid() {
 		bool isBeyondAngle = false;
 
 		for (int j = 0; j < vectorNum; ++j) {
-			osg::Vec2 curVector = curGrid->VectorList[j];
+			const osg::Vec2 &curVector = curGrid->VectorList[j];
 			for (int k = j + 1; k < vectorNum; ++k) {
-				osg::Vec2 nextVector = curGrid->VectorList[k];
+				const osg::Vec2 &nextVector = curGrid->VectorList[k];
 				if (AngleBetweenVector(curVector, nextVector) > AngleValue) {
 					isBeyondAngle = true;
 				}
@@ -476,7 +476,6 @@ static float Distance_point(osg::Vec2 pointA, osg::Vec2 pointB) {
 	return std::sqrt(std::pow(pointA.x() - pointB.x(), 2) + std::pow(pointA.y() - pointB.y(), 2));
 }
 
-
 bool sortFun(const float & angle1, const float & angle2) {
 	return angle1 < angle2;
 }
@@ -486,7 +485,7 @@ void AlphaShape::Detect_Shape_By_PackCirlce(GridNet* curGridNet, float radius, i
 	this->m_shape_points.clear();
 
 	// 遍历所有网格
-	for (int i = 0; i < curGridNet->Grid_Num; i++) {
+	for (size_t i = 0; i < curGridNet->Grid_Num; i++) {
 		// 当前网格
 		SingleGrid2D* curGrid = curGridNet->Grid_list[i];
 
@@ -546,7 +545,7 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 	// 用于判断检测圆是否含有点的判断点云
 	std::vector<osg::Vec2> detect_point_list;
 
-	for (int i = 0; i < curGridNet->Grid_Num; i++) {
+	for (size_t i = 0; i < curGridNet->Grid_Num; i++) {
 		SingleGrid2D* curGrid = curGridNet->Grid_list[i];
 
 		if (curGrid) {
@@ -570,8 +569,8 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 
 		detect_point_list.clear();
 
-		for (int k = curRowID - 1; k <= curRowID + 1; k++) {
-			for (int j = curColID - 1; j <= curColID + 1; j++) {
+		for (size_t k = curRowID - 1; k <= curRowID + 1; k++) {
+			for (size_t j = curColID - 1; j <= curColID + 1; j++) {
 				if ((k == curRowID) && (j == curColID)) {
 					// continue;
 				}
@@ -591,12 +590,12 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 				}
 
 				if (nearGrid->hasPoint) {
-					for (int m = 0; m < nearGrid->cur_PointNum; m++) {
+					for (size_t m = 0; m < nearGrid->cur_PointNum; m++) {
 						float nearPointX = nearGrid->PointList[m].x();
 						float nearPointY = nearGrid->PointList[m].y();
 
 						osg::Vec2 nearPoint(nearPointX, nearPointY);
-						detect_point_list.push_back(nearPoint);
+						detect_point_list.emplace_back(nearPoint);
 					}
 				}
 			}
@@ -666,7 +665,7 @@ void AlphaShape::Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius,
 				}
 			}
             if (circlePointNum < pointNum) {
-				m_shape_points.push_back(curPoint);
+				m_shape_points.emplace_back(curPoint);
 			}
 		}
 	}
@@ -676,7 +675,6 @@ void AlphaShape::Detect_Shape_By_GridNet_New(float radius) {
 	if (nullptr == m_gridNet) {
 		return;
 	}
-
 	this->Detect_Shape_line_by_Grid_New(radius, m_gridNet->Grid_list);
 }
 
@@ -697,7 +695,7 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<S
 	int circleSize = 0;
 
 	for (const auto & centerGrid : allGridList) {
-		if (centerGrid->hasPoint == false) {
+		if (false == centerGrid->hasPoint) {
 			continue;
 		}
 
@@ -707,7 +705,7 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<S
 		}
 
 		// 当前网格不平滑，需要缩小检测半径，检测更为细致
-		if (centerGrid->isSmoothGrid == false) {
+		if (false == centerGrid->isSmoothGrid) {
 			circleSize = centerGrid->SmoothDegree;
 
 			if (circleSize == 1) {
@@ -823,15 +821,13 @@ void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<S
 // 方法三的子函数：基于网格筛选的alpha shape处理函数，供多线程调用
 void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & centerGridList, const std::vector<SingleGrid2D*> & allGridList) {
 	thread_local int cur_point_pair_N = 0;
-
 	thread_local std::vector<osg::Vec2> cur_shape_points;
 	thread_local std::vector<Circle> cur_circles;
 	thread_local std::vector<Edge> cur_edges;
-
 	thread_local std::vector<osg::Vec2> detectAreaAllPointList;
 
 	for (const auto & centerGrid : centerGridList) {
-		if (centerGrid->hasPoint == false) {
+		if (false == centerGrid->hasPoint) {
 			continue;
 		}
 
@@ -1005,7 +1001,7 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 	std::vector<osg::Vec2> detectAreaAllPointList;
 
 	for (const auto & centerGrid : gridList) {
-		if (nullptr == centerGrid || centerGrid->hasPoint == false) {
+		if (nullptr == centerGrid || false == centerGrid->hasPoint) {
 			continue;
 		}
 

@@ -9,7 +9,7 @@ static std::vector<Edge> all_edges;
 static std::vector<Circle> all_circles;
 static int all_point_pair_N;
 
-static bool checkPointSame(osg::Vec2 pointA, osg::Vec2 pointB) {
+static bool checkPointSame(const osg::Vec2 &pointA, const osg::Vec2 &pointB) {
 	if ((pointA - pointB).length() < 0.000001) {
 		return true;
 	}
@@ -24,11 +24,11 @@ point_MAXMIN* getMinMaxXYZ(const std::vector<osg::Vec2> & all_list) {
 		x_list.push_back(all_list[i].x());
 		y_list.push_back(all_list[i].y());
 	}
-	std::vector<float>::iterator xmax = max_element(begin(x_list), end(x_list));
-	std::vector<float>::iterator ymax = max_element(begin(y_list), end(y_list));
+	std::vector<float>::iterator xmax = std::max_element(begin(x_list), end(x_list));
+	std::vector<float>::iterator ymax = std::max_element(begin(y_list), end(y_list));
 
-	std::vector<float>::iterator xmin = min_element(begin(x_list), end(x_list));
-	std::vector<float>::iterator ymin = min_element(begin(y_list), end(y_list));
+	std::vector<float>::iterator xmin = std::min_element(begin(x_list), end(x_list));
+	std::vector<float>::iterator ymin = std::min_element(begin(y_list), end(y_list));
 
 	Max_area->xmax = *xmax;
 	Max_area->ymax = *ymax;
@@ -122,7 +122,7 @@ bool GridNet::isPointInGrid(const osg::Vec2 & curPoint, SingleGrid2D *test_Grid)
 // 检测每个二维网格的八邻域连通的网格，并逐一判断网格内是否有点
 void GridNet::detectGridWithConnection() {
 	for (const auto & curGrid2D : this->Grid_list) {
-		if (curGrid2D->hasPoint == false) {
+		if (false == curGrid2D->hasPoint) {
 			continue;
 		}
 
@@ -138,7 +138,7 @@ void GridNet::detectGridWithConnection() {
 		int topLeftGridID = topGridID - 1;
 		int topRightGridID = topGridID + 1;
 
-		std::vector<int> idList{ buttomLeftGridID , buttomGridID, buttomRightGridID, curLeftGridID, curRightGridID, topLeftGridID, topGridID, topRightGridID };
+		std::vector<int> idList{ buttomLeftGridID, buttomGridID, buttomRightGridID, curLeftGridID, curRightGridID, topLeftGridID, topGridID, topRightGridID };
 		int countNum = 0;
 		SingleGrid2D *nearGrid2D = nullptr;
 		for (const auto curID : idList) {
@@ -244,7 +244,6 @@ void GridNet::getCenterPoint() {
 	for (const auto & curGrid2D : this->Grid_list) {
 		if (curGrid2D->hasPoint) {
 			++haspointGridNum;
-
 			if (false == curGrid2D->nearByGridAllWithpoint) {
 				++GridOutsideNum;
 			}

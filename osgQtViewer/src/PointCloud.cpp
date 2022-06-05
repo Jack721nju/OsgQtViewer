@@ -155,7 +155,6 @@ void PointCloud::buildOtree(float minSize) {
 		geo_mesh->addPrimitiveSet(quad);
 		geo_octree_node->addDrawable(geo_mesh.get());
 	}
-
 	this->addChild(geo_octree_node);
 }
 

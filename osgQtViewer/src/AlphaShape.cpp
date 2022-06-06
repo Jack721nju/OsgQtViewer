@@ -156,7 +156,7 @@ void GridNet::detectGridWithConnection() {
 			}
 		}
 
-		if (countNum == 8) {
+		if (8 == countNum) {
 			curGrid2D->nearByGridAllWithpoint = true;
 		} else {
 			++this->GridOutside_Num;

@@ -104,7 +104,11 @@ class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {
 
 	QLineEdit *m_grid_radius;
 
+	QLineEdit *m_pcl_alpha;
+
 	std::vector<osg::Vec2> pointlist_bulidGrid2D;
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr m_pointPclProject2D;
 
 	GridNet* m_gridNet{nullptr};
 
@@ -201,6 +205,8 @@ class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {
 
 	void slot_DetectPointShapeUsingGridNet();
 
+	void slot_DetectPointShapeUsingPclConcaveHull();
+	
 	void slot_ShowItemMenuSlot(const QPoint& pos);
 
 	void slot_addItem();

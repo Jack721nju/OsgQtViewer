@@ -1535,6 +1535,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	project2DPoints->is_dense = false;
 	project2DPoints->points.resize(project2DPoints->width * project2DPoints->height);
 
+	bool isNeedCurve = false;
 	int id = -1;
 	for (const auto & curP : *pointArry) {
 		float Qpoint_x = (curP.x() - x_min) * ratio_pixel_x;
@@ -1551,11 +1552,15 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 		pointlist_bulidGrid2D.emplace_back(point2D);
 		project2DPoints->at(id).x = new_Qpoint_x;
 		project2DPoints->at(id).y = new_Qpoint_y;
-		if (id % 2 == 0) {
+		if (isNeedCurve && (id % 2 == 0)) {
 			project2DPoints->at(id).z = 1.0;
 		} else {
 			project2DPoints->at(id).z = 0.0;
 		}
+	}
+
+	if (project2DPoints.get()) {
+		m_pointPclProject2D = project2DPoints;
 	}
 
 	pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> m_normal;
@@ -1573,8 +1578,10 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 		pointCurveList.push_back(curNormal.curvature);
 	}
 
-	// Project_widget->drawPoints(point, num);
-	Project_widget->drawPointsWithCurve(point, pointCurveList, num, 2);
+	Project_widget->drawPoints(point, num);
+
+	// 计算投影点的曲率
+	// Project_widget->drawPointsWithCurve(point, pointCurveList, num, 2);
 	Project_widget->drawDegreeLines(QString("X"), QString("Y"), x_min, y_min, delt_x, delt_y);
 
 	QVBoxLayout *v_layout = new QVBoxLayout();
@@ -1700,7 +1707,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 
 	QPushButton * build_quad_tree = new QPushButton("Build", ProjectToXY_dialog);
 	build_quad_tree->setFixedSize(100, 30);
-	connect(build_quad_tree, SIGNAL(clicked()), this, SLOT(slot_BuildQuadGridForPoints()));
+	connect(build_quad_tree, SIGNAL(clicked()), this, SLOT(slot_DetectPointShapeUsingPclConcaveHull()));
 
 	QLabel *m_label_Quad_Tree_maxDepth = new QLabel(ProjectToXY_dialog);
 	m_label_Quad_Tree_maxDepth->setText("Max Depth:");
@@ -1739,11 +1746,36 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	quad_layout->addStretch(8);
 	quad_tab_widget->setLayout(quad_layout);
 
+	// Pcl canvue hull
+	QLabel *m_label_pcl_alpha_radius = new QLabel(ProjectToXY_dialog);
+	m_label_pcl_alpha_radius->setText("Radius:");
+	m_label_pcl_alpha_radius->setFixedSize(100, 30);
+
+	m_pcl_alpha = new QLineEdit(ProjectToXY_dialog);
+	m_pcl_alpha->setFixedSize(100, 30);
+
+	QPushButton * pcl_concave_hull = new QPushButton("Build", ProjectToXY_dialog);
+	pcl_concave_hull->setFixedSize(100, 30);
+	connect(pcl_concave_hull, SIGNAL(clicked()), this, SLOT(slot_DetectPointShapeUsingPclConcaveHull()));
+
+	QWidget * pcl_tab_widget = new QWidget();
+	QVBoxLayout * pcl_layout = new QVBoxLayout();
+	pcl_layout->addStretch(0);
+	pcl_layout->addWidget(m_label_pcl_alpha_radius, 0);
+	grid_layout->addStretch(0);
+	pcl_layout->addWidget(m_pcl_alpha, 0);
+	pcl_layout->addStretch(1);
+	pcl_layout->addWidget(pcl_concave_hull, 0);
+	pcl_layout->addStretch(8);
+	pcl_tab_widget->setLayout(pcl_layout);
+
+
 	QTabWidget * project_Tab_Widget = new QTabWidget();
-	project_Tab_Widget->setFixedSize(360, 600);
+	project_Tab_Widget->setFixedSize(500, 600);
 	project_Tab_Widget->addTab(alpha_tab_widget, QString("Alpha Shape"));
 	project_Tab_Widget->addTab(grid_tab_widget, QString("Grid Shape"));
 	project_Tab_Widget->addTab(quad_tab_widget, QString("Quad Shape"));
+	project_Tab_Widget->addTab(pcl_tab_widget, QString("Pcl Shape"));
 
 	QVBoxLayout *VV_layout = new QVBoxLayout();
 	VV_layout->addWidget(project_Tab_Widget);
@@ -1796,7 +1828,13 @@ void OsgQtTest::slot_DetectPointShape() {
 		}
 		gridNet->buildNetByNum(gridRow, gridCol);
 		gridNet->detectGridWithConnection();
+
+		// 计算Grid生成耗费时间
+		float runGridTime = _timerClock.getTime<Ms>() / 1000.0;
+		QString cost_grid_time = QString::number(runGridTime);
+		this->AddToConsoleSlot(QString("The cost time of build 2D Grid net is :  ") + cost_grid_time + QString("s"));
 	}
+	
 
 	float radius = 0.0;
 	if (m_radius) {
@@ -1813,11 +1851,25 @@ void OsgQtTest::slot_DetectPointShape() {
 		this->AddToConsoleSlot("Perform alpha detection failed! \n");
 	}
 
+	bool isFlANN = true;
+
 	if (isOnlyAShape) {
-		alpha->Detect_Shape_line(radius);
+		if (!isFlANN) {
+			alpha->Detect_Shape_line(radius);
+		}
+		else {
+			if (m_pointPclProject2D.get() == nullptr) {
+				this->AddToConsoleSlot(QString("[WARING] No pcl project point!"));
+				return;
+			}
+			alpha->setPclPointPtr(m_pointPclProject2D);
+			// alpha->Detect_Alpah_Shape_FLANN(radius);
+			alpha->Detect_Alpah_Shape_FLANN_Multi_Thread(radius, 4);
+		}
 	} else {
 		if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
 			auto threadCount = std::thread::hardware_concurrency();
+			threadCount = 4;
 			alpha->Detect_Alpha_Shape_by_Grid_Multi_Thread(radius, threadCount);
 		} else if (m_Alpah_Grid_radio->isChecked()) {
 			alpha->Detect_Alpha_Shape_by_Grid(radius);
@@ -1840,6 +1892,9 @@ void OsgQtTest::slot_DetectPointShape() {
 	//计算小于滚动圆直径长度的点对比例
 	QString cost_scale = QString::number(alpha->point_pair_scale, 'f', 3);
 	this->AddToConsoleSlot(QString("The scale of detecting Contour by default is :  ") + cost_scale);
+
+	QString cost_point_num = QString::number(alpha->m_point_pair_N);
+	this->AddToConsoleSlot(QString("The sum detect point num is :  ") + cost_point_num);
 
 	std::vector<osg::Vec2> center_list;
 
@@ -2116,6 +2171,61 @@ void OsgQtTest::slot_Build2DGridForPoints() {
 	float runTimeAll = _timerClock.getTime<Ms>() / 1000.0;
 	const QString & cost_timeAll = QString::number(runTimeAll);
 	this->AddToConsoleSlot(QString("The all cost time of building 2D grid net is :  ") + cost_timeAll + QString("s"));
+}
+
+void OsgQtTest::slot_DetectPointShapeUsingPclConcaveHull() {
+	if (m_pointPclProject2D.get() == nullptr) {
+		this->AddToConsoleSlot(QString("[WARING] No pcl project point!"));
+		return;
+	}
+
+	_timerClock.start();
+
+	AlphaShape * alpha = new AlphaShape(m_pointPclProject2D);
+	float radius = 0.0;
+	if (m_pcl_alpha) {
+		radius = m_pcl_alpha->text().toFloat();
+	}
+	alpha->Detect_Shape_by_PCl_Concave_Hull(radius);
+
+	float runTimeAll = _timerClock.getTime<Ms>() / 1000.0;
+	const QString &cost_timeAll = QString::number(runTimeAll);
+	this->AddToConsoleSlot(QString("The all cost time of detecting Contour by PCL concave hull is :  ") + cost_timeAll + QString("s"));
+	
+	PaintArea *Project_widget_Point = new PaintArea();
+	Project_widget_Point->setFixedSize(660, 660);
+	Project_widget_Point->setVisible(true);
+	Project_widget_Point->setAttribute(Qt::WA_DeleteOnClose);
+	Project_widget_Point->drawAxis();
+
+	int shape_num = alpha->m_shape_points.size();
+	QPointF *shape_point = new QPointF[shape_num];
+	int pointID = -1;
+	for (const auto & curP : alpha->m_shape_points) {
+		shape_point[++pointID] = QPointF(curP.x(), curP.y());
+	}
+
+	Project_widget_Point->drawPoints(shape_point, shape_num, 2, Qt::red);
+
+
+	std::ofstream outf;
+	double x, y, z = 0.0;
+	outf.open("E:/Data/test/Select/OutlinePoint_UsingPCL.txt", std::ios::out);
+
+	for (int i = 0; i < shape_num; i++) {
+		x = alpha->m_shape_points[i].x();
+		y = alpha->m_shape_points[i].y();
+		z = 0.0;
+
+		if (!outf.is_open()) {
+			return;
+		}
+
+		outf << fixed << std::setprecision(3) << x << " " << y << " " << z << " ";
+		outf << endl;
+	}
+
+	outf.close();
 }
 
 void OsgQtTest::slot_DetectPointShapeUsingGridNet() {

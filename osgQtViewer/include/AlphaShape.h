@@ -14,6 +14,13 @@
 #include <mutex>
 #include <thread>
 
+#include <pcl/io/io.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/features/normal_3d_omp.h>
+#include <pcl/surface/concave_hull.h>
+
 #include "./struct.h"
 
 // 检测边界线的信息
@@ -211,14 +218,28 @@ class AlphaShape {
  public:
 	explicit AlphaShape(const std::vector<osg::Vec2> &point_list);
 	explicit AlphaShape(GridNet * curGridNet);
+	explicit AlphaShape(pcl::PointCloud<pcl::PointXYZ>::Ptr project2DPoints);
 	~AlphaShape();
 
  public:
 	// 根据设置的半径，检测点云边界线，默认的常规算法，将判断所有点，效率较慢
 	void Detect_Shape_line(float radius);
 
+	//通过PCL构建kd树，加速搜索半径方位内的最近邻点
+	void Detect_Alpah_Shape_FLANN(float radius);
+
+	//通过PCL构建kd树，FLANN加速搜索半径方位内的最近邻点，利用多线程并行处理进一步提升速度，后续可考虑结合二维格网，先筛选出必要检测的边界点，剔除内部点集
+	void Detect_Alpah_Shape_FLANN_Multi_Thread(float radius, int threadNum = 4);
+
+	void setPclPointPtr(pcl::PointCloud<pcl::PointXYZ>::Ptr project2DPoints) {
+		m_projectPcl2DPoints = project2DPoints;
+	}
+
 	// 多线程检测
 	void Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threadNum = 4);
+
+	// pcl concave hull 方法获取点云凹包边界
+	void Detect_Shape_by_PCl_Concave_Hull(float radius);
 
 	// 根据生成的网格对默认算法进行优化，检测邻域域网格内的点，并不判断所有的点
 	void Detect_Alpha_Shape_by_Grid(float radius);
@@ -238,6 +259,9 @@ class AlphaShape {
  public:
 	// 用于检测的点列表
 	std::vector<osg::Vec2> m_points;
+
+	// 用于检测的PCL点列表
+	pcl::PointCloud<pcl::PointXYZ>::Ptr m_projectPcl2DPoints;
 
 	// 用于检测的格网指针
 	GridNet * m_gridNet{nullptr};

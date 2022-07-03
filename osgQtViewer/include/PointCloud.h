@@ -8,6 +8,7 @@
 #include <pcl/kdtree/kdtree.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/features/normal_3d_omp.h>
+#include <pcl/surface/concave_hull.h>
 
 #include <iostream>
 #include <string>

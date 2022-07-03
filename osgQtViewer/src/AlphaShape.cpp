@@ -460,6 +460,11 @@ AlphaShape::AlphaShape(GridNet * curGridNet) {
 	}
 }
 
+AlphaShape::AlphaShape(pcl::PointCloud<pcl::PointXYZ>::Ptr project2DPoints) {
+	m_radius = 0.0;
+	m_projectPcl2DPoints = project2DPoints;
+}
+
 AlphaShape::~AlphaShape() {
 	m_radius = 0.0;
 
@@ -471,8 +476,9 @@ AlphaShape::~AlphaShape() {
 	m_shape_points.clear();
 }
 
-static float Distance_point(osg::Vec2 pointA, osg::Vec2 pointB) {
-	return std::sqrt(std::pow(pointA.x() - pointB.x(), 2) + std::pow(pointA.y() - pointB.y(), 2));
+static float Distance_point(const osg::Vec2 &pointA, const osg::Vec2 &pointB) {
+	// return std::sqrt(std::pow(pointA.x() - pointB.x(), 2) + std::pow(pointA.y() - pointB.y(), 2));
+	return (pointA - pointB).length();
 }
 
 bool sortFun(const float & angle1, const float & angle2) {
@@ -677,6 +683,26 @@ void AlphaShape::Detect_Shape_By_GridNet_New(float radius) {
 	this->Detect_Shape_line_by_Grid_New(radius, m_gridNet->Grid_list);
 }
 
+// 方法五：
+void AlphaShape::Detect_Shape_by_PCl_Concave_Hull(float radius) {
+	if (m_projectPcl2DPoints.get() == nullptr) {
+		return;
+	}
+	
+	pcl::ConcaveHull<pcl::PointXYZ> conHull;
+	conHull.setInputCloud(m_projectPcl2DPoints);
+	conHull.setAlpha(radius);
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr point_boundary(new pcl::PointCloud<pcl::PointXYZ>);
+	conHull.reconstruct(*point_boundary);
+
+	auto pointNum = point_boundary->points.size();
+	m_shape_points.clear();
+	for (int i = 0; i < pointNum; ++i) {
+		m_shape_points.emplace_back(osg::Vec2(point_boundary->at(i).x, point_boundary->at(i).y));
+	}
+}
+
 //方法四：基于方法二，不同之处在于滚动圆的检测半径可变
 void AlphaShape::Detect_Shape_line_by_Grid_New(float radius, const std::vector<SingleGrid2D*> & allGridList) {
 	all_edges.clear();
@@ -824,6 +850,7 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 	thread_local std::vector<Circle> cur_circles;
 	thread_local std::vector<Edge> cur_edges;
 	thread_local std::vector<osg::Vec2> detectAreaAllPointList;
+	float dixMax = 2 * radius;
 
 	for (const auto & centerGrid : centerGridList) {
 		if (false == centerGrid->hasPoint) {
@@ -848,7 +875,7 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 		for (const auto & centerPoint : centerGrid->PointList) {
 			bool isAddToShape = false;
 			for (const auto & outPoint : detectAreaAllPointList) {
-				if (Distance_point(centerPoint, outPoint) > 2 * radius) {
+				if (Distance_point(centerPoint, outPoint) > dixMax) {
 					continue;
 				}
 
@@ -858,7 +885,7 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 
 				++cur_point_pair_N;
 
-				const osg::Vec2 &mid_point = (centerPoint + outPoint) / 2;//线段中点
+				const osg::Vec2 &mid_point = (centerPoint + outPoint) * 0.5;//线段中点
 				const osg::Vec2 &vector_line = centerPoint - outPoint;//线段的方向向量
 
 				float a = 1.0, b = 1.0;
@@ -873,12 +900,13 @@ void thread_detect_By_GridList(float radius, const std::vector<SingleGrid2D*> & 
 				osg::Vec2 normal(a, b);
 				normal.normalize();//单位向量化
 
-				float line_length = vector_line.length() / 2.0;
+				float line_length = vector_line.length() * 0.5;
 				float length = sqrt(std::pow(radius, 2) - std::pow(line_length, 2));
 
 				//两外接圆圆心
-				const osg::Vec2 &center1 = mid_point + normal * length;
-				const osg::Vec2 &center2 = mid_point - normal * length;
+				const osg::Vec2 &normal_length = normal * length;
+				const osg::Vec2 &center1 = mid_point + normal_length;
+				const osg::Vec2 &center2 = mid_point - normal_length;
 
 				bool hasPointInCircle1 = false, hasPointInCircle2 = false;
 
@@ -998,6 +1026,7 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 	const auto & gridList = m_gridNet->Grid_list;
 
 	std::vector<osg::Vec2> detectAreaAllPointList;
+	float disMax = 2 * m_radius;
 
 	for (const auto & centerGrid : gridList) {
 		if (nullptr == centerGrid || false == centerGrid->hasPoint) {
@@ -1022,7 +1051,7 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 		for (const auto & centerPoint : centerGrid->PointList) {
 			bool isAddToShape = false;
 			for (const auto & outPoint : detectAreaAllPointList) {
-				if (Distance_point(centerPoint, outPoint) > 2 * m_radius) {
+				if (Distance_point(centerPoint, outPoint) > disMax) {
 					continue;
 				}
 
@@ -1032,27 +1061,30 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 
 				++point_pair_N;
 
-				const osg::Vec2 &mid_point = (centerPoint + outPoint) / 2;//线段中点
+				const osg::Vec2 &mid_point = (centerPoint + outPoint) * 0.5;//线段中点
 				const osg::Vec2 &vector_line = centerPoint - outPoint;//线段的方向向量
 
 				float a = 1.0, b = 1.0;
+				float vector_lineX = vector_line.x();
+				float vector_lineY = vector_line.y();
 
-				if (abs(vector_line.x()) < 0.001) {
+				if (abs(vector_lineX) < 0.001) {
 					b = 0.0;
 				} else {
-					a = (-b * vector_line.y()) / vector_line.x();
+					a = (-b * vector_lineY) / vector_lineX;
 				}
 
 				//线段的垂直向量
 				osg::Vec2 normal(a, b);
 				normal.normalize();//单位向量化
 
-				float line_length = vector_line.length() / 2.0;
+				float line_length = vector_line.length() * 0.5;
 				float length = sqrt(std::pow(m_radius, 2) - std::pow(line_length, 2));
 
 				//两外接圆圆心
-				const osg::Vec2 &center1 = mid_point + normal * length;
-				const osg::Vec2 &center2 = mid_point - normal * length;
+				const osg::Vec2 &normal_length = normal * length;
+				const osg::Vec2 &center1 = mid_point + normal_length;
+				const osg::Vec2 &center2 = mid_point - normal_length;
 
 				bool hasPointInCircle1 = false, hasPointInCircle2 = false;
 
@@ -1103,6 +1135,337 @@ void AlphaShape::Detect_Alpha_Shape_by_Grid(float radius) {
 	this->point_pair_scale = static_cast<float>((point_pair_N * 2) / (point_num*(point_num - 1)));
 }
 
+
+void Detect_Alpah_Shape_FLANN_single_thread(float radius, const std::vector<int> & targetPointIndexList, pcl::PointCloud<pcl::PointXYZ>::Ptr m_projectPcl2DPoints, 
+	                                                                                                    pcl::KdTreeFLANN<pcl::PointXYZ>::Ptr kdTree) {
+	float m_radius = radius;
+	int cur_point_pair_N = 0;
+	int point_num = targetPointIndexList.size();
+
+	thread_local std::vector<osg::Vec2> cur_shape_points;
+	thread_local std::vector<Circle> cur_circles;
+	thread_local std::vector<Edge> cur_edges;
+	thread_local std::unordered_set<int> m_shape_id_set;
+	m_shape_id_set.reserve(point_num);
+
+	float distanceMax = 2 * m_radius;
+
+	// pcl::KdTreeFLANN<pcl::PointXYZ> kdTree;
+	if (kdTree.get() == nullptr) {
+		return;
+	}
+	// kdTree.setInputCloud(m_projectPcl2DPoints);
+
+	std::vector<float> disList;
+	disList.reserve(point_num);
+	std::vector<int> indexList;
+	indexList.reserve(point_num);
+
+	const auto &m_PclPoints = m_projectPcl2DPoints->points;
+	uint32_t detectAllNum = 0;
+
+	for (int i = 0; i < point_num; ++i) {
+		int indexI = targetPointIndexList[i];
+		const auto &curP = m_PclPoints[indexI];
+		// 获取与当前点距离小于滚动圆直径的其他点
+		auto curNearPointNum = kdTree->radiusSearch(curP, distanceMax, indexList, disList);
+		osg::Vec2 point_i(curP.x, curP.y);
+
+		for (int k = 0; k < curNearPointNum; ++k) {
+			int indexK = indexList[k];
+			if (indexK == indexI) {
+				continue;
+			}
+
+			osg::Vec2 point_k(m_PclPoints[indexK].x, m_PclPoints[indexK].y);
+			++cur_point_pair_N;
+
+			const osg::Vec2 & mid_point = (point_i + point_k) * 0.5;  //线段中点
+			const osg::Vec2 & vector_line = point_i - point_k;      //线段的方向向量
+
+			float a = 1.0, b = 1.0;
+
+			const auto& vector_lineX = vector_line.x();
+			const auto& vector_lineY = vector_line.y();
+
+			if (abs(vector_lineX) < 0.001) {
+				b = 0.0;
+			}
+			else {
+				a = (-b * vector_lineY) / vector_lineX;
+			}
+
+			//线段的垂直向量
+			osg::Vec2 normal(a, b);
+			normal.normalize();//单位向量化
+
+			const auto& line_length_2 = disList[k];
+			float length = sqrt(std::pow(m_radius, 2) - line_length_2 * 0.25);
+
+			//两外接圆圆心
+			const osg::Vec2 &length_normal = normal * length;
+			const osg::Vec2 &center1 = mid_point + length_normal;
+			const osg::Vec2 &center2 = mid_point - length_normal;
+
+			bool hasPointInCircle1 = false, hasPointInCircle2 = false;
+
+			for (int m = 0; m < curNearPointNum; ++m) {
+				int indexM = indexList[m];
+				if (indexM == indexK || indexM == indexI) {
+					continue;
+				}
+				osg::Vec2 point_m(m_PclPoints[indexM].x, m_PclPoints[indexM].y);
+
+				if (hasPointInCircle1 && hasPointInCircle2) {
+					break;
+				}
+
+				if (!hasPointInCircle1 && Distance_point(point_m, center1) < m_radius) {
+					hasPointInCircle1 = true;
+				}
+
+				if (!hasPointInCircle2 && Distance_point(point_m, center2) < m_radius) {
+					hasPointInCircle2 = true;
+				}
+			}
+
+			if (!hasPointInCircle1 || !hasPointInCircle2) {
+				cur_edges.emplace_back(Edge(point_i, point_k));
+
+				if (false == hasPointInCircle1) {
+					cur_circles.emplace_back(Circle(center1, m_radius));
+				}
+
+				if (false == hasPointInCircle2) {
+					cur_circles.emplace_back(Circle(center2, m_radius));
+				}
+
+				if (m_shape_id_set.find(indexI) == m_shape_id_set.end()) {
+					m_shape_id_set.emplace(indexI);
+					cur_shape_points.emplace_back(point_i);
+				}
+
+				if (m_shape_id_set.find(indexK) == m_shape_id_set.end()) {
+					m_shape_id_set.emplace(indexK);
+					cur_shape_points.emplace_back(point_k);
+				}
+			}
+		}
+	}
+
+	// 加锁，避免多线程资源冲突
+	{
+		std::lock_guard<std::mutex> lock(all_mutex);
+		all_edges.insert(all_edges.end(), cur_edges.begin(), cur_edges.end());
+		all_circles.insert(all_circles.end(), cur_circles.begin(), cur_circles.end());
+		all_shape_points.insert(all_shape_points.end(), cur_shape_points.begin(), cur_shape_points.end());
+		all_point_pair_N += cur_point_pair_N;
+	}
+}
+
+
+// Flaan，利用多线程进行加速
+void AlphaShape::Detect_Alpah_Shape_FLANN_Multi_Thread(float radius, int threadNum) {
+	if (m_projectPcl2DPoints.get() == nullptr) {
+		return;
+	}
+
+	this->m_radius = radius;
+	this->m_point_pair_N = 0;
+	this->point_pair_scale = 0.0;
+
+	int point_num = m_points.size();
+
+	all_edges.clear();
+	all_circles.clear();
+	all_shape_points.clear();
+
+	m_shape_points.clear();
+	m_circles.clear();
+	m_edges.clear();
+
+	std::vector<int> allList;
+	for (int i = 0; i < point_num; ++i) {
+		allList.push_back(i);
+	}
+
+	int step = static_cast<int>(point_num / threadNum);
+
+	pcl::KdTreeFLANN<pcl::PointXYZ>::Ptr kdTree(new pcl::KdTreeFLANN<pcl::PointXYZ>);
+	kdTree->setInputCloud(m_projectPcl2DPoints);
+		
+	std::vector<std::thread> threadList;
+	std::vector<int> curList;
+	for (int i = 0; i < threadNum; ++i) {
+		curList.clear();
+		if (i == (threadNum - 1)) {
+			curList.assign(allList.begin() + step * i, allList.end());
+		}
+		else {
+			curList.assign(allList.begin() + step * i, allList.begin() + step * (i + 1));
+		}
+		threadList.emplace_back(std::thread(Detect_Alpah_Shape_FLANN_single_thread, m_radius, curList, std::ref(m_projectPcl2DPoints), std::ref(kdTree)));
+	}
+
+	for (auto & curThread : threadList) {
+		curThread.join();
+	}
+
+	std::set<Edge> edge_set(all_edges.begin(), all_edges.end());
+	m_edges.assign(edge_set.begin(), edge_set.end());
+
+	std::set<Circle> circle_set(all_circles.begin(), all_circles.end());
+	m_circles.assign(circle_set.begin(), circle_set.end());
+
+	m_shape_points.assign(all_shape_points.begin(), all_shape_points.end());
+	
+	m_point_pair_N = all_point_pair_N;
+
+	this->point_pair_scale = static_cast<float>((all_point_pair_N * 2) / (point_num*(point_num - 1)));
+}
+
+
+// 利用PCL的FLANN加速常规Alpha-shapes算法，使得快速获取目标点的邻近点，大幅减少需要检测点的数量
+void AlphaShape::Detect_Alpah_Shape_FLANN(float radius) {
+	m_radius = radius;
+	int point_pair_N = 0;
+	this->point_pair_scale = 0.0;
+	int point_num = m_points.size();
+
+	std::unordered_set<int> m_shape_id_set;
+	m_shape_id_set.reserve(point_num);
+	m_shape_points.clear();
+	m_shape_points.reserve(point_num);
+	m_edges.clear();
+	m_circles.clear();
+	float distanceMax = 2 * m_radius;
+
+	pcl::KdTreeFLANN<pcl::PointXYZ> kdTree;
+	if (m_projectPcl2DPoints.get() == nullptr) {
+		return;
+	}
+	kdTree.setInputCloud(m_projectPcl2DPoints);
+
+	std::vector<float> disList;
+	disList.reserve(point_num);
+	std::vector<int> indexList;
+	indexList.reserve(point_num);
+
+	const auto &m_PclPoints = m_projectPcl2DPoints->points;
+	uint32_t detectAllNum = 0;
+
+	for (int indexI = 0; indexI < point_num;  ++indexI) {
+		const auto &curP = m_PclPoints[indexI];
+		// 获取与当前点距离小于滚动圆直径的其他点
+		auto curNearPointNum = kdTree.radiusSearch(curP, distanceMax, indexList, disList);
+		osg::Vec2 point_i(curP.x, curP.y);
+
+		for (int k = 0; k < curNearPointNum; ++k) {
+			int indexK = indexList[k];
+			if (indexK == indexI) {
+				continue;
+			}
+
+			osg::Vec2 point_k(m_PclPoints[indexK].x, m_PclPoints[indexK].y);
+			++point_pair_N;
+
+			const osg::Vec2 & mid_point = (point_i + point_k) * 0.5;  //线段中点
+			const osg::Vec2 & vector_line = point_i - point_k;      //线段的方向向量
+
+			float a = 1.0, b = 1.0;
+
+			const auto& vector_lineX = vector_line.x();
+			const auto& vector_lineY = vector_line.y();
+
+			if (abs(vector_lineX) < 0.001) {
+				b = 0.0;
+			}
+			else {
+				a = (-b * vector_lineY) / vector_lineX;
+			}
+
+			//线段的垂直向量
+			osg::Vec2 normal(a, b);
+			normal.normalize();//单位向量化
+
+			// float line_length = vector_line.length() * 0.5;
+			// float length = sqrt(std::pow(m_radius, 2) - std::pow(line_length, 2));
+
+			const auto& line_length_2 = disList[k];
+			float length = sqrt(std::pow(m_radius, 2) - line_length_2 * 0.25);
+
+			//两外接圆圆心
+			const osg::Vec2 &length_normal = normal * length;
+			const osg::Vec2 &center1 = mid_point + length_normal;
+			const osg::Vec2 &center2 = mid_point - length_normal;
+			
+			bool hasPointInCircle1 = false, hasPointInCircle2 = false;
+			
+			bool isUseKd = true;
+			if (isUseKd) {
+				pcl::PointXYZ pclCenter1(center1.x(), center1.y(), 0.0);
+				pcl::PointXYZ pclCenter2(center2.x(), center2.y(), 0.0);
+				std::vector<float> innerDisList;
+				std::vector<int> innerIndexList;
+
+				if (kdTree.radiusSearch(pclCenter1, m_radius, innerIndexList, innerDisList) > 1) {
+					hasPointInCircle1 = true;
+				}
+
+				if (kdTree.radiusSearch(pclCenter2, m_radius, innerIndexList, innerDisList) > 1) {
+					hasPointInCircle2 = true;
+				}
+			}
+			else {				
+				for (int m = 0; m < curNearPointNum; ++m) {
+					int indexM = indexList[m];
+					if (indexM == indexK || indexM == indexI) {
+						continue;
+					}
+					osg::Vec2 point_m(m_PclPoints[indexM].x, m_PclPoints[indexM].y);
+
+					if (hasPointInCircle1 && hasPointInCircle2) {
+						break;
+					}
+
+					if (!hasPointInCircle1 && Distance_point(point_m, center1) < m_radius) {
+						hasPointInCircle1 = true;
+					}
+
+					if (!hasPointInCircle2 && Distance_point(point_m, center2) < m_radius) {
+						hasPointInCircle2 = true;
+					}
+				}
+			}
+
+			if (!hasPointInCircle1 || !hasPointInCircle2) {
+				m_edges.emplace_back(Edge(point_i, point_k));
+
+				if (false == hasPointInCircle1) {
+					m_circles.emplace_back(Circle(center1, m_radius));
+				}
+
+				if (false == hasPointInCircle2) {
+					m_circles.emplace_back(Circle(center2, m_radius));
+				}
+
+				if (m_shape_id_set.find(indexI) == m_shape_id_set.end()) {
+					m_shape_id_set.emplace(indexI);
+					m_shape_points.emplace_back(point_i);
+				}
+
+				if (m_shape_id_set.find(indexK) == m_shape_id_set.end()) {
+					m_shape_id_set.emplace(indexK);
+					m_shape_points.emplace_back(point_k);
+				}
+			}
+		}
+	}
+
+	m_point_pair_N = point_pair_N;
+	this->point_pair_scale = static_cast<float>((point_pair_N * 2) / (point_num*(point_num - 1)));
+}
+
 // 方法一：常规的Alpha Shapes算法
 void AlphaShape::Detect_Shape_line(float radius) {
 	m_radius = radius;
@@ -1116,37 +1479,44 @@ void AlphaShape::Detect_Shape_line(float radius) {
 	m_shape_points.reserve(point_num);
 	m_edges.clear();
 	m_circles.clear();
+	float distanceMax = 2 * m_radius;
 
 	for (int i = 0; i < point_num; ++i) {
 		for (int k = i + 1; k < point_num; ++k) {
-			// 判断任意两点的点对距离是否大于滚动圆的直径大小
-			if (Distance_point(m_points[i], m_points[k]) > 2 * m_radius) {
+			// 判断任意两点的点对距离是否大于滚动圆的直径大小			
+			if (Distance_point(m_points[i], m_points[k]) > distanceMax) {
 				continue;
 			}
 
 			++point_pair_N;
+			const osg::Vec2 & point_i = m_points[i];
+			const osg::Vec2 & point_k = m_points[k];
 
-			const osg::Vec2 &mid_point = (m_points[i] + m_points[k]) / 2;//线段中点
-			const osg::Vec2 &vector_line = m_points[i] - m_points[k];//线段的方向向量
+			const osg::Vec2 & mid_point = (point_i + point_k) * 0.5;  //线段中点
+			const osg::Vec2 & vector_line = point_i - point_k;      //线段的方向向量
 
      		float a = 1.0, b = 1.0;
 
-			if (abs(vector_line.x()) < 0.001) {
+			float vector_lineX = vector_line.x();
+			float vector_lineY = vector_line.y();
+
+			if (abs(vector_lineX) < 0.001) {
 				b = 0.0;
 			} else {
-				a = (-b * vector_line.y()) / vector_line.x();
+				a = (-b * vector_lineY) / vector_lineX;
 			}
 
 			//线段的垂直向量
 			osg::Vec2 normal(a, b);
 			normal.normalize();//单位向量化
 
-			float line_length = vector_line.length() / 2.0;
+			float line_length = vector_line.length() * 0.5;
 			float length = sqrt(std::pow(m_radius, 2) - std::pow(line_length, 2));
 
 			//两外接圆圆心
-			const osg::Vec2 &center1 = mid_point + normal*length;
-			const osg::Vec2 &center2 = mid_point - normal*length;
+			const osg::Vec2 &length_normal = normal * length;
+			const osg::Vec2 &center1 = mid_point + length_normal;
+			const osg::Vec2 &center2 = mid_point - length_normal;
 
 			bool hasPointInCircle1 = false, hasPointInCircle2 = false;
 
@@ -1155,21 +1525,23 @@ void AlphaShape::Detect_Shape_line(float radius) {
 					continue;
 				}
 
+				const osg::Vec2 & point_m = m_points[m];
+
 				if (hasPointInCircle1 && hasPointInCircle2) {
 					break;
 				}
 
-				if (!hasPointInCircle1 && Distance_point(m_points[m], center1) < m_radius) {
+				if (!hasPointInCircle1 && Distance_point(point_m, center1) < m_radius) {
 					hasPointInCircle1 = true;
 				}
 
-				if (!hasPointInCircle2 && Distance_point(m_points[m], center2) < m_radius) {
+				if (!hasPointInCircle2 && Distance_point(point_m, center2) < m_radius) {
 					hasPointInCircle2 = true;
 				}
 			}
 
 			if (!hasPointInCircle1 || !hasPointInCircle2) {
-				m_edges.emplace_back(Edge(m_points[i], m_points[k]));
+				m_edges.emplace_back(Edge(point_i, point_k));
 
 				if (false == hasPointInCircle1) {
 					m_circles.emplace_back(Circle(center1, m_radius));
@@ -1181,16 +1553,16 @@ void AlphaShape::Detect_Shape_line(float radius) {
 
 				if (m_shape_id_set.find(i) == m_shape_id_set.end()) {
 					m_shape_id_set.emplace(i);
-					m_shape_points.emplace_back(m_points[i]);
+					m_shape_points.emplace_back(point_i);
 				}
 
 				if (m_shape_id_set.find(k) == m_shape_id_set.end()) {
 					m_shape_id_set.emplace(k);
-					m_shape_points.emplace_back(m_points[k]);
+					m_shape_points.emplace_back(point_k);
 				}
 			}
 		}
 	}
 
-	this->point_pair_scale = static_cast<float>((point_pair_N * 2)/ (point_num*(point_num - 1)));
+	this->point_pair_scale = static_cast<float>((point_pair_N * 2) / (point_num*(point_num - 1)));
 }

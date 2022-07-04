@@ -92,6 +92,10 @@ class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {
 
 	QLabel *m_slider_value;
 
+	QSlider* m_slider_thread;
+
+	QLabel *m_slider_thread_value;
+
 	QTimer read_timer;
 
 	osg::ref_ptr<osg::Projection> colorBar_projection{nullptr};
@@ -121,6 +125,10 @@ class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {
 	QLineEdit *m_alpha_Grid_col_num;
 
 	QRadioButton * m_Alpah_radio;
+
+	QRadioButton * m_Alpah_FLANN_radio;
+
+	QRadioButton * m_Alpah_FLANN_multi_thread_radio;
 
 	QRadioButton * m_Alpah_Grid_radio;
 
@@ -172,6 +180,8 @@ class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {
 	void slot_Update_Data_Info_Widget(QTreeWidgetItem* item, int col);
 
 	void slot_setPcloudPointSize(int size);
+
+	void slot_setThreadNum(int num);
 
 	void slot_setPointCloudColor();
 

@@ -192,6 +192,9 @@ class GridNet {
 	void buildNetBySize(float SizeX, float SizeY);
 
 	// 根据设定的网格行列数生成二维格网
+	void buildNetByNumOld(int RowNum, int ColNum);
+
+	// 根据设定的网格行列数生成二维格网,快速
 	void buildNetByNum(int RowNum, int ColNum);
 
 	// 判断当前某点是否处于某一网格中
@@ -284,5 +287,5 @@ class AlphaShape {
 	// 符合检测半径的点对比例
 	float point_pair_scale;
 
-	int m_point_pair_N;
+	size_t m_point_pair_N;
 };

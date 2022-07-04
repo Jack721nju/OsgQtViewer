@@ -7,7 +7,7 @@ static std::mutex all_mutex;
 static std::vector<osg::Vec2> all_shape_points;
 static std::vector<Edge> all_edges;
 static std::vector<Circle> all_circles;
-static int all_point_pair_N;
+static size_t all_point_pair_N;
 
 static bool checkPointSame(const osg::Vec2 &pointA, const osg::Vec2 &pointB) {
 	if ((pointA - pointB).length() < 0.000001) {
@@ -89,6 +89,7 @@ GridNet::GridNet(const std::vector<osg::Vec2> &pList) {
 }
 
 SingleGrid2D* GridNet::getGridByRowAndCol(int RowID, int ColID) {
+	this->Grid_Num = this->Grid_list.size();
 	for (size_t i = 0; i < this->Grid_Num; ++i) {
 		SingleGrid2D* curGrid = this->Grid_list[i];
 		if (curGrid->curGridInfo.m_Row == RowID) {
@@ -164,8 +165,80 @@ void GridNet::detectGridWithConnection() {
 	}
 }
 
-// 根据网格数量构建格网
 void GridNet::buildNetByNum(int RowNum, int ColNum) {
+	this->Row_Num = (unsigned int)(RowNum);
+	this->Col_Num = (unsigned int)(ColNum);
+
+	float allPointsHeight = pointMMM->ymax - pointMMM->ymin;
+	float allPointsWidth = pointMMM->xmax - pointMMM->xmin;
+
+	this->Grid_X = static_cast<float>(allPointsWidth / Col_Num);
+	this->Grid_Y = static_cast<float>(allPointsHeight / Row_Num);
+
+	GridInfo cur_grid;
+	cur_grid.Size_X = Grid_X;
+	cur_grid.Size_Y = Grid_Y;
+
+	int gridNum = -1;
+	// 向外部扩张一层空的网格，便于后续的邻域搜索
+	for (size_t i = 0; i < (Row_Num + 2); ++i) {
+		for (size_t j = 0; j < (Col_Num + 2); ++j) {
+			cur_grid.Min_X = pointMMM->xmin + Grid_X*(i - 1);
+			cur_grid.Max_X = cur_grid.Min_X + Grid_X;
+			cur_grid.Min_Y = pointMMM->ymin + Grid_Y*(j - 1);
+			cur_grid.Max_Y = cur_grid.Min_Y + Grid_Y;
+
+			cur_grid.m_Row = i;// 行号
+			cur_grid.m_Col = j;// 列号
+
+			SingleGrid2D * curGrid2D = new SingleGrid2D(cur_grid);
+
+			if (nullptr == curGrid2D) {
+				continue;
+			}
+			curGrid2D->curGridInfo.m_ID = ++gridNum;
+			Grid_list.push_back(curGrid2D);
+		}
+	}
+
+	this->Grid_Num = gridNum;
+
+	for (const auto & curP : this->Points_List) {
+		int row_ID = (int)((curP.x() - pointMMM->xmin) / Grid_X) + 1;
+		int col_ID = (int)((curP.y() - pointMMM->ymin) / Grid_Y) + 1;
+
+		auto curGridID = row_ID  * (Col_Num + 2) + col_ID;
+		if (curGridID > gridNum) {
+			continue;
+		}
+
+		// SingleGrid2D *locateGrid = getGridByRowAndCol(row_ID + 1, col_ID + 1);
+		SingleGrid2D *locateGrid = Grid_list[curGridID];
+		if (locateGrid) {
+			locateGrid->PointList.emplace_back(curP);
+		}
+	}
+
+	float CenterX = 0.0, CenterY = 0.0;
+	for (const auto & eachGrid2D : Grid_list) {
+		auto cur_PointNum = eachGrid2D->PointList.size();
+		if (cur_PointNum < 1) {
+			continue;
+		}
+		++this->GridWithPoint_Num;
+		eachGrid2D->hasPoint = true;
+
+		for (const auto & curP : eachGrid2D->PointList) {
+			CenterX += curP.x();
+			CenterY += curP.y();
+		}
+		eachGrid2D->CenterPoint.set(CenterX / cur_PointNum, CenterY / cur_PointNum);
+	}
+
+}
+
+// 根据网格数量构建格网
+void GridNet::buildNetByNumOld(int RowNum, int ColNum) {
 	this->Row_Num = (unsigned int)(RowNum);
 	this->Col_Num = (unsigned int)(ColNum);
 
@@ -1264,7 +1337,7 @@ void Detect_Alpah_Shape_FLANN_single_thread(float radius, const std::vector<int>
 }
 
 
-// Flaan，利用多线程进行加速
+// Flaan，利用多线程进行加速，考虑将边界网格内点的indexList作为传参传入
 void AlphaShape::Detect_Alpah_Shape_FLANN_Multi_Thread(float radius, int threadNum) {
 	if (m_projectPcl2DPoints.get() == nullptr) {
 		return;
@@ -1279,6 +1352,7 @@ void AlphaShape::Detect_Alpah_Shape_FLANN_Multi_Thread(float radius, int threadN
 	all_edges.clear();
 	all_circles.clear();
 	all_shape_points.clear();
+	all_point_pair_N = 0;
 
 	m_shape_points.clear();
 	m_circles.clear();
@@ -1360,6 +1434,35 @@ void AlphaShape::Detect_Alpah_Shape_FLANN(float radius) {
 		auto curNearPointNum = kdTree.radiusSearch(curP, distanceMax, indexList, disList);
 		osg::Vec2 point_i(curP.x, curP.y);
 
+		bool isCurPointDensity = true;
+
+		if (true) {
+			std::vector<pcl::PointXYZ> nearPointList;
+
+			float step = 60.0;
+			for (float angle = 0; angle < 360; angle += step) {
+				float xx = curP.x + m_radius * std::cosf(osg::DegreesToRadians(angle));
+				float yy = curP.y + m_radius * std::sinf(osg::DegreesToRadians(angle));
+				pcl::PointXYZ nerP(xx, yy, 0.0);
+				nearPointList.emplace_back(nerP);
+			}
+
+			std::vector<float> nearDisList;
+			std::vector<int> nearIndexList;
+
+			for (const auto & nearP : nearPointList) {
+				if (kdTree.radiusSearch(nearP, m_radius * 0.5, nearIndexList, nearDisList) < 1) {
+					isCurPointDensity = false;
+					break;
+				}
+			}
+		}
+
+		// no need check current point, because it is high density
+		if (isCurPointDensity) {
+			continue;
+		}
+
 		for (int k = 0; k < curNearPointNum; ++k) {
 			int indexK = indexList[k];
 			if (indexK == indexI) {
@@ -1401,22 +1504,24 @@ void AlphaShape::Detect_Alpah_Shape_FLANN(float radius) {
 			
 			bool hasPointInCircle1 = false, hasPointInCircle2 = false;
 			
-			bool isUseKd = true;
+			bool isUseKd = false;
 			if (isUseKd) {
+				// 效率较低，且提取效果不理想，此处不建议使用kd树再次判断
 				pcl::PointXYZ pclCenter1(center1.x(), center1.y(), 0.0);
 				pcl::PointXYZ pclCenter2(center2.x(), center2.y(), 0.0);
 				std::vector<float> innerDisList;
 				std::vector<int> innerIndexList;
 
-				if (kdTree.radiusSearch(pclCenter1, m_radius, innerIndexList, innerDisList) > 1) {
+				float serchDis = m_radius + 0.00001;
+
+				if (kdTree.radiusSearch(pclCenter1, serchDis, innerIndexList, innerDisList) > 2) {
 					hasPointInCircle1 = true;
 				}
 
-				if (kdTree.radiusSearch(pclCenter2, m_radius, innerIndexList, innerDisList) > 1) {
+				if (kdTree.radiusSearch(pclCenter2, serchDis, innerIndexList, innerDisList) > 2) {
 					hasPointInCircle2 = true;
 				}
-			}
-			else {				
+			} else {				
 				for (int m = 0; m < curNearPointNum; ++m) {
 					int indexM = indexList[m];
 					if (indexM == indexK || indexM == indexI) {
@@ -1466,7 +1571,7 @@ void AlphaShape::Detect_Alpah_Shape_FLANN(float radius) {
 	this->point_pair_scale = static_cast<float>((point_pair_N * 2) / (point_num*(point_num - 1)));
 }
 
-// 方法一：常规的Alpha Shapes算法
+// 方法一：常规的Alpha Shapes算法，未优化，效率较低
 void AlphaShape::Detect_Shape_line(float radius) {
 	m_radius = radius;
 	int point_pair_N = 0;
@@ -1564,5 +1669,6 @@ void AlphaShape::Detect_Shape_line(float radius) {
 		}
 	}
 
+	m_point_pair_N = point_pair_N;
 	this->point_pair_scale = static_cast<float>((point_pair_N * 2) / (point_num*(point_num - 1)));
 }

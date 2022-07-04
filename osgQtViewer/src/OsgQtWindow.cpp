@@ -783,7 +783,7 @@ void OsgQtTest::Init_Point_Info_Widget(const std::string & itemName) {
 	m_slider->setValue(curPcloud->getPointSize());
 	m_slider->setMinimumSize(80, 20);
 	connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(slot_setPcloudPointSize(int)));
-
+	
 	m_slider_value = new QLabel();
 	m_slider_value->setMinimumHeight(20);
 	m_slider_value->setText(point_size);
@@ -836,6 +836,12 @@ void OsgQtTest::slot_setPcloudPointSize(int size) {
 	}
 
 	PCloudManager::Instance()->setSelectPointSize(size);
+}
+
+void OsgQtTest::slot_setThreadNum(int num) {
+	if (m_slider_thread_value) {
+		m_slider_thread_value->setText(QString::number(num));
+	}
 }
 
 void OsgQtTest::slot_Update_Data_Info_Widget(QTreeWidgetItem* item, int col) {
@@ -1652,10 +1658,36 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	QWidget * alpha_tab_widget = new QWidget();
 	m_Alpah_radio = new QRadioButton("alpha shape");
 	m_Alpah_radio->setChecked(true);
+	m_Alpah_FLANN_radio = new QRadioButton("alpha shape flann");
+	m_Alpah_FLANN_radio->setChecked(false);
+	m_Alpah_FLANN_multi_thread_radio = new QRadioButton("alpha flann multi-thread");
+	m_Alpah_FLANN_multi_thread_radio->setChecked(false);
 	m_Alpah_Grid_radio = new QRadioButton("alpha grid");
 	m_Alpah_Grid_radio->setChecked(false);
 	m_Alpah_Grid_multi_thread_radio = new QRadioButton("alpha grid multi-thread");
 	m_Alpah_Grid_multi_thread_radio->setChecked(false);
+
+
+	QLabel *m_label_thread = new QLabel(ProjectToXY_dialog);
+	m_label_thread->setText("Thread num:");
+	m_label_thread->setFixedSize(100, 30);
+
+	int threadCount = std::thread::hardware_concurrency();
+	if (threadCount < 4) {
+		threadCount = 4;
+	}
+	int defaultValue = 4;
+
+	m_slider_thread = new QSlider(Qt::Horizontal, ProjectToXY_dialog);
+	m_slider_thread->setMinimum(1);
+	m_slider_thread->setMaximum(threadCount * 2);
+	m_slider_thread->setValue(defaultValue);
+	m_slider_thread->setFixedSize(200, 20);
+	connect(m_slider_thread, SIGNAL(valueChanged(int)), this, SLOT(slot_setThreadNum(int)));
+
+	m_slider_thread_value = new QLabel();
+	m_slider_thread_value->setMinimumHeight(20);
+	m_slider_thread_value->setText(QString::number(defaultValue));
 
 	QVBoxLayout * alpha_layout = new QVBoxLayout();
 	alpha_layout->addStretch(0);
@@ -1673,8 +1705,16 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(m_Alpah_radio, 0);
 	alpha_layout->addStretch(1);
-	alpha_layout->addWidget(m_Alpah_Grid_radio, 0);
+	alpha_layout->addWidget(m_Alpah_FLANN_radio, 0);
+	alpha_layout->addStretch(1);
+	alpha_layout->addWidget(m_Alpah_FLANN_multi_thread_radio, 0);
+	alpha_layout->addStretch(1);
+	alpha_layout->addWidget(m_label_thread, 0);
+	alpha_layout->addWidget(m_slider_thread, 0);
+	alpha_layout->addWidget(m_slider_thread_value, 0);
 	alpha_layout->addStretch(2);
+	alpha_layout->addWidget(m_Alpah_Grid_radio, 0);
+	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(m_Alpah_Grid_multi_thread_radio, 0);
 	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(detect_shape_alpah_shape, 0);
@@ -1707,7 +1747,7 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 
 	QPushButton * build_quad_tree = new QPushButton("Build", ProjectToXY_dialog);
 	build_quad_tree->setFixedSize(100, 30);
-	connect(build_quad_tree, SIGNAL(clicked()), this, SLOT(slot_DetectPointShapeUsingPclConcaveHull()));
+	connect(build_quad_tree, SIGNAL(clicked()), this, SLOT(slot_BuildQuadGridForPoints()));
 
 	QLabel *m_label_Quad_Tree_maxDepth = new QLabel(ProjectToXY_dialog);
 	m_label_Quad_Tree_maxDepth->setText("Max Depth:");
@@ -1809,13 +1849,29 @@ void OsgQtTest::slot_DetectPointShape() {
 
 	AlphaShape * alpha = nullptr;
 	GridNet* gridNet = nullptr;
-	bool isOnlyAShape = true;
 
 	_timerClock.start();
+	int alphaType = 0;
 
-	if (false == m_Alpah_radio->isChecked()) {
-		isOnlyAShape = false;
+	if (m_Alpah_radio->isChecked()) {
+		alphaType = 0;
+	} else if (m_Alpah_FLANN_radio->isChecked()) {
+		alphaType = 1;
+	} else if (m_Alpah_FLANN_multi_thread_radio->isChecked()) {
+		alphaType = 2;
+	} else if (m_Alpah_Grid_radio->isChecked()) {
+		alphaType = 3;
+	} else if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
+		alphaType = 4;
+	}
+	
+	float radius = 0.0;
+	if (m_radius) {
+		radius = m_radius->text().toFloat();
+	}
 
+	// build grid net
+	if (alphaType > 2) {
 		gridNet = new GridNet(this->pointlist_bulidGrid2D);
 		if (nullptr == gridNet) {
 			this->AddToConsoleSlot("Build 2D grid net failed! \n");
@@ -1834,16 +1890,17 @@ void OsgQtTest::slot_DetectPointShape() {
 		QString cost_grid_time = QString::number(runGridTime);
 		this->AddToConsoleSlot(QString("The cost time of build 2D Grid net is :  ") + cost_grid_time + QString("s"));
 	}
-	
 
-	float radius = 0.0;
-	if (m_radius) {
-		radius = m_radius->text().toFloat();
-	}
-
-	if (isOnlyAShape) {
+	bool needGrid = false;
+	if (alphaType <= 2) {
 		alpha = new AlphaShape(pointlist_bulidGrid2D);
+		if (m_pointPclProject2D.get() == nullptr) {
+			this->AddToConsoleSlot(QString("[WARING] No pcl project point!"));
+			return;
+		}
+		alpha->setPclPointPtr(m_pointPclProject2D);
 	} else {
+		needGrid = true;
 		alpha = new AlphaShape(gridNet);
 	}
 
@@ -1851,43 +1908,43 @@ void OsgQtTest::slot_DetectPointShape() {
 		this->AddToConsoleSlot("Perform alpha detection failed! \n");
 	}
 
-	bool isFlANN = true;
-
-	if (isOnlyAShape) {
-		if (!isFlANN) {
-			alpha->Detect_Shape_line(radius);
-		}
-		else {
-			if (m_pointPclProject2D.get() == nullptr) {
-				this->AddToConsoleSlot(QString("[WARING] No pcl project point!"));
-				return;
-			}
-			alpha->setPclPointPtr(m_pointPclProject2D);
-			// alpha->Detect_Alpah_Shape_FLANN(radius);
-			alpha->Detect_Alpah_Shape_FLANN_Multi_Thread(radius, 4);
-		}
-	} else {
-		if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
-			auto threadCount = std::thread::hardware_concurrency();
-			threadCount = 4;
-			alpha->Detect_Alpha_Shape_by_Grid_Multi_Thread(radius, threadCount);
-		} else if (m_Alpah_Grid_radio->isChecked()) {
-			alpha->Detect_Alpha_Shape_by_Grid(radius);
-		}
+	int threadNum = 1;
+	if (m_slider_thread) {
+		threadNum = m_slider_thread->value();
 	}
 
-	// 计算Alpha Shapes算法耗费时间
+	QString typeStr;
+	switch (alphaType) 
+	{
+	case 0:
+		alpha->Detect_Shape_line(radius);
+		typeStr = "default alpha shape";
+		break;
+	case 1:
+		alpha->Detect_Alpah_Shape_FLANN(radius);
+		typeStr = "alpha shape with flann";
+		break;
+	case 2:
+		alpha->Detect_Alpah_Shape_FLANN_Multi_Thread(radius, threadNum);
+		typeStr = "alpha with flann and multi-thread " + QString::number(threadNum);
+		break;
+	case 3:
+		alpha->Detect_Alpha_Shape_by_Grid(radius);
+		typeStr = "alpha with grid net";
+		break;
+	case 4:
+		alpha->Detect_Alpha_Shape_by_Grid_Multi_Thread(radius, threadNum);
+		typeStr = "alpha with grid net multi-thread " + QString::number(threadNum);
+		break;
+	default:
+		break;
+	}
+	
+	// 计算各类Alpha Shapes算法耗费时间
 	float runTime = _timerClock.getTime<Ms>() / 1000.0;
 	QString cost_time = QString::number(runTime);
-	if (!isOnlyAShape) {
-		if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
-			this->AddToConsoleSlot(QString("The cost time of detecting Contour by alpha with grid and multi-Thread is :  ") + cost_time + QString("s"));
-		} else if (m_Alpah_Grid_radio->isChecked()) {
-			this->AddToConsoleSlot(QString("The cost time of detecting Contour by alpha with grid net is :  ") + cost_time + QString("s"));
-		}
-	} else {
-		this->AddToConsoleSlot(QString("The cost time of detecting Contour by default alpha shape is :  ") + cost_time + QString("s"));
-	}
+	this->AddToConsoleSlot(QString("The cost time of detecting Contour by ") + typeStr + QString(" is: ") + cost_time + QString("s"));
+
 
 	//计算小于滚动圆直径长度的点对比例
 	QString cost_scale = QString::number(alpha->point_pair_scale, 'f', 3);
@@ -1927,14 +1984,10 @@ void OsgQtTest::slot_DetectPointShape() {
 	QDialog * DetectResult_dialog = new QDialog();
 	DetectResult_dialog->setAttribute(Qt::WA_DeleteOnClose);
 	DetectResult_dialog->setVisible(true);
-	if (isOnlyAShape) {
-		DetectResult_dialog->setWindowTitle("Alpha Shape result");
-	} else {
-		DetectResult_dialog->setWindowTitle("Alpha Grid result");
-	}
+	DetectResult_dialog->setWindowTitle(typeStr);
 
 	PaintArea *Project_widget_grid_net = nullptr;
-	if (!isOnlyAShape) {
+	if (needGrid) {
 		int delt_x = -10, delt_y = 32;
 		Project_widget_grid_net = new PaintArea();
 		Project_widget_grid_net->setFixedSize(660, 660);

@@ -122,7 +122,18 @@ bool GridNet::isPointInGrid(const osg::Vec2 & curPoint, SingleGrid2D *test_Grid)
 	}
 }
 
-// 检测每个二维网格的八邻域连通的网格，并逐一判断网格内是否有点
+// 获取所有边界网格的点列表		
+void GridNet::getAllOutSideGridPointIDList(std::vector<int> & pointIndexList) {
+	for (const auto & curGrid : this->Grid_list) {
+		if (curGrid) {	
+			if (curGrid->nearByGridAllWithpoint == false) {
+				pointIndexList.insert(pointIndexList.end(), curGrid->indexList.begin(), curGrid->indexList.end());
+			}
+		}
+	}
+}
+
+// 检测每个二维网格的八邻域连通的网格，并逐一判断网格内是否有点，获取边界网格
 void GridNet::detectGridWithConnection() {
 	for (const auto & curGrid2D : this->Grid_list) {
 		if (false == curGrid2D->hasPoint) {
@@ -204,7 +215,7 @@ void GridNet::buildNetByNum(int RowNum, int ColNum) {
 	}
 
 	this->Grid_Num = gridNum;
-
+	int id = -1;
 	for (const auto & curP : this->Points_List) {
 		int row_ID = (int)((curP.x() - pointMMM->xmin) / Grid_X) + 1;
 		int col_ID = (int)((curP.y() - pointMMM->ymin) / Grid_Y) + 1;
@@ -214,27 +225,28 @@ void GridNet::buildNetByNum(int RowNum, int ColNum) {
 			continue;
 		}
 
-		// SingleGrid2D *locateGrid = getGridByRowAndCol(row_ID + 1, col_ID + 1);
 		SingleGrid2D *locateGrid = Grid_list[curGridID];
 		if (locateGrid) {
-			locateGrid->PointList.emplace_back(curP);
+			// locateGrid->PointList.emplace_back(curP);
+			locateGrid->indexList.push_back(++id);
 		}
 	}
 
 	float CenterX = 0.0, CenterY = 0.0;
 	for (const auto & eachGrid2D : Grid_list) {
-		auto cur_PointNum = eachGrid2D->PointList.size();
+		// auto cur_PointNum = eachGrid2D->PointList.size();
+		auto cur_PointNum = eachGrid2D->indexList.size();
 		if (cur_PointNum < 1) {
 			continue;
 		}
 		++this->GridWithPoint_Num;
 		eachGrid2D->hasPoint = true;
 
-		for (const auto & curP : eachGrid2D->PointList) {
-			CenterX += curP.x();
-			CenterY += curP.y();
-		}
-		eachGrid2D->CenterPoint.set(CenterX / cur_PointNum, CenterY / cur_PointNum);
+		//for (const auto & curP : eachGrid2D->PointList) {
+		//	CenterX += curP.x();
+		//	CenterY += curP.y();
+		//}
+		//eachGrid2D->CenterPoint.set(CenterX / cur_PointNum, CenterY / cur_PointNum);
 	}
 
 }
@@ -1571,6 +1583,131 @@ void detectDesity() {
 	// no need check current point, because it is high density
 	if (isCurPointDensity) {
 		return;
+	}
+}
+
+void AlphaShape::Detect_Alpah_Shape_FLANN_Select_Index(float radius, const std::vector<int> & pointIDList) {
+	m_radius = radius;
+	m_point_pair_N = 0;
+	this->point_pair_scale = 0.0;
+	int point_num = m_points.size();
+
+	std::vector<char> m_shape_id_set(point_num, 0);
+
+	m_shape_points.clear();
+	m_edges.clear();
+	m_circles.clear();
+	float distanceMax = 2 * m_radius;
+
+	pcl::KdTreeFLANN<pcl::PointXYZ> kdTree;
+	if (m_projectPcl2DPoints.get() == nullptr) {
+		return;
+	}
+	kdTree.setInputCloud(m_projectPcl2DPoints);
+
+	std::vector<float> disList;
+	disList.reserve(point_num);
+	std::vector<int> indexList;
+	indexList.reserve(point_num);
+
+	const auto &m_PclPoints = m_projectPcl2DPoints->points;
+	m_detectAllNum = 0;
+
+	for (const auto indexI : pointIDList) {
+		const auto &curP = m_PclPoints[indexI];
+		// 获取与当前点距离小于滚动圆直径的其他点
+		auto curNearPointNum = kdTree.radiusSearch(curP, distanceMax, indexList, disList);
+		osg::Vec2 point_i(curP.x, curP.y);
+
+		for (int k = 0; k < curNearPointNum; ++k) {
+			int indexK = indexList[k];
+
+			// same point or the point was the detect point before
+			if (indexK <= indexI) {
+				continue;
+			}
+
+			const auto &curPK = m_PclPoints[indexK];
+			osg::Vec2 point_k(curPK.x, curPK.y);
+			++m_point_pair_N;
+
+			const osg::Vec2 & mid_point = (point_i + point_k) * 0.5;  //线段中点
+			const osg::Vec2 & vector_line = point_i - point_k;      //线段的方向向量
+
+			float a = 1.0, b = 1.0;
+
+			const auto& vector_lineX = vector_line.x();
+			const auto& vector_lineY = vector_line.y();
+
+			if (abs(vector_lineX) < 0.001) {
+				b = 0.0;
+			}
+			else {
+				a = (-b * vector_lineY) / vector_lineX;
+			}
+
+			//线段的垂直向量
+			osg::Vec2 normal(a, b);
+			normal.normalize();//单位向量化
+
+			const auto& line_length_2 = disList[k];
+			float length = sqrt(std::pow(m_radius, 2) - line_length_2 * 0.25);
+
+			//两外接圆圆心
+			const osg::Vec2 &length_normal = normal * length;
+			const osg::Vec2 &center1 = mid_point + length_normal;
+			const osg::Vec2 &center2 = mid_point - length_normal;
+
+			bool hasPointInCircle1 = false, hasPointInCircle2 = false;
+			int indexM = 0;
+			osg::Vec2 point_m;
+
+			for (int m = 0; m < curNearPointNum; ++m) {
+				indexM = indexList[m];
+				if (indexM == indexK || indexM == indexI) {
+					continue;
+				}
+				const auto & curMP = m_PclPoints[indexM];
+				point_m.set(curMP.x, curMP.y);
+				++m_detectAllNum;
+
+				if (hasPointInCircle1 && hasPointInCircle2) {
+					break;
+				}
+
+				if (!hasPointInCircle1 && Distance_point(point_m, center1) < m_radius) {
+					hasPointInCircle1 = true;
+				}
+
+				if (!hasPointInCircle2 && Distance_point(point_m, center2) < m_radius) {
+					hasPointInCircle2 = true;
+				}
+			}
+
+			if (!hasPointInCircle1 || !hasPointInCircle2) {
+				m_edges.emplace_back(Edge(point_i, point_k));
+
+				if (false == hasPointInCircle1) {
+					m_circles.emplace_back(Circle(center1, m_radius));
+				}
+
+				if (false == hasPointInCircle2) {
+					m_circles.emplace_back(Circle(center2, m_radius));
+				}
+
+				if (m_shape_id_set[indexI] == 0) {
+					m_shape_id_set[indexI] = 1;
+					m_shape_id.push_back(indexI);
+					// m_shape_points.emplace_back(point_i);
+				}
+
+				if (m_shape_id_set[indexK] == 0) {
+					m_shape_id_set[indexK] = 1;
+					m_shape_id.push_back(indexK);
+					// m_shape_points.emplace_back(point_k);
+				}
+			}
+		}
 	}
 }
 

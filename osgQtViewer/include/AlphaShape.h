@@ -111,6 +111,9 @@ class SingleGrid2D {
 	// 网格内含有的点列表
 	std::vector<osg::Vec2> PointList;
 
+	// 网格内含有的点ID列表
+	std::vector<int> indexList;
+
 	// 网格内的点数量
 	unsigned int cur_PointNum;
 
@@ -214,6 +217,9 @@ class GridNet {
 
 	// 检测二维格网中网格的连通性，从而区分外部和内部网格
 	void detectGridWithConnection();
+
+	// 获取所有边界网格的点列表		
+	void getAllOutSideGridPointIDList(std::vector<int> & pointIndexList);
 };
 
 // Alpha Shap算法
@@ -230,6 +236,9 @@ class AlphaShape {
 
 	//通过PCL构建kd树，加速搜索半径方位内的最近邻点
 	void Detect_Alpah_Shape_FLANN(float radius);
+
+	//通过PCL构建kd树，加速搜索半径方位内的最近邻点, 后续可考虑结合二维格网，先筛选出必要检测的边界点，剔除内部点集
+	void Detect_Alpah_Shape_FLANN_Select_Index(float radius, const std::vector<int> & pointIDList);
 
 	//通过PCL构建kd树，FLANN加速搜索半径方位内的最近邻点，利用多线程并行处理进一步提升速度，后续可考虑结合二维格网，先筛选出必要检测的边界点，剔除内部点集
 	void Detect_Alpah_Shape_FLANN_Multi_Thread(float radius, int threadNum = 4);

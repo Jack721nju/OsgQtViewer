@@ -128,6 +128,8 @@ class OsgQtTest : public QMainWindow, public osgViewer::CompositeViewer {
 
 	QRadioButton * m_Alpah_FLANN_radio;
 
+	QRadioButton * m_Alpah_FLANN_Grid_radio;
+
 	QRadioButton * m_Alpah_FLANN_multi_thread_radio;
 
 	QRadioButton * m_Alpah_Grid_radio;

@@ -1661,6 +1661,8 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	m_Alpah_radio->setChecked(true);
 	m_Alpah_FLANN_radio = new QRadioButton("alpha shape flann");
 	m_Alpah_FLANN_radio->setChecked(false);
+	m_Alpah_FLANN_Grid_radio = new QRadioButton("alpha shape flann grid");
+	m_Alpah_FLANN_Grid_radio->setChecked(false);
 	m_Alpah_FLANN_multi_thread_radio = new QRadioButton("alpha flann multi-thread");
 	m_Alpah_FLANN_multi_thread_radio->setChecked(false);
 	m_Alpah_Grid_radio = new QRadioButton("alpha grid");
@@ -1707,6 +1709,8 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	alpha_layout->addWidget(m_Alpah_radio, 0);
 	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(m_Alpah_FLANN_radio, 0);
+	alpha_layout->addStretch(1);
+	alpha_layout->addWidget(m_Alpah_FLANN_Grid_radio, 0);
 	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(m_Alpah_FLANN_multi_thread_radio, 0);
 	alpha_layout->addStretch(1);
@@ -1859,24 +1863,30 @@ void OsgQtTest::slot_DetectPointShape() {
 	}
 	else if (m_Alpah_FLANN_radio->isChecked()) {
 		alphaType = 1;
-	}
+	} 
 	else if (m_Alpah_FLANN_multi_thread_radio->isChecked()) {
 		alphaType = 2;
 	}
-	else if (m_Alpah_Grid_radio->isChecked()) {
+	else if (m_Alpah_FLANN_Grid_radio->isChecked()) {
 		alphaType = 3;
 	}
-	else if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
+	else if (m_Alpah_Grid_radio->isChecked()) {
 		alphaType = 4;
+	}
+	else if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
+		alphaType = 5;
 	}
 
 	float radius = 0.0;
 	if (m_radius) {
 		radius = m_radius->text().toFloat();
 	}
+	
+	std::vector<int> pointIndexList;
+	pointIndexList.reserve(this->pointlist_bulidGrid2D.size());
 
 	// build grid net
-	if (alphaType > 2) {
+	if (alphaType >= 3) {
 		gridNet = new GridNet(this->pointlist_bulidGrid2D);
 		if (nullptr == gridNet) {
 			this->AddToConsoleSlot("Build 2D grid net failed! \n");
@@ -1889,6 +1899,7 @@ void OsgQtTest::slot_DetectPointShape() {
 		}
 		gridNet->buildNetByNum(gridRow, gridCol);
 		gridNet->detectGridWithConnection();
+		gridNet->getAllOutSideGridPointIDList(pointIndexList);
 
 		// 计算Grid生成耗费时间
 		float runGridTime = _timerClock.getTime<Ms>() / 1000.0;
@@ -1897,7 +1908,7 @@ void OsgQtTest::slot_DetectPointShape() {
 	}
 
 	bool needGrid = false;
-	if (alphaType <= 2) {
+	if (alphaType <= 3) {
 		alpha = new AlphaShape(pointlist_bulidGrid2D);
 		if (m_pointPclProject2D.get() == nullptr) {
 			this->AddToConsoleSlot(QString("[WARING] No pcl project point!"));
@@ -1935,10 +1946,15 @@ void OsgQtTest::slot_DetectPointShape() {
 		typeStr = "alpha with flann and multi-thread " + QString::number(threadNum);
 		break;
 	case 3:
+		alpha->Detect_Alpah_Shape_FLANN_Select_Index(radius, pointIndexList);
+		typeStr = "alpha with flann and outside grids";
+		needGrid = true;
+		break;
+	case 4:
 		alpha->Detect_Alpha_Shape_by_Grid(radius);
 		typeStr = "alpha with grid net";
 		break;
-	case 4:
+	case 5:
 		alpha->Detect_Alpha_Shape_by_Grid_Multi_Thread(radius, threadNum);
 		typeStr = "alpha with grid net multi-thread " + QString::number(threadNum);
 		break;

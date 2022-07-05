@@ -205,7 +205,8 @@ void PaintArea::drawCircles(const std::vector<osg::Vec3> &circle_list, const std
 	QPainter painter(image);
 	painter.setRenderHint(QPainter::Antialiasing, true);//设置反锯齿模式
 
-	for (int i = 0; i < circle_list.size(); ++i) {
+	auto circleNum = circle_list.size();
+	for (int i = 0; i < circleNum; ++i) {
 		QPoint center(circle_list[i].x(), circle_list[i].y());
 		int radius = static_cast<int>(circle_list[i].z());
 

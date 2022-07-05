@@ -1,308 +1,638 @@
-2022-05-23 23:15:46,412 INFO [default] QtViewer start successfully!
-2022-05-24 22:09:21,543 INFO [default] 22:08:42main
-2022-05-24 22:25:39,502 INFO [default] build at 22:25:12
-2022-05-24 22:25:40,318 INFO [default] osgQtViewer start successfully!
-2022-05-24 22:27:19,714 INFO [default] build at May 24 202222:26:53
-2022-05-24 22:27:20,169 INFO [default] osgQtViewer start successfully!
-2022-05-24 22:36:10,172 INFO [default] build at 2022-05-24 22:36:10
-2022-05-24 22:36:10,584 INFO [default] osgQtViewer was build at May 24 2022 22:35:43
-2022-05-24 22:38:00,492 INFO [default] osgQtViewer was build at May 24 2022 22:37:35
-2022-05-24 22:38:01,497 INFO [default] start at 2022-05-24 22:38:01
-2022-05-24 22:39:17,046 INFO [default] osgQtViewer was build at May 24 2022 22:38:52
-2022-05-24 22:39:18,024 INFO [default] start at 2022-05-24 22:39:18
-2022-05-24 22:40:18,956 INFO [default] start at 2022-05-24 22:40:18
-2022-05-24 22:40:19,239 INFO [default] osgQtViewer was build at May 24 2022 22:39:52
-2022-05-24 22:40:57,450 INFO [default] osgQtViewer was build at May 24 2022 22:40:32
-2022-05-24 22:40:58,029 INFO [default] start at 2022-05-24 22:40:58
-2022-05-25 22:11:16,519 INFO [default] start at 2022-05-25 22:11:16
-2022-05-25 22:11:17,042 INFO [default] osgQtViewer was build at May 25 2022 22:08:34
-2022-05-25 22:12:19,428 INFO [default] start at 2022-05-25 22:12:19
-2022-05-25 22:12:19,862 INFO [default] osgQtViewer was build at May 25 2022 22:08:34
-2022-05-25 22:14:45,935 INFO [default] start at 2022-05-25 22:14:45
-2022-05-25 22:14:46,282 INFO [default] osgQtViewer was build at May 25 2022 22:08:34
-2022-05-25 22:15:40,245 INFO [default] start at 2022-05-25 22:15:40
-2022-05-25 22:15:44,115 INFO [default] osgQtViewer was build at May 25 2022 22:08:34
-2022-05-25 22:16:21,525 INFO [default] start at 2022-05-25 22:16:21
-2022-05-25 22:16:21,977 INFO [default] osgQtViewer was build at May 25 2022 22:08:34
-2022-05-25 22:26:32,742 INFO [default] start at 2022-05-25 22:26:32
-2022-05-25 22:26:33,232 INFO [default] osgQtViewer was build at May 25 2022 22:08:34
-2022-05-25 22:29:57,006 INFO [default] start at 2022-05-25 22:29:57
-2022-05-25 22:29:57,384 INFO [default] osgQtViewer was build at May 25 2022 22:08:34
-2022-05-25 22:30:55,324 INFO [default] start at 2022-05-25 22:30:55
-2022-05-25 22:30:56,633 INFO [default] osgQtViewer was build at May 25 2022 22:08:34
-2022-05-25 22:31:32,894 INFO [default] start at 2022-05-25 22:31:32
-2022-05-25 22:31:33,297 INFO [default] osgQtViewer was build at May 25 2022 22:08:34
-2022-05-26 22:52:36,593 INFO [default] start at 2022-05-26 22:52:36
-2022-05-26 22:52:37,113 INFO [default] osgQtViewer was build at May 25 2022 22:08:34
-2022-05-27 23:26:54,558 INFO [default] start at 2022-05-27 23:26:54
-2022-05-27 23:26:55,948 INFO [default] osgQtViewer was build at May 27 2022 23:25:27
-2022-05-28 23:32:47,922 INFO [default] start at 2022-05-28 23:32:47
-2022-05-28 23:32:49,271 INFO [default] osgQtViewer was build at May 28 2022 23:31:54
-2022-05-29 23:15:43,507 INFO [default] start at 2022-05-29 23:15:43
-2022-05-29 23:15:44,045 INFO [default] osgQtViewer was build at May 29 2022 23:06:44
-2022-06-01 23:33:52,662 INFO [default] start at 2022-06-01 23:33:52
-2022-06-01 23:33:54,016 INFO [default] osgQtViewer was build at May 31 2022 21:32:54
-2022-06-04 23:21:14,171 INFO [default] start at 2022-06-04 23:21:14
-2022-06-04 23:21:15,516 INFO [default] osgQtViewer was build at May 31 2022 21:32:54
-2022-06-06 22:31:53,050 INFO [default] start at 2022-06-06 22:31:53
-2022-06-06 22:31:53,815 INFO [default] osgQtViewer was build at May 31 2022 21:32:54
-2022-07-03 09:33:29,716 INFO [default] start at 2022-07-03 09:33:29
-2022-07-03 09:33:30,195 INFO [default] osgQtViewer was build at May 31 2022 21:32:54
-2022-07-03 09:38:12,543 INFO [default] start at 2022-07-03 09:38:12
-2022-07-03 09:38:12,961 INFO [default] osgQtViewer was build at May 31 2022 21:32:54
-2022-07-03 09:40:44,162 INFO [default] start at 2022-07-03 09:40:44
-2022-07-03 09:40:50,468 INFO [default] osgQtViewer was build at May 31 2022 21:32:54
-2022-07-03 09:54:36,216 INFO [default] start at 2022-07-03 09:54:36
-2022-07-03 09:54:37,572 INFO [default] osgQtViewer was build at Jul  3 2022 09:54:10
-2022-07-03 09:59:43,131 INFO [default] start at 2022-07-03 09:59:43
-2022-07-03 09:59:43,657 INFO [default] osgQtViewer was build at Jul  3 2022 09:59:18
-2022-07-03 10:03:45,311 INFO [default] start at 2022-07-03 10:03:45
-2022-07-03 10:03:45,726 INFO [default] osgQtViewer was build at Jul  3 2022 09:59:18
-2022-07-03 10:28:23,615 INFO [default] start at 2022-07-03 10:28:23
-2022-07-03 10:28:24,093 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:30:33,812 INFO [default] start at 2022-07-03 10:30:33
-2022-07-03 10:30:34,249 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:34:11,210 INFO [default] start at 2022-07-03 10:34:11
-2022-07-03 10:34:11,644 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:35:00,657 INFO [default] start at 2022-07-03 10:35:00
-2022-07-03 10:35:01,952 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:35:18,240 INFO [default] start at 2022-07-03 10:35:18
-2022-07-03 10:35:18,652 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:36:46,661 INFO [default] start at 2022-07-03 10:36:46
-2022-07-03 10:36:47,075 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:37:15,230 INFO [default] start at 2022-07-03 10:37:15
-2022-07-03 10:37:16,530 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:38:29,529 INFO [default] start at 2022-07-03 10:38:29
-2022-07-03 10:38:34,573 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:39:49,911 INFO [default] start at 2022-07-03 10:39:49
-2022-07-03 10:39:50,342 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:41:58,411 INFO [default] start at 2022-07-03 10:41:58
-2022-07-03 10:41:59,713 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:42:58,218 INFO [default] start at 2022-07-03 10:42:58
-2022-07-03 10:42:58,630 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:47:07,215 INFO [default] start at 2022-07-03 10:47:07
-2022-07-03 10:47:07,635 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:47:39,047 INFO [default] start at 2022-07-03 10:47:39
-2022-07-03 10:47:43,087 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 10:50:13,038 INFO [default] start at 2022-07-03 10:50:13
-2022-07-03 10:50:13,456 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 11:10:25,302 INFO [default] start at 2022-07-03 11:10:25
-2022-07-03 11:10:26,669 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 11:14:16,186 INFO [default] start at 2022-07-03 11:14:16
-2022-07-03 11:14:17,492 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 11:16:16,220 INFO [default] start at 2022-07-03 11:16:16
-2022-07-03 11:16:17,525 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 11:17:20,489 INFO [default] start at 2022-07-03 11:17:20
-2022-07-03 11:17:20,945 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 11:23:52,856 INFO [default] start at 2022-07-03 11:23:52
-2022-07-03 11:23:54,236 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:12:17,354 INFO [default] start at 2022-07-03 16:12:17
-2022-07-03 16:12:17,814 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:14:00,346 INFO [default] start at 2022-07-03 16:14:00
-2022-07-03 16:14:01,649 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:15:08,200 INFO [default] start at 2022-07-03 16:15:08
-2022-07-03 16:15:09,505 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:17:27,629 INFO [default] start at 2022-07-03 16:17:27
-2022-07-03 16:17:28,069 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:20:38,562 INFO [default] start at 2022-07-03 16:20:38
-2022-07-03 16:20:39,860 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:23:09,861 INFO [default] start at 2022-07-03 16:23:09
-2022-07-03 16:23:11,168 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:26:45,809 INFO [default] start at 2022-07-03 16:26:45
-2022-07-03 16:26:46,264 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:29:03,580 INFO [default] start at 2022-07-03 16:29:03
-2022-07-03 16:29:07,768 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:37:24,561 INFO [default] start at 2022-07-03 16:37:24
-2022-07-03 16:37:25,055 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:40:07,945 INFO [default] start at 2022-07-03 16:40:07
-2022-07-03 16:40:08,373 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:40:48,861 INFO [default] start at 2022-07-03 16:40:48
-2022-07-03 16:40:51,933 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:42:40,982 INFO [default] start at 2022-07-03 16:42:40
-2022-07-03 16:42:41,382 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:44:11,378 INFO [default] start at 2022-07-03 16:44:11
-2022-07-03 16:44:12,575 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 16:45:05,527 INFO [default] start at 2022-07-03 16:45:05
-2022-07-03 16:45:05,951 INFO [default] osgQtViewer was build at Jul  3 2022 10:26:32
-2022-07-03 17:43:35,218 INFO [default] start at 2022-07-03 17:43:35
-2022-07-03 17:43:35,729 INFO [default] osgQtViewer was build at Jul  3 2022 17:42:54
-2022-07-03 17:45:40,748 INFO [default] start at 2022-07-03 17:45:40
-2022-07-03 17:45:42,049 INFO [default] osgQtViewer was build at Jul  3 2022 17:42:54
-2022-07-03 17:51:50,107 INFO [default] start at 2022-07-03 17:51:50
-2022-07-03 17:51:50,617 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 21:39:46,711 INFO [default] start at 2022-07-03 21:39:46
-2022-07-03 21:39:48,046 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 21:40:24,467 INFO [default] start at 2022-07-03 21:40:24
-2022-07-03 21:40:24,877 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 21:42:58,365 INFO [default] start at 2022-07-03 21:42:58
-2022-07-03 21:42:58,773 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 21:53:06,386 INFO [default] start at 2022-07-03 21:53:06
-2022-07-03 21:53:06,838 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 21:56:31,638 INFO [default] start at 2022-07-03 21:56:31
-2022-07-03 21:56:32,042 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 21:57:32,847 INFO [default] start at 2022-07-03 21:57:32
-2022-07-03 21:57:34,140 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 21:59:25,849 INFO [default] start at 2022-07-03 21:59:25
-2022-07-03 21:59:27,153 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 22:03:34,705 INFO [default] start at 2022-07-03 22:03:34
-2022-07-03 22:03:35,122 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 22:05:18,920 INFO [default] start at 2022-07-03 22:05:18
-2022-07-03 22:05:20,208 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 22:06:58,584 INFO [default] start at 2022-07-03 22:06:58
-2022-07-03 22:06:59,874 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 22:07:41,461 INFO [default] start at 2022-07-03 22:07:41
-2022-07-03 22:07:41,875 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 22:10:19,534 INFO [default] start at 2022-07-03 22:10:19
-2022-07-03 22:10:19,955 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 22:12:03,498 INFO [default] start at 2022-07-03 22:12:03
-2022-07-03 22:12:03,909 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 22:13:47,570 INFO [default] start at 2022-07-03 22:13:47
-2022-07-03 22:13:52,332 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 22:14:51,441 INFO [default] start at 2022-07-03 22:14:51
-2022-07-03 22:14:52,730 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 22:21:14,544 INFO [default] start at 2022-07-03 22:21:14
-2022-07-03 22:21:14,978 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 22:23:38,451 INFO [default] start at 2022-07-03 22:23:38
-2022-07-03 22:23:38,852 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 22:25:20,075 INFO [default] start at 2022-07-03 22:25:20
-2022-07-03 22:25:20,483 INFO [default] osgQtViewer was build at Jul  3 2022 17:51:12
-2022-07-03 23:02:44,233 INFO [default] start at 2022-07-03 23:02:44
-2022-07-03 23:02:44,685 INFO [default] osgQtViewer was build at Jul  3 2022 23:02:06
-2022-07-03 23:10:39,037 INFO [default] start at 2022-07-03 23:10:39
-2022-07-03 23:10:39,538 INFO [default] osgQtViewer was build at Jul  3 2022 23:02:06
-2022-07-03 23:12:40,521 INFO [default] start at 2022-07-03 23:12:40
-2022-07-03 23:12:41,805 INFO [default] osgQtViewer was build at Jul  3 2022 23:02:06
-2022-07-03 23:15:38,399 INFO [default] start at 2022-07-03 23:15:38
-2022-07-03 23:15:39,701 INFO [default] osgQtViewer was build at Jul  3 2022 23:02:06
-2022-07-03 23:16:36,079 INFO [default] start at 2022-07-03 23:16:36
-2022-07-03 23:16:37,349 INFO [default] osgQtViewer was build at Jul  3 2022 23:02:06
-2022-07-03 23:17:39,958 INFO [default] start at 2022-07-03 23:17:39
-2022-07-03 23:17:40,334 INFO [default] osgQtViewer was build at Jul  3 2022 23:02:06
-2022-07-03 23:29:34,080 INFO [default] start at 2022-07-03 23:29:34
-2022-07-03 23:29:35,473 INFO [default] osgQtViewer was build at Jul  3 2022 23:02:06
-2022-07-03 23:47:13,314 INFO [default] start at 2022-07-03 23:47:13
-2022-07-03 23:47:13,762 INFO [default] osgQtViewer was build at Jul  3 2022 23:46:36
-2022-07-03 23:47:17,912 INFO [default] start at 2022-07-03 23:47:17
-2022-07-03 23:47:19,216 INFO [default] osgQtViewer was build at Jul  3 2022 23:46:36
-2022-07-03 23:48:14,177 INFO [default] start at 2022-07-03 23:48:14
-2022-07-03 23:48:14,583 INFO [default] osgQtViewer was build at Jul  3 2022 23:46:36
-2022-07-03 23:48:35,988 INFO [default] start at 2022-07-03 23:48:35
-2022-07-03 23:48:36,364 INFO [default] osgQtViewer was build at Jul  3 2022 23:46:36
-2022-07-03 23:49:25,598 INFO [default] start at 2022-07-03 23:49:25
-2022-07-03 23:49:26,905 INFO [default] osgQtViewer was build at Jul  3 2022 23:46:36
-2022-07-04 18:00:22,850 INFO [default] start at 2022-07-04 18:00:22
-2022-07-04 18:00:23,235 INFO [default] osgQtViewer was build at Jul  3 2022 23:46:36
-2022-07-04 18:32:03,926 INFO [default] start at 2022-07-04 18:32:03
-2022-07-04 18:32:04,387 INFO [default] osgQtViewer was build at Jul  4 2022 18:29:40
-2022-07-04 18:42:11,725 INFO [default] start at 2022-07-04 18:42:11
-2022-07-04 18:42:13,018 INFO [default] osgQtViewer was build at Jul  4 2022 18:41:46
-2022-07-04 18:44:41,972 INFO [default] start at 2022-07-04 18:44:41
-2022-07-04 18:44:42,378 INFO [default] osgQtViewer was build at Jul  4 2022 18:41:46
-2022-07-04 18:46:14,370 INFO [default] start at 2022-07-04 18:46:14
-2022-07-04 18:46:14,771 INFO [default] osgQtViewer was build at Jul  4 2022 18:41:46
-2022-07-04 18:57:22,601 INFO [default] start at 2022-07-04 18:57:22
-2022-07-04 18:57:23,005 INFO [default] osgQtViewer was build at Jul  4 2022 18:41:46
-2022-07-04 19:09:38,894 INFO [default] start at 2022-07-04 19:09:38
-2022-07-04 19:09:39,275 INFO [default] osgQtViewer was build at Jul  4 2022 19:09:11
-2022-07-04 19:10:25,917 INFO [default] start at 2022-07-04 19:10:25
-2022-07-04 19:10:26,334 INFO [default] osgQtViewer was build at Jul  4 2022 19:09:11
-2022-07-04 19:26:52,321 INFO [default] start at 2022-07-04 19:26:52
-2022-07-04 19:26:52,695 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 19:36:57,960 INFO [default] start at 2022-07-04 19:36:57
-2022-07-04 19:36:58,363 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 19:38:54,122 INFO [default] start at 2022-07-04 19:38:54
-2022-07-04 19:38:55,423 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 19:40:34,314 INFO [default] start at 2022-07-04 19:40:34
-2022-07-04 19:40:34,688 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 19:44:03,182 INFO [default] start at 2022-07-04 19:44:03
-2022-07-04 19:44:04,461 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 19:45:44,764 INFO [default] start at 2022-07-04 19:45:44
-2022-07-04 19:45:46,061 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 19:51:39,851 INFO [default] start at 2022-07-04 19:51:39
-2022-07-04 19:51:40,320 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 19:52:43,896 INFO [default] start at 2022-07-04 19:52:43
-2022-07-04 19:52:45,207 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 19:56:12,592 INFO [default] start at 2022-07-04 19:56:12
-2022-07-04 19:56:13,795 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 19:57:44,743 INFO [default] start at 2022-07-04 19:57:44
-2022-07-04 19:57:46,038 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 19:59:29,420 INFO [default] start at 2022-07-04 19:59:29
-2022-07-04 19:59:29,823 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 20:02:37,193 INFO [default] start at 2022-07-04 20:02:37
-2022-07-04 20:02:37,612 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 20:03:51,802 INFO [default] start at 2022-07-04 20:03:51
-2022-07-04 20:03:54,955 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 20:06:31,900 INFO [default] start at 2022-07-04 20:06:31
-2022-07-04 20:06:33,189 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 20:32:51,341 INFO [default] start at 2022-07-04 20:32:51
-2022-07-04 20:32:52,674 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 20:40:27,634 INFO [default] start at 2022-07-04 20:40:27
-2022-07-04 20:40:27,998 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 21:01:39,993 INFO [default] start at 2022-07-04 21:01:39
-2022-07-04 21:01:41,348 INFO [default] osgQtViewer was build at Jul  4 2022 19:26:24
-2022-07-04 21:06:21,985 INFO [default] start at 2022-07-04 21:06:21
-2022-07-04 21:06:23,280 INFO [default] osgQtViewer was build at Jul  4 2022 21:05:41
-2022-07-04 21:31:17,881 INFO [default] start at 2022-07-04 21:31:17
-2022-07-04 21:31:19,196 INFO [default] osgQtViewer was build at Jul  4 2022 21:30:38
-2022-07-04 21:34:58,536 INFO [default] start at 2022-07-04 21:34:58
-2022-07-04 21:34:58,977 INFO [default] osgQtViewer was build at Jul  4 2022 21:30:38
-2022-07-04 21:38:59,977 INFO [default] start at 2022-07-04 21:38:59
-2022-07-04 21:39:01,277 INFO [default] osgQtViewer was build at Jul  4 2022 21:30:38
-2022-07-04 21:39:57,348 INFO [default] start at 2022-07-04 21:39:57
-2022-07-04 21:39:58,657 INFO [default] osgQtViewer was build at Jul  4 2022 21:30:38
-2022-07-04 21:40:22,092 INFO [default] start at 2022-07-04 21:40:22
-2022-07-04 21:40:23,395 INFO [default] osgQtViewer was build at Jul  4 2022 21:30:38
-2022-07-04 21:44:45,329 INFO [default] start at 2022-07-04 21:44:45
-2022-07-04 21:44:46,628 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 21:47:46,282 INFO [default] start at 2022-07-04 21:47:46
-2022-07-04 21:47:46,710 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 21:49:39,191 INFO [default] start at 2022-07-04 21:49:39
-2022-07-04 21:49:40,486 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 21:51:10,694 INFO [default] start at 2022-07-04 21:51:10
-2022-07-04 21:51:11,996 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 21:52:43,158 INFO [default] start at 2022-07-04 21:52:43
-2022-07-04 21:52:44,455 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 21:54:40,321 INFO [default] start at 2022-07-04 21:54:40
-2022-07-04 21:54:41,585 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 21:56:09,645 INFO [default] start at 2022-07-04 21:56:09
-2022-07-04 21:56:10,925 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 21:56:55,734 INFO [default] start at 2022-07-04 21:56:55
-2022-07-04 21:56:59,378 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 22:06:22,646 INFO [default] start at 2022-07-04 22:06:22
-2022-07-04 22:06:24,030 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 22:08:18,347 INFO [default] start at 2022-07-04 22:08:18
-2022-07-04 22:08:19,659 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 22:10:52,963 INFO [default] start at 2022-07-04 22:10:52
-2022-07-04 22:10:54,270 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 22:13:53,333 INFO [default] start at 2022-07-04 22:13:53
-2022-07-04 22:13:54,635 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 22:14:41,805 INFO [default] start at 2022-07-04 22:14:41
-2022-07-04 22:14:43,091 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 22:17:12,030 INFO [default] start at 2022-07-04 22:17:12
-2022-07-04 22:17:17,205 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:03:50,187 INFO [default] start at 2022-07-04 23:03:50
-2022-07-04 23:03:51,537 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:12:39,832 INFO [default] start at 2022-07-04 23:12:39
-2022-07-04 23:12:41,230 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:14:03,282 INFO [default] start at 2022-07-04 23:14:03
-2022-07-04 23:14:04,577 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:15:20,699 INFO [default] start at 2022-07-04 23:15:20
-2022-07-04 23:15:22,007 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:16:34,515 INFO [default] start at 2022-07-04 23:16:34
-2022-07-04 23:16:34,885 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:17:23,441 INFO [default] start at 2022-07-04 23:17:23
-2022-07-04 23:17:24,357 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:19:08,502 INFO [default] start at 2022-07-04 23:19:08
-2022-07-04 23:19:09,777 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:20:09,647 INFO [default] start at 2022-07-04 23:20:09
-2022-07-04 23:20:10,078 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:20:42,761 INFO [default] start at 2022-07-04 23:20:42
-2022-07-04 23:20:44,071 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:22:51,275 INFO [default] start at 2022-07-04 23:22:51
-2022-07-04 23:22:52,578 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:25:01,779 INFO [default] start at 2022-07-04 23:25:01
-2022-07-04 23:25:02,202 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:26:52,657 INFO [default] start at 2022-07-04 23:26:52
-2022-07-04 23:26:53,092 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
-2022-07-04 23:47:31,151 INFO [default] start at 2022-07-04 23:47:31
-2022-07-04 23:47:32,480 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 17:57:21,160 INFO [default] start at 2022-07-05 17:57:21
+2022-07-05 17:57:21,160 INFO [default] [2022-07-05 17:57:21] start at 2022-07-05 17:57:21
+2022-07-05 17:57:21,662 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 17:57:25,226 INFO [default] [2022-07-05 17:57:25] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 17:57:32,797 INFO [default] [2022-07-05 17:57:32] The cost time of detecting Contour by alpha shape with flann is: 1.514s
+2022-07-05 17:57:32,797 INFO [default] [2022-07-05 17:57:32] The scale of detecting Contour by default is :  0.000
+2022-07-05 17:57:32,798 INFO [default] [2022-07-05 17:57:32] The sum detect point num is :  5730928
+2022-07-05 17:57:42,402 INFO [default] [2022-07-05 17:57:42] The cost time of detecting Contour by alpha shape with flann is: 1.512s
+2022-07-05 17:57:42,403 INFO [default] [2022-07-05 17:57:42] The scale of detecting Contour by default is :  0.000
+2022-07-05 17:57:42,404 INFO [default] [2022-07-05 17:57:42] The sum detect point num is :  5730928
+2022-07-05 18:03:39,950 INFO [default] start at 2022-07-05 18:03:39
+2022-07-05 18:03:39,951 INFO [default] start at 2022-07-05 18:03:39
+2022-07-05 18:03:40,388 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 18:05:08,582 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 18:05:15,226 INFO [default] The cost time of detecting Contour by alpha shape with flann is: 1.11s
+2022-07-05 18:05:15,227 INFO [default] The scale of detecting Contour by default is :  0.000
+2022-07-05 18:05:15,228 INFO [default] The sum detect point num is :  0
+2022-07-05 18:05:33,825 INFO [default] The cost time of detecting Contour by alpha shape with flann is: 1.112s
+2022-07-05 18:05:33,826 INFO [default] The scale of detecting Contour by default is :  0.000
+2022-07-05 18:05:33,827 INFO [default] The sum detect point num is :  0
+2022-07-05 18:07:54,567 INFO [default] start at 2022-07-05 18:07:54
+2022-07-05 18:07:54,568 INFO [default] start at 2022-07-05 18:07:54
+2022-07-05 18:07:54,986 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 18:07:58,894 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 18:08:05,632 INFO [default] The cost time of detecting Contour radius is 5 is: alpha shape with flann is: 1.126s
+2022-07-05 18:08:05,632 INFO [default] The scale of detecting Contour by default is :  0.000
+2022-07-05 18:08:05,633 INFO [default] The sum detect point num is :  0
+2022-07-05 18:09:35,654 INFO [default] start at 2022-07-05 18:09:35
+2022-07-05 18:09:35,654 INFO [default] start at 2022-07-05 18:09:35
+2022-07-05 18:09:36,932 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 18:09:39,413 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.01s
+2022-07-05 18:10:31,345 INFO [default] The cost time of detecting Contour radius is 5 is: alpha shape with flann is: 45.624s
+2022-07-05 18:10:31,345 INFO [default] The scale of detecting Contour by default is :  0.000
+2022-07-05 18:10:31,346 INFO [default] The sum detect point num is :  0
+2022-07-05 18:11:02,638 INFO [default] start at 2022-07-05 18:11:02
+2022-07-05 18:11:02,638 INFO [default] start at 2022-07-05 18:11:02
+2022-07-05 18:11:03,053 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 18:11:09,949 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 18:11:21,220 INFO [default] The cost time of detecting Contour radius is 5 is: alpha shape with flann is: 5.074s
+2022-07-05 18:11:21,222 INFO [default] The scale of detecting Contour by default is :  0.000
+2022-07-05 18:11:21,222 INFO [default] The sum detect point num is :  5730928
+2022-07-05 18:11:31,621 INFO [default] The cost time of detecting Contour radius is 5 is: alpha shape with flann is: 2.182s
+2022-07-05 18:11:31,622 INFO [default] The scale of detecting Contour by default is :  0.000
+2022-07-05 18:11:31,623 INFO [default] The sum detect point num is :  5730928
+2022-07-05 18:14:29,140 INFO [default] start at 2022-07-05 18:14:29
+2022-07-05 18:14:29,141 INFO [default] start at 2022-07-05 18:14:29
+2022-07-05 18:14:30,424 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 18:14:33,211 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.01s
+2022-07-05 18:14:40,765 INFO [default] The cost time of detecting Contour radius is 5 is: alpha shape with flann is: 1.802s
+2022-07-05 18:14:40,766 INFO [default] The scale of detecting Contour by default is :  0.000
+2022-07-05 18:14:40,767 INFO [default] The sum detect point num is :  2865464
+2022-07-05 18:14:51,712 INFO [default] The cost time of detecting Contour radius is 5 is: alpha shape with flann is: 1.758s
+2022-07-05 18:14:51,713 INFO [default] The scale of detecting Contour by default is :  0.000
+2022-07-05 18:14:51,714 INFO [default] The sum detect point num is :  2865464
+2022-07-05 18:32:44,372 INFO [default] start at 2022-07-05 18:32:44
+2022-07-05 18:32:44,372 INFO [default] start at 2022-07-05 18:32:44
+2022-07-05 18:32:44,780 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 18:32:47,570 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.01s
+2022-07-05 18:32:53,587 INFO [default] The cost time of detecting Contour radius is 5 is: alpha shape with flann is: 1.057s
+2022-07-05 18:32:53,588 INFO [default] The scale of detecting Contour by default is :  0.000
+2022-07-05 18:32:53,589 INFO [default] The sum detect point num is :  2865464
+2022-07-05 18:40:30,673 INFO [default] start at 2022-07-05 18:40:30
+2022-07-05 18:40:30,673 INFO [default] start at 2022-07-05 18:40:30
+2022-07-05 18:40:32,097 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 18:40:34,522 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 18:40:41,570 INFO [default] The cost time of detecting Contour radius is 5 is: alpha shape with flann is: 1.037s
+2022-07-05 18:40:41,570 INFO [default] The scale of detecting Contour by default is :  0.000
+2022-07-05 18:40:41,571 INFO [default] The sum detect point num is :  2865464
+2022-07-05 18:40:47,124 INFO [default] The cost time of detecting Contour radius is 5 is: alpha shape with flann is: 1.036s
+2022-07-05 18:40:47,124 INFO [default] The scale of detecting Contour by default is :  0.000
+2022-07-05 18:40:47,126 INFO [default] The sum detect point num is :  2865464
+2022-07-05 18:50:52,145 INFO [default] start at 2022-07-05 18:50:52
+2022-07-05 18:50:52,146 INFO [default] start at 2022-07-05 18:50:52
+2022-07-05 18:50:53,439 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 18:50:56,038 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 18:51:02,995 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.934s
+2022-07-05 18:51:02,995 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 18:51:02,997 INFO [default] The sum detect point num is: 2865464
+2022-07-05 18:52:07,913 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 4 is: 0.514s
+2022-07-05 18:52:07,913 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 18:52:07,914 INFO [default] The sum detect point num is: 5730928
+2022-07-05 18:54:47,633 INFO [default] start at 2022-07-05 18:54:47
+2022-07-05 18:54:47,634 INFO [default] start at 2022-07-05 18:54:47
+2022-07-05 18:54:48,051 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 18:54:49,102 INFO [default] [WARING] Can not save, no data was selected
+2022-07-05 18:54:51,447 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 18:54:59,190 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.933s
+2022-07-05 18:54:59,190 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 18:54:59,191 INFO [default] The sum detect point num is: 2865464
+2022-07-05 19:02:00,801 INFO [default] start at 2022-07-05 19:02:00
+2022-07-05 19:02:00,801 INFO [default] start at 2022-07-05 19:02:00
+2022-07-05 19:02:01,260 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 19:02:04,222 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 19:02:10,191 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.945s
+2022-07-05 19:02:10,192 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 19:02:10,193 INFO [default] The sum detect point num is: 2865464
+2022-07-05 19:02:22,178 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.942s
+2022-07-05 19:02:22,179 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 19:02:22,180 INFO [default] The sum detect point num is: 2865464
+2022-07-05 21:15:47,017 INFO [default] start at 2022-07-05 21:15:47
+2022-07-05 21:15:47,017 INFO [default] start at 2022-07-05 21:15:47
+2022-07-05 21:15:48,348 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 21:15:53,715 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 21:16:01,806 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.965s
+2022-07-05 21:16:01,807 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:16:01,808 INFO [default] The sum detect point num is: 2865464
+2022-07-05 21:16:13,518 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.918s
+2022-07-05 21:16:13,519 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:16:13,520 INFO [default] The sum detect point num is: 2865464
+2022-07-05 21:16:15,502 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.916s
+2022-07-05 21:16:15,503 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:16:15,504 INFO [default] The sum detect point num is: 2865464
+2022-07-05 21:16:17,218 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.931s
+2022-07-05 21:16:17,218 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:16:17,219 INFO [default] The sum detect point num is: 2865464
+2022-07-05 21:16:18,986 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.916s
+2022-07-05 21:16:18,986 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:16:18,986 INFO [default] The sum detect point num is: 2865464
+2022-07-05 21:16:25,397 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.555s
+2022-07-05 21:16:25,398 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:16:25,398 INFO [default] The sum detect point num is: 5730928
+2022-07-05 21:16:34,536 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.587s
+2022-07-05 21:16:34,537 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:16:34,538 INFO [default] The sum detect point num is: 5730928
+2022-07-05 21:22:13,104 INFO [default] start at 2022-07-05 21:22:13
+2022-07-05 21:22:13,104 INFO [default] start at 2022-07-05 21:22:13
+2022-07-05 21:22:14,466 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 21:22:19,799 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 21:22:28,479 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.953s
+2022-07-05 21:22:28,479 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:22:28,480 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:22:28,486 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:22:39,084 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.601s
+2022-07-05 21:22:39,085 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:22:39,089 INFO [default] The sum detect point pair num is: 5730928
+2022-07-05 21:22:39,095 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:24:22,516 INFO [default] start at 2022-07-05 21:24:22
+2022-07-05 21:24:22,517 INFO [default] start at 2022-07-05 21:24:22
+2022-07-05 21:24:23,789 INFO [default] osgQtViewer was build at Jul  4 2022 21:42:07
+2022-07-05 21:24:27,789 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.01s
+2022-07-05 21:24:33,954 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.94s
+2022-07-05 21:24:33,954 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:24:33,955 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:24:33,961 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:24:36,159 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.962s
+2022-07-05 21:24:36,160 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:24:36,161 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:24:36,167 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:24:41,097 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.947s
+2022-07-05 21:24:41,098 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:24:41,099 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:24:41,105 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:24:44,087 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.935s
+2022-07-05 21:24:44,088 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:24:44,090 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:24:44,098 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:24:47,057 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.935s
+2022-07-05 21:24:47,058 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:24:47,062 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:24:47,068 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:32:28,511 INFO [default] start at 2022-07-05 21:32:28
+2022-07-05 21:32:28,511 INFO [default] start at 2022-07-05 21:32:28
+2022-07-05 21:32:28,926 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 21:34:01,642 INFO [default] start at 2022-07-05 21:34:01
+2022-07-05 21:34:01,642 INFO [default] start at 2022-07-05 21:34:01
+2022-07-05 21:34:02,082 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 21:34:05,230 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 21:34:13,458 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.95s
+2022-07-05 21:34:13,458 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:34:13,462 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:34:13,468 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:34:13,468 INFO [default] The detect cost all count is: 0
+2022-07-05 21:35:45,052 INFO [default] start at 2022-07-05 21:35:45
+2022-07-05 21:35:45,053 INFO [default] start at 2022-07-05 21:35:45
+2022-07-05 21:35:45,484 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 21:35:53,237 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 21:36:00,239 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.944s
+2022-07-05 21:36:00,240 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:36:00,240 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:36:00,247 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:36:00,249 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:37:01,218 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.574s
+2022-07-05 21:37:01,220 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:37:01,220 INFO [default] The sum detect point pair num is: 5730928
+2022-07-05 21:37:01,228 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:37:01,228 INFO [default] The detect cost all count is: 20803976
+2022-07-05 21:39:03,166 INFO [default] start at 2022-07-05 21:39:03
+2022-07-05 21:39:03,166 INFO [default] start at 2022-07-05 21:39:03
+2022-07-05 21:39:04,448 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 21:39:06,214 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 21:39:12,511 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.942s
+2022-07-05 21:39:12,511 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:39:12,512 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:39:12,518 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:39:12,519 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:39:19,251 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.026s
+2022-07-05 21:39:19,252 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:39:19,252 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:39:19,258 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:39:19,258 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:39:26,978 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.014s
+2022-07-05 21:39:26,979 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:39:26,980 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:39:26,986 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:39:26,987 INFO [default] The detect cost all count is: 20827272
+2022-07-05 21:39:29,719 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.02s
+2022-07-05 21:39:29,720 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:39:29,721 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:39:29,728 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:39:29,728 INFO [default] The detect cost all count is: 31240908
+2022-07-05 21:39:32,933 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.031s
+2022-07-05 21:39:32,934 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:39:32,934 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:39:32,941 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:39:32,941 INFO [default] The detect cost all count is: 41654544
+2022-07-05 21:48:47,518 INFO [default] start at 2022-07-05 21:48:47
+2022-07-05 21:48:47,518 INFO [default] start at 2022-07-05 21:48:47
+2022-07-05 21:48:48,812 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 21:48:50,960 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 21:48:57,411 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.942s
+2022-07-05 21:48:57,411 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:48:57,412 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:48:57,418 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:48:57,418 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:49:25,183 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.042s
+2022-07-05 21:49:25,184 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:49:25,185 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:49:25,191 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:49:25,192 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:49:33,155 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.024s
+2022-07-05 21:49:33,155 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:49:33,156 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:49:33,161 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:49:33,164 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:52:07,635 INFO [default] start at 2022-07-05 21:52:07
+2022-07-05 21:52:07,635 INFO [default] start at 2022-07-05 21:52:07
+2022-07-05 21:52:10,822 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.01s
+2022-07-05 21:52:10,855 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 21:52:19,906 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.003s
+2022-07-05 21:52:19,906 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:52:19,907 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:52:19,913 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:52:19,913 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:52:24,057 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.002s
+2022-07-05 21:52:24,058 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:52:24,059 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:52:24,066 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:52:24,066 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:52:26,791 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.002s
+2022-07-05 21:52:26,791 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:52:26,792 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:52:26,798 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:52:26,799 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:53:54,682 INFO [default] start at 2022-07-05 21:53:54
+2022-07-05 21:53:54,682 INFO [default] start at 2022-07-05 21:53:54
+2022-07-05 21:53:55,132 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 21:54:01,797 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.01s
+2022-07-05 21:54:09,053 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.011s
+2022-07-05 21:54:09,053 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:54:09,054 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:54:09,059 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:54:09,060 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:54:15,856 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.009s
+2022-07-05 21:54:15,858 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:54:15,858 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:54:15,864 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:54:15,864 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:54:18,629 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.014s
+2022-07-05 21:54:18,629 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:54:18,631 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:54:18,637 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:54:18,637 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:54:21,250 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 1.017s
+2022-07-05 21:54:21,250 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:54:21,251 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:54:21,257 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:54:21,258 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:54:28,718 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.945s
+2022-07-05 21:54:28,718 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:54:28,719 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:54:28,725 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:54:28,725 INFO [default] The detect cost all count is: 10413636
+2022-07-05 21:54:32,164 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.937s
+2022-07-05 21:54:32,164 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 21:54:32,165 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 21:54:32,171 INFO [default] The detect edge point num is: 1706
+2022-07-05 21:54:32,171 INFO [default] The detect cost all count is: 10413636
+2022-07-05 22:00:46,086 INFO [default] start at 2022-07-05 22:00:46
+2022-07-05 22:00:46,086 INFO [default] start at 2022-07-05 22:00:46
+2022-07-05 22:00:47,472 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:01:47,113 INFO [default] start at 2022-07-05 22:01:47
+2022-07-05 22:01:47,113 INFO [default] start at 2022-07-05 22:01:47
+2022-07-05 22:01:47,538 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:01:50,542 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 22:01:59,075 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 1 is: 0.997s
+2022-07-05 22:01:59,075 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 22:01:59,082 INFO [default] The detect point num is: 1706
+2022-07-05 22:01:59,082 INFO [default] The detect edge num is: 1703
+2022-07-05 22:01:59,082 INFO [default] The detect circle num is: 1703
+2022-07-05 22:01:59,083 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 22:01:59,084 INFO [default] The detect all count num is: 10413636
+2022-07-05 22:02:16,426 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.951s
+2022-07-05 22:02:16,427 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 22:02:16,433 INFO [default] The detect point num is: 1706
+2022-07-05 22:02:16,435 INFO [default] The detect edge num is: 1703
+2022-07-05 22:02:16,437 INFO [default] The detect circle num is: 1703
+2022-07-05 22:02:16,437 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 22:02:16,437 INFO [default] The detect all count num is: 10413636
+2022-07-05 22:03:14,980 INFO [default] start at 2022-07-05 22:03:14
+2022-07-05 22:03:14,980 INFO [default] start at 2022-07-05 22:03:14
+2022-07-05 22:03:16,278 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:03:22,197 INFO [default] [Time] Read file <E:/Data/tower_cut2.las> [2112] points cost 0.00s
+2022-07-05 22:03:29,839 INFO [default] The cost time of detecting Contour with radius 15 by default alpha shape is: 1.486s
+2022-07-05 22:03:29,840 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 22:03:29,843 INFO [default] The detect point num is: 319
+2022-07-05 22:03:29,843 INFO [default] The detect edge num is: 319
+2022-07-05 22:03:29,843 INFO [default] The detect circle num is: 319
+2022-07-05 22:03:29,844 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:03:29,844 INFO [default] The detect all count num is: 0
+2022-07-05 22:03:40,353 INFO [default] The cost time of detecting Contour with radius 15 by alpha shape with flann is: 0.024s
+2022-07-05 22:03:40,353 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 22:03:40,356 INFO [default] The detect point num is: 319
+2022-07-05 22:03:40,357 INFO [default] The detect edge num is: 319
+2022-07-05 22:03:40,357 INFO [default] The detect circle num is: 319
+2022-07-05 22:03:40,357 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:03:40,358 INFO [default] The detect all count num is: 224155
+2022-07-05 22:03:54,932 INFO [default] The cost time of detecting Contour with radius 15 by alpha with flann and multi-thread 1 is: 0.024s
+2022-07-05 22:03:54,933 INFO [default] The scale of detecting Contour by default is: 0.000
+2022-07-05 22:03:54,937 INFO [default] The detect point num is: 319
+2022-07-05 22:03:54,937 INFO [default] The detect edge num is: 319
+2022-07-05 22:03:54,938 INFO [default] The detect circle num is: 319
+2022-07-05 22:03:54,938 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:03:54,938 INFO [default] The detect all count num is: 224155
+2022-07-05 22:06:31,145 INFO [default] start at 2022-07-05 22:06:31
+2022-07-05 22:06:31,145 INFO [default] start at 2022-07-05 22:06:31
+2022-07-05 22:06:35,174 INFO [default] [Time] Read file <E:/Data/tower_cut2.las> [2112] points cost 0.00s
+2022-07-05 22:06:35,200 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:06:41,600 INFO [default] The cost time of detecting Contour with radius 15 by default alpha shape is: 1.505s
+2022-07-05 22:06:41,603 INFO [default] The detect point num is: 319
+2022-07-05 22:06:41,604 INFO [default] The detect edge num is: 319
+2022-07-05 22:06:41,604 INFO [default] The detect circle num is: 319
+2022-07-05 22:06:41,604 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:06:41,605 INFO [default] The detect all count num is: 57550079
+2022-07-05 22:07:20,752 INFO [default] The cost time of detecting Contour with radius 15 by alpha shape with flann is: 0.024s
+2022-07-05 22:07:20,755 INFO [default] The detect point num is: 319
+2022-07-05 22:07:20,755 INFO [default] The detect edge num is: 319
+2022-07-05 22:07:20,758 INFO [default] The detect circle num is: 319
+2022-07-05 22:07:20,758 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:07:20,759 INFO [default] The detect all count num is: 224155
+2022-07-05 22:07:32,814 INFO [default] The cost time of detecting Contour with radius 15 by alpha with flann and multi-thread 1 is: 0.024s
+2022-07-05 22:07:32,817 INFO [default] The detect point num is: 319
+2022-07-05 22:07:32,817 INFO [default] The detect edge num is: 319
+2022-07-05 22:07:32,817 INFO [default] The detect circle num is: 319
+2022-07-05 22:07:32,818 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:07:32,818 INFO [default] The detect all count num is: 224155
+2022-07-05 22:07:38,988 INFO [default] The cost time of detecting Contour with radius 15 by alpha with flann and multi-thread 4 is: 0.012s
+2022-07-05 22:07:38,992 INFO [default] The detect point num is: 342
+2022-07-05 22:07:38,992 INFO [default] The detect edge num is: 319
+2022-07-05 22:07:38,993 INFO [default] The detect circle num is: 319
+2022-07-05 22:07:38,993 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:07:38,994 INFO [default] The detect all count num is: 224155
+2022-07-05 22:16:11,232 INFO [default] start at 2022-07-05 22:16:11
+2022-07-05 22:16:11,232 INFO [default] start at 2022-07-05 22:16:11
+2022-07-05 22:16:12,234 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:16:15,169 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 22:16:22,511 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.954s
+2022-07-05 22:16:22,516 INFO [default] The detect point num is: 1706
+2022-07-05 22:16:22,517 INFO [default] The detect edge num is: 1703
+2022-07-05 22:16:22,517 INFO [default] The detect circle num is: 1703
+2022-07-05 22:16:22,518 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 22:16:22,518 INFO [default] The detect all count num is: 10413636
+2022-07-05 22:16:31,130 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 4 is: 0.298s
+2022-07-05 22:16:31,136 INFO [default] The detect point num is: 1706
+2022-07-05 22:16:31,136 INFO [default] The detect edge num is: 1703
+2022-07-05 22:16:31,137 INFO [default] The detect circle num is: 1703
+2022-07-05 22:16:31,137 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 22:16:31,137 INFO [default] The detect all count num is: 10413636
+2022-07-05 22:16:57,610 INFO [default] start at 2022-07-05 22:16:57
+2022-07-05 22:16:57,610 INFO [default] start at 2022-07-05 22:16:57
+2022-07-05 22:17:02,175 INFO [default] [Time] Read file <E:/Data/tower_cut2.las> [2112] points cost 0.00s
+2022-07-05 22:17:02,202 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:17:07,719 INFO [default] The cost time of detecting Contour with radius 15 by alpha shape with flann is: 0.025s
+2022-07-05 22:17:07,722 INFO [default] The detect point num is: 319
+2022-07-05 22:17:07,722 INFO [default] The detect edge num is: 319
+2022-07-05 22:17:07,723 INFO [default] The detect circle num is: 319
+2022-07-05 22:17:07,723 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:17:07,724 INFO [default] The detect all count num is: 224155
+2022-07-05 22:17:11,509 INFO [default] The cost time of detecting Contour with radius 15 by alpha with flann and multi-thread 4 is: 0.012s
+2022-07-05 22:17:11,512 INFO [default] The detect point num is: 319
+2022-07-05 22:17:11,512 INFO [default] The detect edge num is: 319
+2022-07-05 22:17:11,513 INFO [default] The detect circle num is: 319
+2022-07-05 22:17:11,513 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:17:11,514 INFO [default] The detect all count num is: 224155
+2022-07-05 22:17:29,517 INFO [default] The cost time of detecting Contour with radius 15 by alpha shape with flann is: 0.021s
+2022-07-05 22:17:29,520 INFO [default] The detect point num is: 319
+2022-07-05 22:17:29,521 INFO [default] The detect edge num is: 319
+2022-07-05 22:17:29,521 INFO [default] The detect circle num is: 319
+2022-07-05 22:17:29,522 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:17:29,522 INFO [default] The detect all count num is: 224155
+2022-07-05 22:17:32,152 INFO [default] The cost time of detecting Contour with radius 15 by alpha shape with flann is: 0.021s
+2022-07-05 22:17:32,155 INFO [default] The detect point num is: 319
+2022-07-05 22:17:32,156 INFO [default] The detect edge num is: 319
+2022-07-05 22:17:32,156 INFO [default] The detect circle num is: 319
+2022-07-05 22:17:32,156 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:17:32,158 INFO [default] The detect all count num is: 224155
+2022-07-05 22:17:35,279 INFO [default] The cost time of detecting Contour with radius 15 by alpha with flann and multi-thread 4 is: 0.012s
+2022-07-05 22:17:35,282 INFO [default] The detect point num is: 319
+2022-07-05 22:17:35,283 INFO [default] The detect edge num is: 319
+2022-07-05 22:17:35,283 INFO [default] The detect circle num is: 319
+2022-07-05 22:17:35,284 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:17:35,284 INFO [default] The detect all count num is: 224155
+2022-07-05 22:17:37,681 INFO [default] The cost time of detecting Contour with radius 15 by alpha with flann and multi-thread 4 is: 0.012s
+2022-07-05 22:17:37,684 INFO [default] The detect point num is: 319
+2022-07-05 22:17:37,684 INFO [default] The detect edge num is: 319
+2022-07-05 22:17:37,686 INFO [default] The detect circle num is: 319
+2022-07-05 22:17:37,686 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:17:37,686 INFO [default] The detect all count num is: 224155
+2022-07-05 22:18:58,179 INFO [default] start at 2022-07-05 22:18:58
+2022-07-05 22:18:58,180 INFO [default] start at 2022-07-05 22:18:58
+2022-07-05 22:19:01,404 INFO [default] [Time] Read file <E:/Data/air-2.las> [172071] points cost 0.05s
+2022-07-05 22:19:01,442 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:19:09,470 INFO [default] The cost time of detecting Contour with radius 2 by alpha shape with flann is: 1.975s
+2022-07-05 22:19:09,476 INFO [default] The detect point num is: 3763
+2022-07-05 22:19:09,476 INFO [default] The detect edge num is: 3738
+2022-07-05 22:19:09,476 INFO [default] The detect circle num is: 3738
+2022-07-05 22:19:09,477 INFO [default] The sum detect point pair num is: 5648992
+2022-07-05 22:19:09,478 INFO [default] The detect all count num is: 21566395
+2022-07-05 22:19:22,344 INFO [default] The cost time of detecting Contour with radius 2 by alpha with flann and multi-thread 4 is: 0.688s
+2022-07-05 22:19:22,351 INFO [default] The detect point num is: 3763
+2022-07-05 22:19:22,353 INFO [default] The detect edge num is: 3738
+2022-07-05 22:19:22,353 INFO [default] The detect circle num is: 3738
+2022-07-05 22:19:22,353 INFO [default] The sum detect point pair num is: 5648992
+2022-07-05 22:19:22,354 INFO [default] The detect all count num is: 21566395
+2022-07-05 22:21:05,011 INFO [default] start at 2022-07-05 22:21:05
+2022-07-05 22:21:05,012 INFO [default] start at 2022-07-05 22:21:05
+2022-07-05 22:21:06,309 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:21:59,702 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 22:22:06,729 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.956s
+2022-07-05 22:22:06,735 INFO [default] The detect point num is: 1706
+2022-07-05 22:22:06,735 INFO [default] The detect edge num is: 1703
+2022-07-05 22:22:06,736 INFO [default] The detect circle num is: 1703
+2022-07-05 22:22:06,736 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 22:22:06,737 INFO [default] The detect all count num is: 10413636
+2022-07-05 22:23:12,826 INFO [default] The cost time of detecting Contour with radius 6 by alpha shape with flann is: 1.298s
+2022-07-05 22:23:12,832 INFO [default] The detect point num is: 1550
+2022-07-05 22:23:12,832 INFO [default] The detect edge num is: 1550
+2022-07-05 22:23:12,833 INFO [default] The detect circle num is: 1550
+2022-07-05 22:23:12,833 INFO [default] The sum detect point pair num is: 4053645
+2022-07-05 22:23:12,835 INFO [default] The detect all count num is: 14577669
+2022-07-05 22:23:20,990 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.938s
+2022-07-05 22:23:20,996 INFO [default] The detect point num is: 1706
+2022-07-05 22:23:20,996 INFO [default] The detect edge num is: 1703
+2022-07-05 22:23:20,996 INFO [default] The detect circle num is: 1703
+2022-07-05 22:23:20,996 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 22:23:20,997 INFO [default] The detect all count num is: 10413636
+2022-07-05 22:23:25,980 INFO [default] The cost time of detecting Contour with radius 4 by alpha shape with flann is: 0.643s
+2022-07-05 22:23:25,986 INFO [default] The detect point num is: 1911
+2022-07-05 22:23:25,987 INFO [default] The detect edge num is: 1901
+2022-07-05 22:23:25,987 INFO [default] The detect circle num is: 1901
+2022-07-05 22:23:25,988 INFO [default] The sum detect point pair num is: 1856095
+2022-07-05 22:23:25,989 INFO [default] The detect all count num is: 6866036
+2022-07-05 22:28:14,540 INFO [default] start at 2022-07-05 22:28:14
+2022-07-05 22:28:14,541 INFO [default] start at 2022-07-05 22:28:14
+2022-07-05 22:28:15,046 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:28:17,959 INFO [default] [Time] Read file <E:/Data/air-3.las> [49542] points cost 0.02s
+2022-07-05 22:28:23,501 INFO [default] The cost time of detecting Contour with radius 5 by alpha shape with flann is: 0.949s
+2022-07-05 22:28:23,508 INFO [default] The detect point num is: 1706
+2022-07-05 22:28:23,508 INFO [default] The detect edge num is: 1703
+2022-07-05 22:28:23,508 INFO [default] The detect circle num is: 1703
+2022-07-05 22:28:23,508 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 22:28:23,509 INFO [default] The detect all count num is: 10413636
+2022-07-05 22:28:29,083 INFO [default] The cost time of detecting Contour with radius 5 by alpha with flann and multi-thread 4 is: 0.293s
+2022-07-05 22:28:29,089 INFO [default] The detect point num is: 1706
+2022-07-05 22:28:29,089 INFO [default] The detect edge num is: 1694
+2022-07-05 22:28:29,090 INFO [default] The detect circle num is: 1688
+2022-07-05 22:28:29,090 INFO [default] The sum detect point pair num is: 2865464
+2022-07-05 22:28:29,090 INFO [default] The detect all count num is: 10413636
+2022-07-05 22:30:52,851 INFO [default] start at 2022-07-05 22:30:52
+2022-07-05 22:30:52,852 INFO [default] start at 2022-07-05 22:30:52
+2022-07-05 22:30:54,144 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:31:02,771 INFO [default] [Time] Read file <E:/Data/tower_cut2.las> [2112] points cost 0.00s
+2022-07-05 22:31:09,406 INFO [default] The cost time of detecting Contour with radius 15 by default alpha shape is: 1.484s
+2022-07-05 22:31:09,408 INFO [default] The detect point num is: 319
+2022-07-05 22:31:09,409 INFO [default] The detect edge num is: 319
+2022-07-05 22:31:09,409 INFO [default] The detect circle num is: 319
+2022-07-05 22:31:09,409 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:31:09,410 INFO [default] The detect all count num is: 57550079
+2022-07-05 22:35:54,402 INFO [default] start at 2022-07-05 22:35:54
+2022-07-05 22:35:54,402 INFO [default] start at 2022-07-05 22:35:54
+2022-07-05 22:35:54,908 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:36:00,183 INFO [default] [Time] Read file <E:/Data/tower_cut2.las> [2112] points cost 0.00s
+2022-07-05 22:36:06,464 INFO [default] The cost time of detecting Contour with radius 15 by default alpha shape is: 1.498s
+2022-07-05 22:36:06,467 INFO [default] The detect point num is: 319
+2022-07-05 22:36:06,468 INFO [default] The detect edge num is: 319
+2022-07-05 22:36:06,468 INFO [default] The detect circle num is: 319
+2022-07-05 22:36:06,469 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:36:06,469 INFO [default] The detect all count num is: 57550079
+2022-07-05 22:36:13,313 INFO [default] The cost time of detecting Contour with radius 15 by alpha shape with flann is: 0.024s
+2022-07-05 22:36:13,317 INFO [default] The detect point num is: 319
+2022-07-05 22:36:13,317 INFO [default] The detect edge num is: 319
+2022-07-05 22:36:13,318 INFO [default] The detect circle num is: 319
+2022-07-05 22:36:13,318 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:36:13,318 INFO [default] The detect all count num is: 224155
+2022-07-05 22:36:23,020 INFO [default] The cost time of detecting Contour with radius 15 by alpha with flann and multi-thread 24 is: 0.024s
+2022-07-05 22:36:23,023 INFO [default] The detect point num is: 319
+2022-07-05 22:36:23,024 INFO [default] The detect edge num is: 319
+2022-07-05 22:36:23,024 INFO [default] The detect circle num is: 319
+2022-07-05 22:36:23,025 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:36:23,025 INFO [default] The detect all count num is: 224155
+2022-07-05 22:36:28,082 INFO [default] The cost time of detecting Contour with radius 15 by alpha with flann and multi-thread 12 is: 0.015s
+2022-07-05 22:36:28,085 INFO [default] The detect point num is: 319
+2022-07-05 22:36:28,086 INFO [default] The detect edge num is: 319
+2022-07-05 22:36:28,086 INFO [default] The detect circle num is: 319
+2022-07-05 22:36:28,090 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:36:28,092 INFO [default] The detect all count num is: 224155
+2022-07-05 22:36:33,583 INFO [default] The cost time of detecting Contour with radius 15 by alpha with flann and multi-thread 4 is: 0.012s
+2022-07-05 22:36:33,587 INFO [default] The detect point num is: 319
+2022-07-05 22:36:33,587 INFO [default] The detect edge num is: 319
+2022-07-05 22:36:33,587 INFO [default] The detect circle num is: 319
+2022-07-05 22:36:33,588 INFO [default] The sum detect point pair num is: 58895
+2022-07-05 22:36:33,588 INFO [default] The detect all count num is: 224155
+2022-07-05 22:36:51,535 INFO [default] start at 2022-07-05 22:36:51
+2022-07-05 22:36:51,535 INFO [default] start at 2022-07-05 22:36:51
+2022-07-05 22:36:52,839 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:36:55,006 INFO [default] [Time] Read file <E:/Data/air-2.las> [172071] points cost 0.05s
+2022-07-05 22:37:09,175 INFO [default] The cost time of detecting Contour with radius 3 by alpha shape with flann is: 3.96s
+2022-07-05 22:37:09,181 INFO [default] The detect point num is: 2999
+2022-07-05 22:37:09,182 INFO [default] The detect edge num is: 2986
+2022-07-05 22:37:09,183 INFO [default] The detect circle num is: 2987
+2022-07-05 22:37:09,183 INFO [default] The sum detect point pair num is: 12504166
+2022-07-05 22:37:09,184 INFO [default] The detect all count num is: 46150142
+2022-07-05 22:37:33,493 INFO [default] The cost time of detecting Contour with radius 3 by alpha with flann and multi-thread 4 is: 1.289s
+2022-07-05 22:37:33,502 INFO [default] The detect point num is: 2999
+2022-07-05 22:37:33,502 INFO [default] The detect edge num is: 2986
+2022-07-05 22:37:33,503 INFO [default] The detect circle num is: 2987
+2022-07-05 22:37:33,503 INFO [default] The sum detect point pair num is: 12504166
+2022-07-05 22:37:33,503 INFO [default] The detect all count num is: 46150142
+2022-07-05 22:37:38,915 INFO [default] The cost time of detecting Contour with radius 3 by alpha with flann and multi-thread 12 is: 0.657s
+2022-07-05 22:37:38,922 INFO [default] The detect point num is: 2999
+2022-07-05 22:37:38,922 INFO [default] The detect edge num is: 2986
+2022-07-05 22:37:38,923 INFO [default] The detect circle num is: 2987
+2022-07-05 22:37:38,923 INFO [default] The sum detect point pair num is: 12504166
+2022-07-05 22:37:38,924 INFO [default] The detect all count num is: 46150142
+2022-07-05 22:37:47,296 INFO [default] The cost time of detecting Contour with radius 3 by alpha with flann and multi-thread 24 is: 0.663s
+2022-07-05 22:37:47,303 INFO [default] The detect point num is: 2999
+2022-07-05 22:37:47,304 INFO [default] The detect edge num is: 2986
+2022-07-05 22:37:47,304 INFO [default] The detect circle num is: 2987
+2022-07-05 22:37:47,304 INFO [default] The sum detect point pair num is: 12504166
+2022-07-05 22:37:47,305 INFO [default] The detect all count num is: 46150142
+2022-07-05 22:37:53,160 INFO [default] The cost time of detecting Contour with radius 3 by alpha with flann and multi-thread 16 is: 0.64s
+2022-07-05 22:37:53,167 INFO [default] The detect point num is: 2999
+2022-07-05 22:37:53,167 INFO [default] The detect edge num is: 2986
+2022-07-05 22:37:53,168 INFO [default] The detect circle num is: 2987
+2022-07-05 22:37:53,168 INFO [default] The sum detect point pair num is: 12504166
+2022-07-05 22:37:53,168 INFO [default] The detect all count num is: 46150142
+2022-07-05 22:38:02,219 INFO [default] The cost time of detecting Contour with radius 3 by alpha with flann and multi-thread 12 is: 0.641s
+2022-07-05 22:38:02,226 INFO [default] The detect point num is: 2999
+2022-07-05 22:38:02,226 INFO [default] The detect edge num is: 2986
+2022-07-05 22:38:02,226 INFO [default] The detect circle num is: 2987
+2022-07-05 22:38:02,227 INFO [default] The sum detect point pair num is: 12504166
+2022-07-05 22:38:02,227 INFO [default] The detect all count num is: 46150142
+2022-07-05 22:38:18,463 INFO [default] start at 2022-07-05 22:38:18
+2022-07-05 22:38:18,463 INFO [default] start at 2022-07-05 22:38:18
+2022-07-05 22:38:18,895 INFO [default] osgQtViewer was build at Jul  5 2022 21:31:48
+2022-07-05 22:38:21,826 INFO [default] [Time] Read file <E:/Data/air.las> [381860] points cost 0.12s
+2022-07-05 22:38:31,596 INFO [default] The cost time of detecting Contour with radius 1 by alpha shape with flann is: 2.912s
+2022-07-05 22:38:31,622 INFO [default] The detect point num is: 16248
+2022-07-05 22:38:31,622 INFO [default] The detect edge num is: 16713
+2022-07-05 22:38:31,622 INFO [default] The detect circle num is: 17088
+2022-07-05 22:38:31,622 INFO [default] The sum detect point pair num is: 7466107
+2022-07-05 22:38:31,623 INFO [default] The detect all count num is: 31650124
+2022-07-05 22:38:49,223 INFO [default] The cost time of detecting Contour with radius 2 by alpha shape with flann is: 9.781s
+2022-07-05 22:38:49,231 INFO [default] The detect point num is: 4395
+2022-07-05 22:38:49,232 INFO [default] The detect edge num is: 4370
+2022-07-05 22:38:49,232 INFO [default] The detect circle num is: 4371
+2022-07-05 22:38:49,233 INFO [default] The sum detect point pair num is: 30641709
+2022-07-05 22:38:49,233 INFO [default] The detect all count num is: 117960560
+2022-07-05 22:39:33,633 INFO [default] The cost time of detecting Contour with radius 2 by alpha with flann and multi-thread 4 is: 4.116s
+2022-07-05 22:39:33,641 INFO [default] The detect point num is: 4395
+2022-07-05 22:39:33,641 INFO [default] The detect edge num is: 4370
+2022-07-05 22:39:33,643 INFO [default] The detect circle num is: 4371
+2022-07-05 22:39:33,643 INFO [default] The sum detect point pair num is: 30641709
+2022-07-05 22:39:33,644 INFO [default] The detect all count num is: 117960560
+2022-07-05 22:39:45,808 INFO [default] The cost time of detecting Contour with radius 2 by alpha with flann and multi-thread 8 is: 2.53s
+2022-07-05 22:39:45,816 INFO [default] The detect point num is: 4395
+2022-07-05 22:39:45,817 INFO [default] The detect edge num is: 4370
+2022-07-05 22:39:45,818 INFO [default] The detect circle num is: 4371
+2022-07-05 22:39:45,818 INFO [default] The sum detect point pair num is: 30641709
+2022-07-05 22:39:45,818 INFO [default] The detect all count num is: 117960560
+2022-07-05 22:39:51,305 INFO [default] The cost time of detecting Contour with radius 2 by alpha with flann and multi-thread 12 is: 2.04s
+2022-07-05 22:39:51,314 INFO [default] The detect point num is: 4395
+2022-07-05 22:39:51,314 INFO [default] The detect edge num is: 4370
+2022-07-05 22:39:51,315 INFO [default] The detect circle num is: 4371
+2022-07-05 22:39:51,315 INFO [default] The sum detect point pair num is: 30641709
+2022-07-05 22:39:51,315 INFO [default] The detect all count num is: 117960560
+2022-07-05 22:39:59,136 INFO [default] The cost time of detecting Contour with radius 2 by alpha with flann and multi-thread 16 is: 1.828s
+2022-07-05 22:39:59,144 INFO [default] The detect point num is: 4395
+2022-07-05 22:39:59,144 INFO [default] The detect edge num is: 4370
+2022-07-05 22:39:59,145 INFO [default] The detect circle num is: 4371
+2022-07-05 22:39:59,147 INFO [default] The sum detect point pair num is: 30641709
+2022-07-05 22:39:59,148 INFO [default] The detect all count num is: 117960560
+2022-07-05 22:40:04,159 INFO [default] The cost time of detecting Contour with radius 2 by alpha with flann and multi-thread 24 is: 1.699s
+2022-07-05 22:40:04,168 INFO [default] The detect point num is: 4395
+2022-07-05 22:40:04,168 INFO [default] The detect edge num is: 4370
+2022-07-05 22:40:04,168 INFO [default] The detect circle num is: 4371
+2022-07-05 22:40:04,169 INFO [default] The sum detect point pair num is: 30641709
+2022-07-05 22:40:04,170 INFO [default] The detect all count num is: 117960560
+2022-07-05 22:40:07,796 INFO [default] The cost time of detecting Contour with radius 2 by alpha with flann and multi-thread 24 is: 1.716s
+2022-07-05 22:40:07,804 INFO [default] The detect point num is: 4395
+2022-07-05 22:40:07,805 INFO [default] The detect edge num is: 4370
+2022-07-05 22:40:07,805 INFO [default] The detect circle num is: 4371
+2022-07-05 22:40:07,805 INFO [default] The sum detect point pair num is: 30641709
+2022-07-05 22:40:07,806 INFO [default] The detect all count num is: 117960560
+2022-07-05 22:40:18,661 INFO [default] The all cost time of detecting Contour by PCL concave hull is :  4.237s
+2022-07-05 22:40:58,526 INFO [default] The cost time of detecting Contour with radius 2 by alpha with flann and multi-thread 12 is: 2.039s
+2022-07-05 22:40:58,533 INFO [default] The detect point num is: 4395
+2022-07-05 22:40:58,533 INFO [default] The detect edge num is: 4370
+2022-07-05 22:40:58,535 INFO [default] The detect circle num is: 4371
+2022-07-05 22:40:58,535 INFO [default] The sum detect point pair num is: 30641709
+2022-07-05 22:40:58,535 INFO [default] The detect all count num is: 117960560
+2022-07-05 22:41:23,635 INFO [default] The cost time of detecting Contour with radius 2 by alpha with flann and multi-thread 12 is: 2.081s
+2022-07-05 22:41:23,643 INFO [default] The detect point num is: 4395
+2022-07-05 22:41:23,643 INFO [default] The detect edge num is: 4370
+2022-07-05 22:41:23,643 INFO [default] The detect circle num is: 4371
+2022-07-05 22:41:23,644 INFO [default] The sum detect point pair num is: 30641709
+2022-07-05 22:41:23,645 INFO [default] The detect all count num is: 117960560
+2022-07-05 22:42:01,546 INFO [default] The cost time of building 2D grid net is :  0.161s
+2022-07-05 22:42:01,546 INFO [default] The Full 2D grid number is : 1568
+2022-07-05 22:42:01,548 INFO [default] The OutSide 2D grid number is : 504
+2022-07-05 22:42:01,584 INFO [default] The all cost time of building 2D grid net is :  0.199s
+2022-07-05 22:42:14,514 INFO [default] The cost time of building 2D grid net is :  0.551s
+2022-07-05 22:42:14,514 INFO [default] The Full 2D grid number is : 5813
+2022-07-05 22:42:14,514 INFO [default] The OutSide 2D grid number is : 1115
+2022-07-05 22:42:14,569 INFO [default] The all cost time of building 2D grid net is :  0.607s
+2022-07-05 22:42:27,790 INFO [default] The cost time of building 2D grid net is :  0.201s
+2022-07-05 22:42:27,790 INFO [default] The Full 2D grid number is : 2213
+2022-07-05 22:42:27,791 INFO [default] The OutSide 2D grid number is : 625
+2022-07-05 22:42:27,831 INFO [default] The all cost time of building 2D grid net is :  0.242s

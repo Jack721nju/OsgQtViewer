@@ -288,4 +288,6 @@ class AlphaShape {
 	float point_pair_scale;
 
 	size_t m_point_pair_N;
+	
+	size_t m_detectAllNum;
 };

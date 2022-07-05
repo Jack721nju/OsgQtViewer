@@ -936,6 +936,7 @@ void OsgQtTest::AddToConsoleSlot(const QString & show_text) {
 	QString cur_systemTime = "[" + QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") + "] ";
 	if (Console_edit) {
 		Console_edit->append(cur_systemTime + show_text);
+		LOG(INFO) << show_text.toStdString();
 	}
 }
 
@@ -1855,16 +1856,20 @@ void OsgQtTest::slot_DetectPointShape() {
 
 	if (m_Alpah_radio->isChecked()) {
 		alphaType = 0;
-	} else if (m_Alpah_FLANN_radio->isChecked()) {
+	}
+	else if (m_Alpah_FLANN_radio->isChecked()) {
 		alphaType = 1;
-	} else if (m_Alpah_FLANN_multi_thread_radio->isChecked()) {
+	}
+	else if (m_Alpah_FLANN_multi_thread_radio->isChecked()) {
 		alphaType = 2;
-	} else if (m_Alpah_Grid_radio->isChecked()) {
+	}
+	else if (m_Alpah_Grid_radio->isChecked()) {
 		alphaType = 3;
-	} else if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
+	}
+	else if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
 		alphaType = 4;
 	}
-	
+
 	float radius = 0.0;
 	if (m_radius) {
 		radius = m_radius->text().toFloat();
@@ -1899,7 +1904,8 @@ void OsgQtTest::slot_DetectPointShape() {
 			return;
 		}
 		alpha->setPclPointPtr(m_pointPclProject2D);
-	} else {
+	}
+	else {
 		needGrid = true;
 		alpha = new AlphaShape(gridNet);
 	}
@@ -1914,7 +1920,7 @@ void OsgQtTest::slot_DetectPointShape() {
 	}
 
 	QString typeStr;
-	switch (alphaType) 
+	switch (alphaType)
 	{
 	case 0:
 		alpha->Detect_Shape_line(radius);
@@ -1939,36 +1945,62 @@ void OsgQtTest::slot_DetectPointShape() {
 	default:
 		break;
 	}
-	
+
 	// 计算各类Alpha Shapes算法耗费时间
-	float runTime = _timerClock.getTime<Ms>() / 1000.0;
+	float runTime = _timerClock.getTime<Ms>() * 0.001;
 	QString cost_time = QString::number(runTime);
-	this->AddToConsoleSlot(QString("The cost time of detecting Contour by ") + typeStr + QString(" is: ") + cost_time + QString("s"));
-
-
-	//计算小于滚动圆直径长度的点对比例
-	QString cost_scale = QString::number(alpha->point_pair_scale, 'f', 3);
-	this->AddToConsoleSlot(QString("The scale of detecting Contour by default is :  ") + cost_scale);
-
-	QString cost_point_num = QString::number(alpha->m_point_pair_N);
-	this->AddToConsoleSlot(QString("The sum detect point num is :  ") + cost_point_num);
+	this->AddToConsoleSlot(QString("The cost time of detecting Contour with radius ") + QString::number(radius) +
+		QString(" by ") + typeStr + QString(" is: ") + cost_time + QString("s"));
 
 	std::vector<osg::Vec2> center_list;
 
-	for (int i = 0; i < alpha->m_circles.size(); ++i) {
-		osg::Vec2 center_P = alpha->m_circles[i].m_center;
-		center_list.emplace_back(center_P);
+	auto circleNum = alpha->m_circles.size();
+	for (int i = 0; i < circleNum; ++i) {
+		center_list.emplace_back(alpha->m_circles[i].m_center);
 	}
 
 	Project_widget_Circle_And_Edge->drawCircles(center_list, radius);
 	Project_widget_Circle_And_Edge->drawLines(alpha->m_edges);
 
-	int shape_num = alpha->m_shape_points.size();
-	QPointF *shape_point = new QPointF[shape_num];
+	auto shape_num = alpha->m_shape_id.size();
+	bool isUseIndex = true;
+	if (shape_num < 1) {
+		isUseIndex = false;
+		shape_num = alpha->m_shape_points.size();
+	}
 
-	for (int i = 0; i < shape_num; ++i) {
-		const auto & curP = alpha->m_shape_points[i];
-		shape_point[i] = QPointF(curP.x(), curP.y());
+	QString shape_point_num = QString::number(shape_num);
+	this->AddToConsoleSlot(QString("The detect point num is: ") + shape_point_num);
+
+	if (shape_num < 1) {
+		return;
+	}
+
+	QString detect_edge_num = QString::number(alpha->m_edges.size());
+	this->AddToConsoleSlot(QString("The detect edge num is: ") + detect_edge_num);
+
+	QString detect_circle_num = QString::number(alpha->m_circles.size());
+	this->AddToConsoleSlot(QString("The detect circle num is: ") + detect_circle_num);
+
+	QString cost_point_num = QString::number(alpha->m_point_pair_N);
+	this->AddToConsoleSlot(QString("The sum detect point pair num is: ") + cost_point_num);
+
+	QString detect_all_num = QString::number(alpha->m_detectAllNum);
+	this->AddToConsoleSlot(QString("The detect all count num is: ") + detect_all_num);
+
+
+	QPointF *shape_point = new QPointF[shape_num];
+	const auto & shape_id_list = alpha->m_shape_id;
+	if (isUseIndex) {
+		for (int i = 0; i < shape_num; ++i) {
+			const auto & curP = pointlist_bulidGrid2D[shape_id_list[i]];
+			shape_point[i] = QPointF(curP.x(), curP.y());
+		}
+	} else {
+		for (int i = 0; i < shape_num; ++i) {
+			const auto & curP = alpha->m_shape_points[i];
+			shape_point[i] = QPointF(curP.x(), curP.y());
+		}
 	}
 
 	PaintArea *Project_widget_Point_Edge = new PaintArea();

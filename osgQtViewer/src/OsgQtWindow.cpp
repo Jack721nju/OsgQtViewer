@@ -1659,12 +1659,14 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	QWidget * alpha_tab_widget = new QWidget();
 	m_Alpah_radio = new QRadioButton("alpha shape");
 	m_Alpah_radio->setChecked(true);
-	m_Alpah_FLANN_radio = new QRadioButton("alpha shape flann");
+	m_Alpah_FLANN_radio = new QRadioButton("alpha shape flann+");
 	m_Alpah_FLANN_radio->setChecked(false);
-	m_Alpah_FLANN_Grid_radio = new QRadioButton("alpha shape flann grid");
-	m_Alpah_FLANN_Grid_radio->setChecked(false);
-	m_Alpah_FLANN_multi_thread_radio = new QRadioButton("alpha flann multi-thread");
+	m_Alpah_FLANN_multi_thread_radio = new QRadioButton("alpha shape flann && multi-thread");
 	m_Alpah_FLANN_multi_thread_radio->setChecked(false);
+	m_Alpah_FLANN_Grid_radio = new QRadioButton("alpha shape flann && grid");
+	m_Alpah_FLANN_Grid_radio->setChecked(false);
+	m_Alpah_FLANN_Grid_multi_thread_radio = new QRadioButton("alpha shape flann && grid && multi-thread");
+	m_Alpah_FLANN_Grid_multi_thread_radio->setChecked(false);
 	m_Alpah_Grid_radio = new QRadioButton("alpha grid");
 	m_Alpah_Grid_radio->setChecked(false);
 	m_Alpah_Grid_multi_thread_radio = new QRadioButton("alpha grid multi-thread");
@@ -1710,9 +1712,11 @@ void OsgQtTest::slot_Init_Project_Dialog() {
 	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(m_Alpah_FLANN_radio, 0);
 	alpha_layout->addStretch(1);
+	alpha_layout->addWidget(m_Alpah_FLANN_multi_thread_radio, 0);
+	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(m_Alpah_FLANN_Grid_radio, 0);
 	alpha_layout->addStretch(1);
-	alpha_layout->addWidget(m_Alpah_FLANN_multi_thread_radio, 0);
+	alpha_layout->addWidget(m_Alpah_FLANN_Grid_multi_thread_radio, 0);	
 	alpha_layout->addStretch(1);
 	alpha_layout->addWidget(m_label_thread, 0);
 	alpha_layout->addWidget(m_slider_thread, 0);
@@ -1870,11 +1874,14 @@ void OsgQtTest::slot_DetectPointShape() {
 	else if (m_Alpah_FLANN_Grid_radio->isChecked()) {
 		alphaType = 3;
 	}
-	else if (m_Alpah_Grid_radio->isChecked()) {
+	else if (m_Alpah_FLANN_Grid_multi_thread_radio->isChecked()) {
 		alphaType = 4;
 	}
-	else if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
+	else if (m_Alpah_Grid_radio->isChecked()) {
 		alphaType = 5;
+	}
+	else if (m_Alpah_Grid_multi_thread_radio->isChecked()) {
+		alphaType = 6;
 	}
 
 	float radius = 0.0;
@@ -1886,7 +1893,7 @@ void OsgQtTest::slot_DetectPointShape() {
 	pointIndexList.reserve(this->pointlist_bulidGrid2D.size());
 
 	// build grid net
-	if (alphaType >= 3) {
+	if (alphaType > 2) {
 		gridNet = new GridNet(this->pointlist_bulidGrid2D);
 		if (nullptr == gridNet) {
 			this->AddToConsoleSlot("Build 2D grid net failed! \n");
@@ -1894,12 +1901,18 @@ void OsgQtTest::slot_DetectPointShape() {
 		}
 		int gridRow = m_alpha_Grid_row_num->text().toInt();
 		int gridCol = m_alpha_Grid_col_num->text().toInt();
+
 		if (gridRow <= 0 || gridCol <= 0) {
 			this->AddToConsoleSlot("Input correct row and col value! \n");
 		}
-		gridNet->buildNetByNum(gridRow, gridCol);
-		gridNet->detectGridWithConnection();
-		gridNet->getAllOutSideGridPointIDList(pointIndexList);
+		
+		if (alphaType >= 5) {
+			gridNet->buildNetByNum(gridRow, gridCol, false);
+			gridNet->detectGridWithConnection();
+		} else {
+			gridNet->buildNetByNum(gridRow, gridCol, true);
+			gridNet->getAllOutSideGridPointIDList(pointIndexList);
+		}
 
 		// 计算Grid生成耗费时间
 		float runGridTime = _timerClock.getTime<Ms>() / 1000.0;
@@ -1908,13 +1921,12 @@ void OsgQtTest::slot_DetectPointShape() {
 	}
 
 	bool needGrid = false;
-	if (alphaType <= 3) {
+	if (alphaType <= 2) {
 		alpha = new AlphaShape(pointlist_bulidGrid2D);
 		if (m_pointPclProject2D.get() == nullptr) {
 			this->AddToConsoleSlot(QString("[WARING] No pcl project point!"));
 			return;
 		}
-		alpha->setPclPointPtr(m_pointPclProject2D);
 	}
 	else {
 		needGrid = true;
@@ -1924,6 +1936,7 @@ void OsgQtTest::slot_DetectPointShape() {
 	if (nullptr == alpha) {
 		this->AddToConsoleSlot("Perform alpha detection failed! \n");
 	}
+	alpha->setPclPointPtr(m_pointPclProject2D);
 
 	int threadNum = 1;
 	if (m_slider_thread) {
@@ -1943,18 +1956,22 @@ void OsgQtTest::slot_DetectPointShape() {
 		break;
 	case 2:
 		alpha->Detect_Alpah_Shape_FLANN_Multi_Thread(radius, threadNum);
-		typeStr = "alpha with flann and multi-thread " + QString::number(threadNum);
+		typeStr = "alpha with flann using multi-thread " + QString::number(threadNum);
 		break;
 	case 3:
-		alpha->Detect_Alpah_Shape_FLANN_Select_Index(radius, pointIndexList);
+		alpha->Detect_Alpah_Shape_FLANN_Grid(radius, pointIndexList);
 		typeStr = "alpha with flann and outside grids";
 		needGrid = true;
 		break;
 	case 4:
+		alpha->Detect_Alpah_Shape_FLANN_Grid_Multi_Thread(radius, pointIndexList, threadNum);
+		typeStr = "alpha with flann and outside grids using multi-thread " + QString::number(threadNum);
+		break;
+	case 5:
 		alpha->Detect_Alpha_Shape_by_Grid(radius);
 		typeStr = "alpha with grid net";
 		break;
-	case 5:
+	case 6:
 		alpha->Detect_Alpha_Shape_by_Grid_Multi_Thread(radius, threadNum);
 		typeStr = "alpha with grid net multi-thread " + QString::number(threadNum);
 		break;
@@ -2045,11 +2062,12 @@ void OsgQtTest::slot_DetectPointShape() {
 		for (const auto & curGrid : gridNet->Grid_list) {
 			QColor new_color(0, 0, 0, 0);
 			if (curGrid->hasPoint) {
-				new_color.setRgb(0, 125, 0, 155);
-			}
-			if (curGrid->nearByGridAllWithpoint == true) {
-				//内部网格，灰色
-				new_color.setRgb(150, 150, 150, 125);
+				new_color.setRgb(250, 100, 0, 155);
+				if (curGrid->isGridMayBeOutSide == false) {
+					//内部网格，灰色
+					//  new_color.setRgb(150, 150, 150, 125);
+					new_color.setRgb(0, 125, 0, 125);
+				}
 			}
 			Project_widget_grid_net->drawGridWithFillColor(curGrid, new_color, delt_x, delt_y);
 		}
@@ -2061,7 +2079,7 @@ void OsgQtTest::slot_DetectPointShape() {
 			all_point[++pointID] = QPointF(curP.x() + delt_x, curP.y() + delt_y);
 		}
 		//绘制所有离散点云,离散点默认颜色为纯黑色
-		Project_widget_grid_net->drawPoints(all_point, allPointNum, 2, QColor(0, 0, 0, 125));
+		Project_widget_grid_net->drawPoints(all_point, allPointNum, 1, QColor(0, 0, 0, 125));
 	}
 
 	QGridLayout * gridLayout = new QGridLayout;

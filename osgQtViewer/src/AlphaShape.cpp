@@ -79,6 +79,9 @@ GridNet::GridNet(const std::vector<osg::Vec2> &pList) {
 	Grid_list.clear();
 	pointMMM = getMinMaxXYZ(Points_List);
 
+	grid_all_Point_Num = Points_List.size();
+	grid_aver_Point_Num = 0;
+
 	Grid_X = 0;
 	Grid_Y = 0;
 
@@ -124,10 +127,52 @@ bool GridNet::isPointInGrid(const osg::Vec2 & curPoint, SingleGrid2D *test_Grid)
 
 // 获取所有边界网格的点列表		
 void GridNet::getAllOutSideGridPointIDList(std::vector<int> & pointIndexList) {
-	for (const auto & curGrid : this->Grid_list) {
-		if (curGrid) {	
-			if (curGrid->nearByGridAllWithpoint == false) {
-				pointIndexList.insert(pointIndexList.end(), curGrid->indexList.begin(), curGrid->indexList.end());
+	for (const auto & curGrid2D : this->Grid_list) {
+		if (false == curGrid2D->hasPoint) {
+			continue;
+		}
+
+		int curGridID = curGrid2D->curGridInfo.m_ID;
+		int curLeftGridID = curGridID - 1;
+		int curRightGridID = curGridID + 1;
+
+		int buttomGridID = curGridID - (this->Col_Num + 2);
+		int buttomLeftGridID = buttomGridID - 1;
+		int buttomRightGridID = buttomGridID + 1;
+
+		int topGridID = curGridID + (this->Col_Num + 2);
+		int topLeftGridID = topGridID - 1;
+		int topRightGridID = topGridID + 1;
+
+		std::vector<int> idList{ buttomLeftGridID, buttomGridID, buttomRightGridID, curLeftGridID, curRightGridID, topLeftGridID, topGridID, topRightGridID };
+
+		if (curGrid2D->cur_PointNum < (this->grid_aver_Point_Num * 0.5)) {
+			curGrid2D->isGridMayBeOutSide = true;
+			pointIndexList.insert(pointIndexList.end(), curGrid2D->indexList.begin(), curGrid2D->indexList.end());
+			continue;
+		}
+
+		SingleGrid2D *nearGrid2D = nullptr;
+		for (const auto curID : idList) {
+			if (curID < 0 || curID > this->Grid_list.size() - 1) {
+				continue;
+			}
+
+			nearGrid2D = this->Grid_list[curID];
+			if (nullptr == nearGrid2D) {
+				continue;
+			}
+			if (nearGrid2D->hasPoint) {
+				if (nearGrid2D->cur_PointNum < (this->grid_aver_Point_Num * 0.5)) {
+					curGrid2D->isGridMayBeOutSide = true;
+				}
+			} else {
+				curGrid2D->isGridMayBeOutSide = true;
+			}
+
+			if (curGrid2D->isGridMayBeOutSide) {
+				pointIndexList.insert(pointIndexList.end(), curGrid2D->indexList.begin(), curGrid2D->indexList.end());
+                break;
 			}
 		}
 	}
@@ -154,6 +199,12 @@ void GridNet::detectGridWithConnection() {
 
 		std::vector<int> idList{ buttomLeftGridID, buttomGridID, buttomRightGridID, curLeftGridID, curRightGridID, topLeftGridID, topGridID, topRightGridID };
 		int countNum = 0;
+		int countDensityNum = 0;
+
+		if (curGrid2D->cur_PointNum < (this->grid_aver_Point_Num * 0.5)) {
+			curGrid2D->isGridMayBeOutSide = true;
+		}
+
 		SingleGrid2D *nearGrid2D = nullptr;
 		for (const auto curID : idList) {
 			if (curID < 0 || curID > this->Grid_list.size() - 1) {
@@ -178,7 +229,7 @@ void GridNet::detectGridWithConnection() {
 	}
 }
 
-void GridNet::buildNetByNum(int RowNum, int ColNum) {
+void GridNet::buildNetByNum(int RowNum, int ColNum, bool isIndex) {
 	this->Row_Num = (unsigned int)(RowNum);
 	this->Col_Num = (unsigned int)(ColNum);
 
@@ -227,20 +278,24 @@ void GridNet::buildNetByNum(int RowNum, int ColNum) {
 
 		SingleGrid2D *locateGrid = Grid_list[curGridID];
 		if (locateGrid) {
-			// locateGrid->PointList.emplace_back(curP);
-			locateGrid->indexList.push_back(++id);
+			if (isIndex) {
+				locateGrid->indexList.push_back(++id);
+			} else {
+				locateGrid->PointList.emplace_back(curP);
+			}
 		}
 	}
 
 	float CenterX = 0.0, CenterY = 0.0;
 	for (const auto & eachGrid2D : Grid_list) {
 		// auto cur_PointNum = eachGrid2D->PointList.size();
-		auto cur_PointNum = eachGrid2D->indexList.size();
-		if (cur_PointNum < 1) {
+		auto cur_Pnum = isIndex ? eachGrid2D->indexList.size() : eachGrid2D->PointList.size();
+		if (cur_Pnum < 1) {
 			continue;
 		}
 		++this->GridWithPoint_Num;
 		eachGrid2D->hasPoint = true;
+		eachGrid2D->cur_PointNum = cur_Pnum;
 
 		//for (const auto & curP : eachGrid2D->PointList) {
 		//	CenterX += curP.x();
@@ -249,9 +304,10 @@ void GridNet::buildNetByNum(int RowNum, int ColNum) {
 		//eachGrid2D->CenterPoint.set(CenterX / cur_PointNum, CenterY / cur_PointNum);
 	}
 
+	this->grid_aver_Point_Num = (int)(grid_all_Point_Num / GridWithPoint_Num);
 }
 
-// 根据网格数量构建格网
+// 根据网格数量构建格网，此版本低效，不使用
 void GridNet::buildNetByNumOld(int RowNum, int ColNum) {
 	this->Row_Num = (unsigned int)(RowNum);
 	this->Col_Num = (unsigned int)(ColNum);
@@ -1549,6 +1605,68 @@ void AlphaShape::Detect_Alpah_Shape_FLANN_Multi_Thread(float radius, int threadN
 	m_detectAllNum = all_detect_num;
 }
 
+void AlphaShape::Detect_Alpah_Shape_FLANN_Grid_Multi_Thread(float radius, const std::vector<int> & pointIDList, int threadNum) {
+	if (m_projectPcl2DPoints.get() == nullptr) {
+		return;
+	}
+		
+	this->m_radius = radius;
+	this->m_point_pair_N = 0;
+	this->point_pair_scale = 0.0;
+	m_detectAllNum = 0;
+
+	int point_num = pointIDList.size();
+
+	all_edges.clear();
+	all_circles.clear();
+	all_shape_points.clear();
+	all_index_points.clear();
+	all_point_pair_N = 0;
+	all_detect_num = 0;
+
+	m_shape_points.clear();
+	m_circles.clear();
+	m_edges.clear();
+
+	int step = static_cast<int>(point_num / threadNum);
+
+	pcl::KdTreeFLANN<pcl::PointXYZ>::Ptr kdTree(new pcl::KdTreeFLANN<pcl::PointXYZ>);
+	kdTree->setInputCloud(m_projectPcl2DPoints);
+
+	std::vector<std::thread> threadList;
+	std::vector<int> curList;
+	for (int i = 0; i < threadNum; ++i) {
+		curList.clear();
+		if (i == (threadNum - 1)) {
+			curList.assign(pointIDList.begin() + step * i, pointIDList.end());
+		}
+		else {
+			curList.assign(pointIDList.begin() + step * i, pointIDList.begin() + step * (i + 1));
+		}
+		threadList.emplace_back(std::thread(Detect_Alpah_Shape_FLANN_single_thread, m_radius, curList, std::ref(m_projectPcl2DPoints), std::ref(kdTree)));
+	}
+
+	for (auto & curThread : threadList) {
+		curThread.join();
+	}
+
+	// std::set<Edge> edge_set(all_edges.begin(), all_edges.end());
+	// m_edges.assign(edge_set.begin(), edge_set.end());
+	m_edges.assign(all_edges.begin(), all_edges.end());
+
+	// std::set<Circle> circle_set(all_circles.begin(), all_circles.end());
+	// m_circles.assign(circle_set.begin(), circle_set.end());
+	m_circles.assign(all_circles.begin(), all_circles.end());
+
+	// 强制去除若有重复index的点
+	std::set<int> index_set(all_index_points.begin(), all_index_points.end());
+	m_shape_id.assign(index_set.begin(), index_set.end());
+	// m_shape_points.assign(all_shape_points.begin(), all_shape_points.end());
+
+	m_point_pair_N = all_point_pair_N;
+	m_detectAllNum = all_detect_num;
+}
+
 void detectDesity() {
 	bool isCurPointDensity = false;
 	pcl::KdTreeFLANN<pcl::PointXYZ> kdTree;
@@ -1586,7 +1704,7 @@ void detectDesity() {
 	}
 }
 
-void AlphaShape::Detect_Alpah_Shape_FLANN_Select_Index(float radius, const std::vector<int> & pointIDList) {
+void AlphaShape::Detect_Alpah_Shape_FLANN_Grid(float radius, const std::vector<int> & pointIDList) {
 	m_radius = radius;
 	m_point_pair_N = 0;
 	this->point_pair_scale = 0.0;

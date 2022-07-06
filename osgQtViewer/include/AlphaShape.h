@@ -127,7 +127,10 @@ class SingleGrid2D {
 	float heightDifference;
 
 	// 当前网格的周围八邻域网格是否均含有点，即表示当前网格是否为内部网格
-	bool nearByGridAllWithpoint;
+	bool nearByGridAllWithpoint{ false };
+
+	// 当前网格的周围八邻域网格是否均含有点,且邻域网格内点数量大于均值点的0.5
+	bool isGridMayBeOutSide{ false };
 
 	// 是否被检测过
 	bool hasDetected;
@@ -171,6 +174,10 @@ class GridNet {
 	float Grid_X;
 	float Grid_Y;
 
+	int grid_all_Point_Num;
+
+	int grid_aver_Point_Num;
+
 	// 含有点的网格数量
 	int GridWithPoint_Num;
 
@@ -197,8 +204,9 @@ class GridNet {
 	// 根据设定的网格行列数生成二维格网
 	void buildNetByNumOld(int RowNum, int ColNum);
 
-	// 根据设定的网格行列数生成二维格网,快速
-	void buildNetByNum(int RowNum, int ColNum);
+	// 根据设定的网格行列数生成二维格网,快速获取网格内点的ID/坐标
+	void buildNetByNum(int RowNum, int ColNum, bool isIndex = true);
+
 
 	// 判断当前某点是否处于某一网格中
 	bool isPointInGrid(const osg::Vec2 &curPoint, SingleGrid2D *test_Grid);
@@ -238,10 +246,13 @@ class AlphaShape {
 	void Detect_Alpah_Shape_FLANN(float radius);
 
 	//通过PCL构建kd树，加速搜索半径方位内的最近邻点, 后续可考虑结合二维格网，先筛选出必要检测的边界点，剔除内部点集
-	void Detect_Alpah_Shape_FLANN_Select_Index(float radius, const std::vector<int> & pointIDList);
+	void Detect_Alpah_Shape_FLANN_Grid(float radius, const std::vector<int> & pointIDList);
 
-	//通过PCL构建kd树，FLANN加速搜索半径方位内的最近邻点，利用多线程并行处理进一步提升速度，后续可考虑结合二维格网，先筛选出必要检测的边界点，剔除内部点集
+	//通过PCL构建kd树，FLANN加速搜索半径方位内的最近邻点，利用多线程并行处理进一步提升速度，
 	void Detect_Alpah_Shape_FLANN_Multi_Thread(float radius, int threadNum = 4);
+
+	//通过PCL构建kd树，FLANN加速搜索半径方位内的最近邻点，利用多线程并行处理进一步提升速度, 考虑结合二维格网，先筛选出必要检测的边界点，剔除内部点集
+	void Detect_Alpah_Shape_FLANN_Grid_Multi_Thread(float radius, const std::vector<int> & pointIDList, int threadNum = 4);
 
 	void setPclPointPtr(pcl::PointCloud<pcl::PointXYZ>::Ptr project2DPoints) {
 		m_projectPcl2DPoints = project2DPoints;

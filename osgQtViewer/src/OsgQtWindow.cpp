@@ -1907,8 +1907,9 @@ void OsgQtTest::slot_DetectPointShape() {
 		}
 		
 		if (alphaType >= 5) {
-			gridNet->buildNetByNum(gridRow, gridCol, false);
-			gridNet->detectGridWithConnection();
+			gridNet->buildNetByNum(gridRow, gridCol, true);
+			// gridNet->detectGridWithConnection();
+			gridNet->detectOutSideGrid();
 		} else {
 			gridNet->buildNetByNum(gridRow, gridCol, true);
 			gridNet->getAllOutSideGridPointIDList(pointIndexList);

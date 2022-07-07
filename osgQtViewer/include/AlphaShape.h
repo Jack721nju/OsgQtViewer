@@ -228,6 +228,9 @@ class GridNet {
 
 	// 获取所有边界网格的点列表		
 	void getAllOutSideGridPointIDList(std::vector<int> & pointIndexList);
+
+	// 检测所有边界网格
+	void detectOutSideGrid();
 };
 
 // Alpha Shap算法
@@ -261,16 +264,20 @@ class AlphaShape {
 	// 多线程检测
 	void Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threadNum = 4);
 
+	void Detect_Alpha_Shape_by_Grid_Multi_Thread_old(float radius, int threadNum = 4);
+
 	// pcl concave hull 方法获取点云凹包边界
 	void Detect_Shape_by_PCl_Concave_Hull(float radius);
 
 	// 根据生成的网格对默认算法进行优化，检测邻域域网格内的点，并不判断所有的点
 	void Detect_Alpha_Shape_by_Grid(float radius);
 
-	// 根据生成的网格和半径，以及邻域点云检测边界线，传递值为网格列表
+	void Detect_Alpha_Shape_by_Grid_old(float radius);
+
+	// 根据生成的网格和半径，以及邻域点云检测边界线，传递值为网格列表,滚动圆半径可变
 	void Detect_Shape_line_by_Grid_New(float radius, const std::vector<SingleGrid2D*> & allGridList);
 
-	// 根据生成的网格和半径检测边界(新)
+	// 根据生成的网格和半径检测边界(新),滚动圆半径可变
 	void Detect_Shape_By_GridNet_New(float radius);
 
 	// 根据包裹圆，通过落点数量和点的分布角度，检测边界点

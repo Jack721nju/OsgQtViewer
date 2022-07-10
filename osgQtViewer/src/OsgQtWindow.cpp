@@ -1859,7 +1859,6 @@ void OsgQtTest::slot_DetectPointShape() {
 	AlphaShape * alpha = nullptr;
 	GridNet* gridNet = nullptr;
 
-	_timerClock.start();
 	int alphaType = 0;
 
 	if (m_Alpah_radio->isChecked()) {
@@ -1888,37 +1887,57 @@ void OsgQtTest::slot_DetectPointShape() {
 	if (m_radius) {
 		radius = m_radius->text().toFloat();
 	}
+
+	_timerClock.start();
 	
 	std::vector<int> pointIndexList;
 	pointIndexList.reserve(this->pointlist_bulidGrid2D.size());
 
+	int gridRow = m_alpha_Grid_row_num->text().toInt();
+	int gridCol = m_alpha_Grid_col_num->text().toInt();
+
+	bool isOnlyRadius = false;
+	if (gridRow <= 0 || gridCol <= 0) {
+		isOnlyRadius = true;
+		this->AddToConsoleSlot("Using radius * 2 as grid size !");
+	}
+
 	// build grid net
 	if (alphaType > 2) {
 		gridNet = new GridNet(this->pointlist_bulidGrid2D);
+
+		// 计算Grid net初始化耗费时间
+		this->AddToConsoleSlot(QString("The cost time of initiate 2D Grid net is :  ") + QString::number(_timerClock.getTime<Ms>() / 1000.0) + QString("s"));
+
 		if (nullptr == gridNet) {
-			this->AddToConsoleSlot("Build 2D grid net failed! \n");
+			this->AddToConsoleSlot("Build 2D grid net failed!");
 			return;
 		}
-		int gridRow = m_alpha_Grid_row_num->text().toInt();
-		int gridCol = m_alpha_Grid_col_num->text().toInt();
-
-		if (gridRow <= 0 || gridCol <= 0) {
-			this->AddToConsoleSlot("Input correct row and col value! \n");
-		}
 		
-		if (alphaType >= 5) {
-			gridNet->buildNetByNum(gridRow, gridCol, true);
-			// gridNet->detectGridWithConnection();
-			gridNet->detectOutSideGrid();
+		// 以点的ID为元素，开始构建网格索引
+		if (isOnlyRadius) {
+			float gridSizeX = radius * 2;
+			float gridSizeY = gridSizeX;
+			gridNet->buildNetBySize(gridSizeX, gridSizeY);
 		} else {
-			gridNet->buildNetByNum(gridRow, gridCol, true);
+			gridNet->buildNetByNum(gridRow, gridCol);
+		}
+
+		gridRow = gridNet->Row_Num;
+		gridCol = gridNet->Col_Num;
+		
+		// 计算Grid net生成耗费时间
+		this->AddToConsoleSlot(QString("The cost time of build 2D Grid net is :  ") + QString::number(_timerClock.getTime<Ms>() / 1000.0) + QString("s"));
+
+		if (alphaType >= 5) {
+			// gridNet->detectGridWithConnection();
+			gridNet->detectOutSideGrid(radius);
+		} else {
 			gridNet->getAllOutSideGridPointIDList(pointIndexList);
 		}
-
-		// 计算Grid生成耗费时间
-		float runGridTime = _timerClock.getTime<Ms>() / 1000.0;
-		QString cost_grid_time = QString::number(runGridTime);
-		this->AddToConsoleSlot(QString("The cost time of build 2D Grid net is :  ") + cost_grid_time + QString("s"));
+		
+		// 计算网格连接关系耗费时间
+		this->AddToConsoleSlot(QString("The cost time of detect outside grids is :  ") + QString::number(_timerClock.getTime<Ms>() / 1000.0) + QString("s"));
 	}
 
 	bool needGrid = false;
@@ -1945,10 +1964,12 @@ void OsgQtTest::slot_DetectPointShape() {
 	}
 
 	QString typeStr;
+	QString gridStr = QString(" Grid Row:") + QString::number(gridRow) + QString(" Grid Col:") + QString::number(gridCol);
+
 	switch (alphaType)
 	{
 	case 0:
-		alpha->Detect_Shape_line(radius);
+		alpha->Detect_Alpha_Shape_Default(radius);
 		typeStr = "default alpha shape";
 		break;
 	case 1:
@@ -1961,20 +1982,20 @@ void OsgQtTest::slot_DetectPointShape() {
 		break;
 	case 3:
 		alpha->Detect_Alpah_Shape_FLANN_Grid(radius, pointIndexList);
-		typeStr = "alpha with flann and outside grids";
+		typeStr = "alpha with flann and outside grids" + gridStr;
 		needGrid = true;
 		break;
 	case 4:
 		alpha->Detect_Alpah_Shape_FLANN_Grid_Multi_Thread(radius, pointIndexList, threadNum);
-		typeStr = "alpha with flann and outside grids using multi-thread " + QString::number(threadNum);
+		typeStr = "alpha with flann and outside grids using multi-thread " + QString::number(threadNum) + gridStr;
 		break;
 	case 5:
 		alpha->Detect_Alpha_Shape_by_Grid(radius);
-		typeStr = "alpha with grid net";
+		typeStr = "alpha with grid net" + gridStr;
 		break;
 	case 6:
 		alpha->Detect_Alpha_Shape_by_Grid_Multi_Thread(radius, threadNum);
-		typeStr = "alpha with grid net multi-thread " + QString::number(threadNum);
+		typeStr = "alpha with grid net multi-thread " + QString::number(threadNum) + gridStr;
 		break;
 	default:
 		break;
@@ -2043,7 +2064,7 @@ void OsgQtTest::slot_DetectPointShape() {
 	Project_widget_Point_Edge->setVisible(true);
 	Project_widget_Point_Edge->drawAxis();
 	Project_widget_Point_Edge->drawLines(alpha->m_edges);
-	Project_widget_Point_Edge->drawPoints(shape_point, shape_num, 3, Qt::black);
+	Project_widget_Point_Edge->drawPoints(shape_point, shape_num, 2, Qt::black);
 
 	Project_widget_Point->drawPoints(shape_point, shape_num, 2, Qt::red);
 
@@ -2060,6 +2081,7 @@ void OsgQtTest::slot_DetectPointShape() {
 		Project_widget_grid_net->setAttribute(Qt::WA_DeleteOnClose);
 		Project_widget_grid_net->setVisible(true);
 		Project_widget_grid_net->setWindowTitle(m_alpha_Grid_row_num->text() + tr(" X ") + m_alpha_Grid_col_num->text());
+
 		for (const auto & curGrid : gridNet->Grid_list) {
 			QColor new_color(0, 0, 0, 0);
 			if (curGrid->hasPoint) {
@@ -2327,6 +2349,8 @@ void OsgQtTest::slot_DetectPointShapeUsingPclConcaveHull() {
 
 	Project_widget_Point->drawPoints(shape_point, shape_num, 2, Qt::red);
 
+	QString shape_point_num = QString::number(shape_num);
+	this->AddToConsoleSlot(QString("The detect point num is: ") + shape_point_num);
 
 	std::ofstream outf;
 	double x, y, z = 0.0;
@@ -2366,7 +2390,7 @@ void OsgQtTest::slot_DetectPointShapeUsingGridNet() {
 	if (m_grid_radius) {
 		radius = m_grid_radius->text().toFloat();
 	}
-	alpha->Detect_Shape_By_GridNet_New(radius);
+	alpha->Detect_Shape_By_GridNet(radius);
 
 	float runTimeAll = _timerClock.getTime<Ms>() / 1000.0;
 	const QString &cost_timeAll = QString::number(runTimeAll);

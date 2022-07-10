@@ -88,9 +88,6 @@ struct GridInfo {
 	float Max_X;
 	float Max_Y;
 
-	float Size_X;
-	float Size_Y;
-
 	int m_ID;
 	int m_Col;
 	int m_Row;
@@ -121,7 +118,7 @@ class SingleGrid2D {
 	std::vector<osg::Vec2> VectorList;
 
 	// 是否含有点
-	bool hasPoint;
+	bool hasPoint{false};
 
 	// 当前网格内点的高程差值
 	float heightDifference;
@@ -160,6 +157,8 @@ class GridNet {
 	// 根据点云生成当前的二维网格
 	explicit GridNet(const std::vector<osg::Vec2> & pList);
 
+	point_MAXMIN* getMinMaxXYZ(const std::vector<osg::Vec2> & all_list);
+
  public:
 	// 所有点的列表
 	std::vector<osg::Vec2> Points_List;
@@ -173,6 +172,8 @@ class GridNet {
 	//网格的长宽
 	float Grid_X;
 	float Grid_Y;
+
+	bool isUsingInputSize{ false };
 
 	int grid_all_Point_Num;
 
@@ -205,9 +206,10 @@ class GridNet {
 	void buildNetByNumOld(int RowNum, int ColNum);
 
 	// 根据设定的网格行列数生成二维格网,快速获取网格内点的ID/坐标
-	void buildNetByNum(int RowNum, int ColNum, bool isIndex = true);
+	void buildNetByNum(int RowNum, int ColNum);
 
-
+	void buildNetByNumToPoints(int RowNum, int ColNum);
+	
 	// 判断当前某点是否处于某一网格中
 	bool isPointInGrid(const osg::Vec2 &curPoint, SingleGrid2D *test_Grid);
 
@@ -230,55 +232,56 @@ class GridNet {
 	void getAllOutSideGridPointIDList(std::vector<int> & pointIndexList);
 
 	// 检测所有边界网格
-	void detectOutSideGrid();
+	void detectOutSideGrid(float radius);
 };
 
 // Alpha Shap算法
 class AlphaShape {
  public:
 	explicit AlphaShape(const std::vector<osg::Vec2> &point_list);
+
 	explicit AlphaShape(GridNet * curGridNet);
+
 	explicit AlphaShape(pcl::PointCloud<pcl::PointXYZ>::Ptr project2DPoints);
+
 	~AlphaShape();
-
- public:
-	// 根据设置的半径，检测点云边界线，默认的常规算法，将判断所有点，效率较慢
-	void Detect_Shape_line(float radius);
-
-	//通过PCL构建kd树，加速搜索半径方位内的最近邻点
-	void Detect_Alpah_Shape_FLANN(float radius);
-
-	//通过PCL构建kd树，加速搜索半径方位内的最近邻点, 后续可考虑结合二维格网，先筛选出必要检测的边界点，剔除内部点集
-	void Detect_Alpah_Shape_FLANN_Grid(float radius, const std::vector<int> & pointIDList);
-
-	//通过PCL构建kd树，FLANN加速搜索半径方位内的最近邻点，利用多线程并行处理进一步提升速度，
-	void Detect_Alpah_Shape_FLANN_Multi_Thread(float radius, int threadNum = 4);
-
-	//通过PCL构建kd树，FLANN加速搜索半径方位内的最近邻点，利用多线程并行处理进一步提升速度, 考虑结合二维格网，先筛选出必要检测的边界点，剔除内部点集
-	void Detect_Alpah_Shape_FLANN_Grid_Multi_Thread(float radius, const std::vector<int> & pointIDList, int threadNum = 4);
 
 	void setPclPointPtr(pcl::PointCloud<pcl::PointXYZ>::Ptr project2DPoints) {
 		m_projectPcl2DPoints = project2DPoints;
 	}
 
-	// 多线程检测
-	void Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threadNum = 4);
+ public:
+	// 方法一[单线程]，默认的Alpha shapes算法，以r为半径滚动圆，所有的点两两生成点对，并判断是否落在圆内，效率很慢，一般不直接使用，需要优化
+	void Detect_Alpha_Shape_Default(float radius);
 
-	void Detect_Alpha_Shape_by_Grid_Multi_Thread_old(float radius, int threadNum = 4);
+	// 方法二[单线程]，对方法一进行优化，对全局点云构建kd树，逐一遍历每个点，根据kd树FLANN加速检索中心点半径2*r内的所有点Q，在Q点集内进行滚动圆判断
+	void Detect_Alpah_Shape_FLANN(float radius);
+	
+	// 方法三[多线程]，对方法二进行优化，利用多线程并行处理进一步提升速度，threadNum为线程数
+	void Detect_Alpah_Shape_FLANN_Multi_Thread(float radius, int threadNum = 4);
+		
+	// 方法四[单线程]，对方法二进行优化，构建二维格网，先筛选出边界网格和边界点，对筛选出的边界点集逐一遍历，利用kd树加速搜索半径方位内的最近邻点，加速比较大
+	void Detect_Alpah_Shape_FLANN_Grid(float radius, const std::vector<int> & pointIDList);
 
-	// pcl concave hull 方法获取点云凹包边界
-	void Detect_Shape_by_PCl_Concave_Hull(float radius);
-
-	// 根据生成的网格对默认算法进行优化，检测邻域域网格内的点，并不判断所有的点
+	// 方法五[多线程]，对方法四进行优化，利用多线程并行处理进一步提升速度，threadNum为线程数
+	void Detect_Alpah_Shape_FLANN_Grid_Multi_Thread(float radius, const std::vector<int> & pointIDList, int threadNum = 4);
+	
+	// 方法六[单线程]，对方法一进行优化，构造二维格网，检测边界网格，遍历所有边界网格，并对3*3窗口网格内的点进行滚动圆检测，不判断窗口外的点，以点序号为索引，从而提升检测效率
 	void Detect_Alpha_Shape_by_Grid(float radius);
+	
+	// 方法七[多线程]，对方法六进行优化，多线程检测，以点序号为索引
+	void Detect_Alpha_Shape_by_Grid_Multi_Thread(float radius, int threadNum = 4);
+	
+	// 方法八[单线程]，根据pcl库的concave hull方法获取点云凹包边界，对全局点云构建三角网，对三角网的外部边检测是否大于2*radius，计算量和点数量相关，与检测半径r无关
+	void Detect_Shape_by_PCl_Concave_Hull(float radius);
+	
+/***************************************************************************************************************************************************************/
+		
+	// 根据生成的网格和半径检测边界,滚动圆半径可变
+	void Detect_Shape_By_GridNet(float radius);
 
-	void Detect_Alpha_Shape_by_Grid_old(float radius);
-
-	// 根据生成的网格和半径，以及邻域点云检测边界线，传递值为网格列表,滚动圆半径可变
-	void Detect_Shape_line_by_Grid_New(float radius, const std::vector<SingleGrid2D*> & allGridList);
-
-	// 根据生成的网格和半径检测边界(新),滚动圆半径可变
-	void Detect_Shape_By_GridNet_New(float radius);
+	// 内部函数，根据生成的网格和半径，以及邻域点云检测边界线，传递值为网格列表，滚动圆半径可变
+	void Detect_Shape_line_By_Grid(float radius, const std::vector<SingleGrid2D*> & allGridList);
 
 	// 根据包裹圆，通过落点数量和点的分布角度，检测边界点
 	void Detect_Shape_By_SingleCirlce(GridNet* curGridNet, float radius, int pointNum);

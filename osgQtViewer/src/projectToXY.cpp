@@ -118,16 +118,11 @@ void PaintArea::drawGridWithFillColor(SingleGrid2D* eachGrid, const QColor& curG
 	painter.setPen(pen);
 	painter.setBrush(brush);//设置画刷形式
 
-	QPoint point_LeftBottom(eachGrid->curGridInfo.Min_X, eachGrid->curGridInfo.Min_Y);
-	QPoint point_RightBottom(eachGrid->curGridInfo.Max_X, eachGrid->curGridInfo.Min_Y);
-
-	QPoint point_LeftTop(eachGrid->curGridInfo.Min_X, eachGrid->curGridInfo.Max_Y);
-	QPoint poitn_RightTop(eachGrid->curGridInfo.Max_X, eachGrid->curGridInfo.Max_Y);
-
 	float originX = eachGrid->curGridInfo.Min_X;
 	float originY = eachGrid->curGridInfo.Min_Y;
-	float width = eachGrid->curGridInfo.Max_X - eachGrid->curGridInfo.Min_X;
-	float height = eachGrid->curGridInfo.Max_Y - eachGrid->curGridInfo.Min_Y;
+	float width = eachGrid->curGridInfo.Max_X - originX;
+	float height = eachGrid->curGridInfo.Max_Y - originY;
+
 	painter.drawRect(originX + delt_x, originY + delt_y, width, height);
 }
 
